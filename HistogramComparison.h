@@ -40,7 +40,7 @@ private :
      * @param sample
      * @return
      */
-    double scoreLogLikehood(const LBPModel& model,const LBPModel& sample) const;
+    double scoreLogLikelihood(const LBPModel &model, const LBPModel &sample) const;
 
     /**
      * Perform chi-squared scoring

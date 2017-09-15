@@ -11,7 +11,7 @@ public :
     enum CompareType
     {
         INTERSECTION,
-        LOG_LIKEHOOD,
+        LOG_LIKELIHOOD,
         CHI_SQUARED,
         KULLBACK_LEIBLER_DIVERGENCE
     };

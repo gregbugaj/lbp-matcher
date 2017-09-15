@@ -7,7 +7,7 @@ double HistogramComparison::compare(const LBPModel &model, const LBPModel &sampl
     {
         case CompareType::INTERSECTION :
             return scoreHistogramIntersection(model, sample);
-        case CompareType::LOG_LIKEHOOD:
+        case CompareType::LOG_LIKELIHOOD:
             return scoreLogLikelihood(model, sample);
         case CompareType::CHI_SQUARED:
             return scoreChiSquared(model, sample);
@@ -20,14 +20,17 @@ double HistogramComparison::compare(const LBPModel &model, const LBPModel &sampl
 
 double HistogramComparison::scoreHistogramIntersection(const LBPModel &model, const LBPModel &sample) const
 {
-    double d = 0;
-    // branch less execution
+    double d = 0,s1 = 0,s2 = 0;
+
     for (int_t i = 0; i < model.bin_size; ++i)
     {
-        d += model.bins[i] + sample.bins[i] - std::abs(model.bins[i] - sample.bins[i]);
+        d  += model.bins[i] + sample.bins[i] - std::abs(model.bins[i] - sample.bins[i]);
+        s1 += model.bins[i];
+        s2 += sample.bins[i];
     }
 
-    return 0.5 * d;
+    // normalize
+    return (0.5 * d) / std::fmax(s1, s2);
 }
 
 double HistogramComparison::scoreLogLikelihood(const LBPModel &model, const LBPModel &sample) const

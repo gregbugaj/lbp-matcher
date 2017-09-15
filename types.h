@@ -1,9 +1,7 @@
 #ifndef LBP_MATCHER_TYPES_H
 #define LBP_MATCHER_TYPES_H
 
-#include <bits/unique_ptr.h>
-#include <bits/shared_ptr.h>
-
+#include <memory>
 #include <leptonica/allheaders.h>
 
 typedef double          double_t;
@@ -41,6 +39,6 @@ struct LEP_Deleter
 
 using PIXPtr = std::unique_ptr<PIX, LEP_Deleter>;
 
-using PIXShPtr = shared_ptr_with_deleter<PIX, LEP_Deleter>;
+// using PIXShPtr = shared_ptr_with_deleter<PIX, LEP_Deleter>;
 
 #endif //LBP_MATCHER_TYPES_H

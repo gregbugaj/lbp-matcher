@@ -1,6 +1,6 @@
 #include "PerceptualHash.h"
 
-double PerceptualHash::hash() const
+hash_t PerceptualHash::hash(PIX* pix) const
 {
     return 0;
 }

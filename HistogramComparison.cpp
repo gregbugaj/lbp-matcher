@@ -5,13 +5,13 @@ double HistogramComparison::compare(const LBPModel &model, const LBPModel &sampl
 {
     switch (type)
     {
-        case CompareType::INTERSECTION :
+        case INTERSECTION :
             return scoreHistogramIntersection(model, sample);
-        case CompareType::LOG_LIKELIHOOD:
+        case LOG_LIKELIHOOD:
             return scoreLogLikelihood(model, sample);
-        case CompareType::CHI_SQUARED:
+        case CHI_SQUARED:
             return scoreChiSquared(model, sample);
-        case CompareType::KULLBACK_LEIBLER_DIVERGENCE:
+        case KULLBACK_LEIBLER_DIVERGENCE:
             return scoreKullbackLeiblerDivergence(model, sample);
     }
 

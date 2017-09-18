@@ -1,7 +1,20 @@
 #include <iostream>
 #include "HistogramComparison.h"
+#include "AverageHash.h"
+
 
 int main()
+{
+    ImageHash* imghash = new AverageHash();
+    double h1 = imghash->hash(nullptr);
+    
+    std::cout<< "Average Hash = " << h1 << "\n";
+
+    return 0;
+}
+
+
+int mainXX()
 {
     LBPModel model;
     LBPModel sample;

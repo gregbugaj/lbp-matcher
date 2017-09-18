@@ -1,9 +1,10 @@
 #include <iostream>
 #include "AverageHash.h"
 
-double AverageHash::hash() const
+hash_t AverageHash::hash(PIX* pix) const
 {
+    PIX* converted = convert(pix);
     std::cout<< "Calculating Average Hash \n";
 
-    return 0;
+    return 2;
 }

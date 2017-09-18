@@ -1,7 +1,3 @@
-//
-// Created by gbugaj on 9/13/2017.
-//
-
 #ifndef LBP_MATCHER_PERCEPTUALHASH_H
 #define LBP_MATCHER_PERCEPTUALHASH_H
 
@@ -10,7 +6,7 @@
 
 class PerceptualHash : public  ImageHash
 {
-    virtual double hash() const override;
+    virtual hash_t hash(PIX* pix) const override;
 };
 
 

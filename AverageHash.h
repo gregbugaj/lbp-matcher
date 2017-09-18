@@ -6,7 +6,8 @@
 class AverageHash : public ImageHash {
 
 public :
-    virtual double hash() const override;
+    virtual hash_t hash(PIX* pix) const override;
+
 };
 
 #endif //LBP_MATCHER_AVERAGEHASH_H

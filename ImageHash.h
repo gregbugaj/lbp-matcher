@@ -3,8 +3,10 @@
 
 #include "leptonica/allheaders.h"
 #include "types.h"
+#include <map>
 
-class ImageHash {
+class ImageHash
+{
 
 public :
 
@@ -15,13 +17,7 @@ public :
         PERCEPTUAL
     };
 
-    /**
-     * Get hash value by given method
-     * @param pix input image
-     * @param method the method used to obtain hash
-     * @return 64 bit hash value
-     */
-    static hash_t hash(PIX* pix, HashMethod& method);
+    using HandlerTypeMap =  std::map<HashMethod, ImageHash*>;
 
     /**
      * Generate hash for given input image
@@ -31,24 +27,37 @@ public :
      */
     virtual hash_t hash(PIX* pix) const = 0;
 
+
     /**
-     * Compare two different hashes and return their similarity in range 0..1
-     * Default implementation uses "Hamming distance"
+     * Get hash value from image
      *
-     * @param hash1 the first hash to compare
-     * @param hash2 the second hash to compare
-     * @return similarity in range 0..1 0 = No similarity 1 = Full match
+     * @param pix input image
+     * @param method the method used to obtain hash
+     * @return 64 bit hash value
      */
-    double_t similarity(hash_t& hash1, hash_t& hash2) const;
+    static hash_t hash(PIX* pix, const HashMethod& method);
+
+
+    /**
+     * Get hash value from image provided via filename
+     *
+     * @param pix input image
+     * @param method the method used to obtain hash
+     * @return 64 bit hash value
+     */
+    static hash_t hash(const std::string& filename, const HashMethod& method);
+
+    static HandlerTypeMap handlers;
 
 protected:
+
     /**
-     * Convert to correct format, this may involve up/down conversion
+     * Convert to correct format, this may involve up/down conversion.
+     *
      * @param pix the pix to convert
      * @return converted pix
      */
-    PIX* convert(PIX *pix) const;
-
+    PIX* normalize(PIX *pix) const;
 
     /**
      * Reduce the size of given pix to given size
@@ -58,6 +67,11 @@ protected:
      * @return reduced pix
      */
     PIX* reduce(PIX *pix, int width, int height) const;
+
+private:
+
+    static HandlerTypeMap createHandlers();
+
 };
 
 #endif //LBP_MATCHER_IMAGEHASH_H

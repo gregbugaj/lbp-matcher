@@ -4,12 +4,12 @@
 #include <memory>
 #include <leptonica/allheaders.h>
 
-typedef double          double_t;
-typedef bool            bool_t;
-typedef char            char_t;
-typedef unsigned char   byte_t;
-typedef int             int_t;
-typedef long long       hash_t; // 8 bytes(64)
+typedef double               double_t;
+typedef bool                 bool_t;
+typedef char                 char_t;
+typedef unsigned char        byte_t;
+typedef int                  int_t;
+typedef unsigned long long   hash_t; // 8 bytes(64)
 
 struct LBPModel
 {

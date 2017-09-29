@@ -2,11 +2,13 @@
 #define LBP_MATCHER_AVERAGEHASH_H
 
 #include "ImageHash.h"
+#include "leptonutil.h"
 
-class AverageHash : public ImageHash {
+class AverageHash : public ImageHash
+{
 
 public :
-    virtual hash_t hash(PIX* pix) const override;
+    hash_t hash(PIX* pix) const override;
 
 };
 

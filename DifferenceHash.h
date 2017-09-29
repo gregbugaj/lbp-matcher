@@ -7,7 +7,7 @@
 class DifferenceHash : public ImageHash
 {
 public :
-    virtual hash_t hash(PIX* pix) const override;
+    hash_t hash(PIX* pix) const override;
 };
 
 

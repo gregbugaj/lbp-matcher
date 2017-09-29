@@ -1,14 +1,43 @@
 #include <iostream>
 #include "HistogramComparison.h"
-#include "AverageHash.h"
+#include "ImageHash.h"
+#include "HashDistance.h"
+#include "ImageSimilarity.h"
+
+
+int mainXX333()
+{
+    /**
+     bf3d45d5d505fdff
+    ff3d5555d50505ff
+    bf7d45d5d505ffff
+    bf7d45d5d505ffff
+    bf7d45d5d505fdff
+    ff3d45d5d505fdff
+
+     */
+    HashDistance hs ;
+    auto val = hs.distance(0x5013f7ffeccfbf1b, 0x5110abbbfdcc8ffb);
+    std::cout<< "Average Hash = " << val << "\n";
+
+    return 0;
+}
 
 
 int main()
 {
-    ImageHash* imghash = new AverageHash();
-    double h1 = imghash->hash(nullptr);
-    
-    std::cout<< "Average Hash = " << h1 << "\n";
+    auto h1 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/41.png", ImageHash::AVERAGE);
+    auto h2 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/42.png", ImageHash::AVERAGE);
+
+    std::cout<< "Hashing result = " << h1 << "\n";
+    std::cout<< "Hashing result = " << h2 << "\n";
+
+
+    ImageSimilarity::similarity("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/42.png", "/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/42.png", ImageHash::AVERAGE);
+
+/*    HashDistance hs ;
+    auto val = hs.distance(0xfd3f9ad8e6eef884, 0xff3d1f8151465edd);
+    std::cout<< "Average Hash = " << val << "\n";*/
 
     return 0;
 }

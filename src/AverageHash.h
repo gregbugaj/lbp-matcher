@@ -9,7 +9,6 @@ class AverageHash : public ImageHash
 
 public :
     hash_t hash(PIX* pix) const override;
-
 };
 
 #endif //LBP_MATCHER_AVERAGEHASH_H

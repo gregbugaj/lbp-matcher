@@ -18,21 +18,24 @@ public :
 
     /**
      * Compare two histograms
-     * @param model the model we comparing to
-     * @param sample the sample we comparing agains
+     *
+     * @param expected the model we comparing to
+     * @param observed the sample we comparing agains
      * @param type Type of comparsion
      * @return score in range 0..1, 0 = No similarity, 1 = Identical
      */
-    double compare(const LBPModel&  model, const LBPModel&  sample, CompareType type) const;
+    double compare(const LBPModel& expected, const LBPModel& observed, CompareType type) const;
 
 private :
+
     /**
      * Perform histogram intersection
+     *
      * @param model
      * @param sample
      * @return
      */
-    double scoreHistogramIntersection(const LBPModel& model,const LBPModel& sample) const;
+    double scoreHistogramIntersection(const LBPModel& expected,const LBPModel& observed) const;
 
     /**
      * Perform log likehood scoring
@@ -40,15 +43,16 @@ private :
      * @param sample
      * @return
      */
-    double scoreLogLikelihood(const LBPModel &model, const LBPModel &sample) const;
+    double scoreLogLikelihood(const LBPModel &expected, const LBPModel &observed) const;
 
     /**
-     * Perform chi-squared scoring
-     * @param model
-     * @param sample
+     * Perform chi-squared goodness of fit test
+     *
+     * @param expected
+     * @param observed
      * @return
      */
-    double scoreChiSquared(const LBPModel& model,const LBPModel& sample) const;
+    double scoreChiSquared(const LBPModel& expected,const LBPModel& observed) const;
 
     /**
      * Perform Kullback Leibler Divergence
@@ -56,7 +60,7 @@ private :
      * @param sample
      * @return
      */
-    double scoreKullbackLeiblerDivergence(const LBPModel &model, const LBPModel &sample) const;
+    double scoreKullbackLeiblerDivergence(const LBPModel &expected, const LBPModel &observed) const;
 };
 
 

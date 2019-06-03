@@ -10,24 +10,8 @@
 
 ImageHash::HandlerTypeMap  ImageHash::handlers  = createHandlers();
 
-
-PIX *ImageHash::normalize(PIX *pix) const
-{
-    if(pix->d != 8)
-        return pixConvertTo8(pix, 0);
-    else
-        return pixClone(pix);
-}
-
-PIX *ImageHash::reduce(PIX *pix, int width, int height) const
-{
-    PIX* out = pixScaleToSize(pix, width, height);
-    dump(out);
-    return out;
-}
-
-///  statistics
-hash_t ImageHash::hash(PIX *pix, const HashMethod& method)
+///  statics
+hash_t ImageHash::hash(PIX* pix, const HashMethod& method)
 {
     auto handler = ImageHash::handlers[method];
     return handler->hash(pix);
@@ -36,11 +20,13 @@ hash_t ImageHash::hash(PIX *pix, const HashMethod& method)
 
 hash_t ImageHash::hash(const std::string &filename, const ImageHash::HashMethod &method)
 {
-    std::cout << "Reading file : " << filename;
     validateFileExists(filename);
-
     PIX* pix = pixRead(filename.c_str());
-    return hash(pix, method);
+    auto hs  = hash(pix, method);
+
+    pixDestroy(&pix);
+
+    return hs;
 }
 
 ImageHash::HandlerTypeMap ImageHash::createHandlers()
@@ -53,4 +39,3 @@ ImageHash::HandlerTypeMap ImageHash::createHandlers()
 
     return types;
 }
-

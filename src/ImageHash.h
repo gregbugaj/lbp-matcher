@@ -4,11 +4,17 @@
 #include "leptonica/allheaders.h"
 #include "types.h"
 #include <map>
+#include <bitset>
+#include <climits>
+#include <iomanip>
+#include <iostream>
 
 class ImageHash
 {
 
 public :
+
+    bool debug = true;
 
     enum HashMethod
     {
@@ -51,22 +57,22 @@ public :
 
 protected:
 
-    /**
-     * Convert to correct format, this may involve up/down conversion.
-     *
-     * @param pix the pix to convert
-     * @return converted pix
+    /***
+     * Debug trace
+     * @param out
+     * @param pos
+     * @param one
      */
-    PIX* normalize(PIX *pix) const;
+    void trace(hash_t out, int_t pos, uinit64_t one) const
+    {
+        if(debug)
+        {
+            std::bitset<CHAR_BIT * sizeof(hash_t)> bs(out);
+            std::cout << "hash : pos [" << std::dec << std::setw(2) << pos << "] " << std::hex << " 0x"
+                      << std::setw(16) << out << " : " << one << " :: " << bs << std::endl;
+        }
+    }
 
-    /**
-     * Reduce the size of given pix to given size
-     * @param pix the pix to reduce
-     * @param width  the width to reduce to
-     * @param height the height to reduce to
-     * @return reduced pix
-     */
-    PIX* reduce(PIX *pix, int width, int height) const;
 
 private:
 

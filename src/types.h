@@ -68,7 +68,6 @@ struct shared_ptr_with_deleter : public std::shared_ptr<T>
     ///    PIXPtr converted = pixConvertTo8(scaled, 0);
     /// </pre>
  /*
-
      operator T*() const
     {
         return std::shared_ptr<T>::get();

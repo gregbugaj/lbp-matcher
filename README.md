@@ -7,6 +7,11 @@ https://github.com/catchorg/Catch2
 https://github.com/catchorg/Catch2/issues/882
 https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md#where-to-put-it
 
+# Distance measures
+
+* https://dataaspirant.com/2015/04/11/five-most-popular-similarity-measures-implementation-in-python/
+* https://stackoverflow.com/questions/6499491/comparing-two-histograms
+* http://www.cs.huji.ac.il/~werman/Papers/ECCV2010.pdf
 
 # Some build info
 

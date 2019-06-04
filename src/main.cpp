@@ -16,11 +16,14 @@
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
 
+void test_histogram_scores();
+
 int main(int argc, char* argv[])
 {
     fs::path path = fs::current_path();
     std::cout<< "Current Directory : " << path << std::endl;
 
+    test_histogram_scores();
     return 0;
 }
 
@@ -334,7 +337,7 @@ void test_histogram_scores()
     model.bins[3] = 40;
 
     sample.bins[0] = 10;
-    sample.bins[1] = 20;
+    sample.bins[1] = 50;
     sample.bins[2] = 30;
     sample.bins[3] = 40;
 
@@ -350,11 +353,11 @@ void test_histogram_scores()
 
 
     std::cout<< "---------------------------------\n";
-    std::cout<< "Intersection      = " << r1 << "\n";
-    std::cout<< "Chi Squared       = " << r2 << "\n";
-    std::cout<< "LogLikehood       = " << r3 << "\n";
-    std::cout<< "Kullback-Leibler  = " << r4 << "\n";
-    std::cout<< "Euclidean         = " << r5 << "\n";
+    std::cout<< "Intersection          = " << r1 << "\n";
+    std::cout<< "Chi Squared           = " << r2 << "\n";
+    std::cout<< "LogLikehood           = " << r3 << "\n";
+    std::cout<< "Kullback-Leibler      = " << r4 << "\n";
+    std::cout<< "Euclidean             = " << r5 << "\n";
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
-    std::cout<< "Absolute Value    = " << r7 << "\n";
+    std::cout<< "Absolute Value        = " << r7 << "\n";
 }

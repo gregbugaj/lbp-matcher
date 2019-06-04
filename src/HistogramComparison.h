@@ -11,7 +11,9 @@ class HistogramComparison
 public :
 
     /**
-     * Type of the metric to use for histogram comparacence
+     * Type of the metric to use for histogram comparison
+     *
+     * Similarity are measured in the range 0 to 1 [0,1]
      */
     enum CompareType
     {
@@ -29,7 +31,7 @@ public :
      *
      * @param expected the model we comparing to
      * @param observed the sample we comparing agains
-     * @param type Type of comparsion
+     * @param type Type of comparison
      * @return score in range 0..1, 0 = No similarity, 1 = Identical
      */
     double compare(const LBPModel& expected, const LBPModel& observed, CompareType type) const;

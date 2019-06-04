@@ -387,20 +387,18 @@ int mainxas()
 
 int main()
 {
- //   ImageSimilarity::similarity("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/42.png", "/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/42.png", ImageHash::AVERAGE);
-
     LBPModel model(4);
     LBPModel sample(4);
 
-    model.bins[0] = 1;
-    model.bins[1] = 2;
-    model.bins[2] = 3;
-    model.bins[3] = 4;
+    model.bins[0] = 10;
+    model.bins[1] = 20;
+    model.bins[2] = 30;
+    model.bins[3] = 40;
 
-    sample.bins[0] = 1;
-    sample.bins[1] = 2;
-    sample.bins[2] = 4;
-    sample.bins[3] = 4;
+    sample.bins[0] = 10;
+    sample.bins[1] = 20;
+    sample.bins[2] = 30;
+    sample.bins[3] = 40;
 
     HistogramComparison histogram;
 

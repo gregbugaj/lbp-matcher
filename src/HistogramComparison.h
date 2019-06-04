@@ -7,10 +7,18 @@
 
 class HistogramComparison
 {
+
 public :
+
+    /**
+     * Type of the metric to use for histogram comparacence
+     */
     enum CompareType
     {
         INTERSECTION,
+        EUCLIDEAN_DISTANCE,
+        EUCLIDEAN_DISTANCE_NORMALIZED,
+        ABSOLUTE_VALUE,
         LOG_LIKELIHOOD,
         CHI_SQUARED,
         KULLBACK_LEIBLER_DIVERGENCE
@@ -29,6 +37,33 @@ public :
 private :
 
     /**
+     * Euclidean distance
+     *
+     * @param expected
+     * @param observed
+     * @return
+     */
+    double scoreEuclideanDistance(const LBPModel& expected, const LBPModel& observed) const;
+
+    /**
+     * Euclidian distance normalized
+     *
+     * @param expected
+     * @param observed
+     * @return
+     */
+    double scoreEuclideanDistanceNormalized(const LBPModel& expected,const LBPModel& observed) const;
+
+    /**
+     * Euclidian distance normalized
+     *
+     * @param expected
+     * @param observed
+     * @return
+     */
+    double scoreAbsoluteValueDistance(const LBPModel& expected,const LBPModel& observed) const;
+
+    /**
      * Perform histogram intersection
      *
      * @param model
@@ -39,6 +74,7 @@ private :
 
     /**
      * Perform log likehood scoring
+     *
      * @param model
      * @param sample
      * @return
@@ -61,6 +97,7 @@ private :
      * @return
      */
     double scoreKullbackLeiblerDivergence(const LBPModel &expected, const LBPModel &observed) const;
+
 };
 
 

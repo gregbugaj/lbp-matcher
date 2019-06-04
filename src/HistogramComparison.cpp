@@ -21,7 +21,14 @@ double HistogramComparison::compare(const LBPModel &expected, const LBPModel &ob
             return scoreLogLikelihood(expected, observed);
         case CHI_SQUARED:
             return scoreChiSquared(expected, observed);
-        case KULLBACK_LEIBLER_DIVERGENCE:            return scoreKullbackLeiblerDivergence(expected, observed);
+        case KULLBACK_LEIBLER_DIVERGENCE:
+            return scoreKullbackLeiblerDivergence(expected, observed);
+        case EUCLIDEAN_DISTANCE:
+            return scoreEuclideanDistance(expected, observed);
+        case EUCLIDEAN_DISTANCE_NORMALIZED:
+            return scoreEuclideanDistanceNormalized(expected, observed);
+        case ABSOLUTE_VALUE:
+            return scoreAbsoluteValueDistance(expected, observed);
     }
 
     throw "Compare type not handled";
@@ -79,8 +86,6 @@ double HistogramComparison::scoreChiSquared(const LBPModel &expected, const LBPM
     }
     return d;
 }
-
-
 
 double scoreChiSquaredGoodnesOfFit(const LBPModel &expected, const LBPModel &observed)
 {
@@ -150,6 +155,59 @@ double scoreKullbackLeiblerDivergenceORG(const LBPModel &model, const LBPModel &
         }
     }
     return d;
+}
+
+double HistogramComparison::scoreEuclideanDistance(const LBPModel& expected, const LBPModel& observed) const
+{
+    if(expected.size != observed.size)
+        throw std::runtime_error("expected size != observed size");
+
+    if(expected.size == 0)
+        throw std::runtime_error("expected or observed size is zero");
+
+    double sum = 0;
+    for (int_t i = 0, s = expected.size; i < s; ++i)
+    {
+        sum += std::pow(expected.bins[i] - observed.bins[i], 2);
+    }
+
+    return std::sqrt(sum);
+}
+
+
+double HistogramComparison::scoreEuclideanDistanceNormalized(const LBPModel& expected, const LBPModel& observed) const
+{
+    if(expected.size != observed.size)
+        throw std::runtime_error("expected size != observed size");
+
+    if(expected.size == 0)
+        throw std::runtime_error("expected or observed size is zero");
+
+    double sum = 0;
+    int n = expected.size;
+    for (int_t i = 0, s = n; i < s; ++i)
+    {
+        sum += std::pow(expected.bins[i] - observed.bins[i], 2);
+    }
+
+    return std::sqrt(sum / n);
+}
+
+double  HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected, const LBPModel& observed) const
+{
+    if(expected.size != observed.size)
+        throw std::runtime_error("expected size != observed size");
+
+    if(expected.size == 0)
+        throw std::runtime_error("expected or observed size is zero");
+
+    double sum = 0;
+    for (int_t i = 0, s = expected.size; i < s; ++i)
+    {
+        sum += std::abs(expected.bins[i] - observed.bins[i]);
+    }
+
+    return sum;
 }
 
 

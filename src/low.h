@@ -9,11 +9,29 @@
 #include <limits.h>
 #include "types.h"
 
-
+/**
+ * Count number of a transitions
+ *
+ * @param a
+ * @return count of transitions
+ */
 int transitions(int a);
 
+/**
+ * Count number of a transitions
+ *
+ * @param a
+ * @return count of transitions
+ */
 int transition_lbp(byte_t a);
 
+/**
+ * Perform population count using 'popcount' instruction
+ *
+ * @tparam T
+ * @param val
+ * @return
+ */
 template <class T>
 int popcnt(const T& val) noexcept
 {
@@ -22,6 +40,11 @@ int popcnt(const T& val) noexcept
     return bitcount;
 }
 
+/**
+ * Output value as a bit string
+ * @tparam T
+ * @param out
+ */
 template <class T>
 void bitstr(const T& out) noexcept
 {

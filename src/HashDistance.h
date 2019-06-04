@@ -20,7 +20,6 @@ public :
      */
     int distance(const hash_t& x, const hash_t& y) const;
 
-
     /**
      * Calculate distance between two hashes in range 0..1
      * 1 = Full match  0 = No Match

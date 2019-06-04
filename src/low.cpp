@@ -1,6 +1,5 @@
 #include "low.h"
 
-
 int transitions(int a)
 {
     int b = a >> 1;

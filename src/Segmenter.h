@@ -30,6 +30,7 @@ public :
 
     /***
      * Segment document
+     *
      * @param w image width
      * @param h image height
      * @param blockw block width

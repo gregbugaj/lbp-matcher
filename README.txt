@@ -1,4 +1,14 @@
-<<<<<<< HEAD
+
+# Catch2 Testing Framework
+
+Test cases are build with Catch2 test framework
+
+https://github.com/catchorg/Catch2
+https://github.com/catchorg/Catch2/issues/882
+https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md#where-to-put-it
+
+
+# Some build info
 
 C++17 Required
 
@@ -20,6 +30,3 @@ https://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/template_matching/t
 
 
 Manhatan Distance Instead of Hamming Distance
-
-
->>>>>>> c9d58811587a71140d566722e3c5df062c809ca5

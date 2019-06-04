@@ -8,6 +8,7 @@
 #include "PerceptualHash.h"
 #include "fileutil.h"
 
+// Handlers used to create different hashes
 ImageHash::HandlerTypeMap  ImageHash::handlers  = createHandlers();
 
 ///  statics
@@ -21,11 +22,16 @@ hash_t ImageHash::hash(const std::string &filename, const ImageHash::HashMethod 
 {
     validateFileExists(filename);
     PIX* pix = pixRead(filename.c_str());
-    auto hs  = hash(pix, method);
 
-    pixDestroy(&pix);
+    if(pix)
+    {
+        auto hs = hash(pix, method);
+        pixDestroy(&pix);
 
-    return hs;
+        return hs;
+    }
+
+    return 0;
 }
 
 ImageHash::HandlerTypeMap ImageHash::createHandlers()

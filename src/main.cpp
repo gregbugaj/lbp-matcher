@@ -16,25 +16,27 @@
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
 
-int mainAAX()
+int main(int argc, char* argv[])
 {
-    auto m0 = LBPMatcher::createLBP("/home/gbugaj/share/devbox/data1/test.tif");
-/*
+    fs::path path = fs::current_path();
+    std::cout<< "Current Directory : " << path << std::endl;
 
+    return 0;
+}
 
-    Extractor extractor;
-
+int test_extractor_001()
+{
     std::string document = "/home/gbugaj/share/devbox/data1/claim001.tif";
     std::string snip     = "/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/27.png";
 
+    Extractor extractor;
     extractor.extract(document, snip);
 
- */
     return 0;
 }
 
 
-int mainafdsfdsf()
+void test_segmenter_01()
 {
     Segmenter seg;
     auto segments = seg.segment(120, 120, 10, 10);
@@ -45,36 +47,15 @@ int mainafdsfdsf()
     }
 
 //    std::cout<< "Hashing result = " << h2 << "\n";
-
     /*
     std::cout<< "A = " << hs.normalize(0) << "\n";
     std::cout<< "B = " << hs.normalize(32) << "\n";
     std::cout<< "C = " << hs.normalize(64) << "\n";
     std::cout<< "C = " << hs.normalize(26) << "\n";
     */
-    return 0;
 }
 
-
-int maina()
-{
-    HistogramComparison comp;
-    //auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/27.png");
-
-    auto m0   = LBPMatcher::createLBP("/home/gbugaj/share/devbox/data1/face004.tif");
-    //auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/8.png");
-    //auto m0   = LBPMatcher::createLBP("/home/gbugaj/share/devbox/data1/anna-300x300.jpg");
-
-    auto type = HistogramComparison::CompareType::INTERSECTION;
-    auto s0 = comp.compare(m0, m0, type);
-
-    std::cout << "\nScores :" << std::endl;
-    std::cout << "s0 :" << std::dec << s0  << std::endl;
-
-    return 0;
-}
-
-int mainxa()
+void test_lbp_001()
 {
     HistogramComparison comp;
 
@@ -94,15 +75,12 @@ int mainxa()
     std::cout << "s2 :" << std::dec << s2  << std::endl;
     std::cout << "s3 :" << std::dec << s3  << std::endl;
 
-
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
-
-    return 0;
 }
 
-int main3()
+void test_lbp_002()
 {
     HistogramComparison comp;
 
@@ -123,11 +101,9 @@ int main3()
     std::cout << "s0 :" << std::dec << s0  << std::endl;
     std::cout << "s1 :" << std::dec << s1  << std::endl;
     std::cout << "s2 :" << std::dec << s2  << std::endl;
-
-    return 0;
 }
 
-int mainxxxa()
+void test_lbp_003()
 {
     HistogramComparison comp;
 
@@ -168,39 +144,10 @@ int mainxxxa()
     std::cout << std::dec << s7  << std::endl;
     std::cout << std::dec << s8  << std::endl;
     std::cout << std::dec << s9  << std::endl;
-
-    return 0;
 }
 
-int mainXXA()
-{
-    byte_t v0 = 1;
-    byte_t v1 = 0;
-    byte_t v2 = 1;
-    byte_t v3 = 0;
-    byte_t v4 = 0;
-    byte_t v5 = 0;
-    byte_t v6 = 1;
-    byte_t v7 = 1;
 
-    byte_t  out = 0;
-    out |= (v0 << 7) | (v1 << 6) | (v2 << 5) | (v3 << 4) | (v4 << 3) | (v5 << 2) | (v6 << 1) | (v7 << 0);
-
-    std::bitset<CHAR_BIT * sizeof(byte_t)> bs(out);
-    std::cout << "hash : pos [" << std::dec  << std::hex << " 0x" << std::setw(16) << out << " : " <<  " :: " << bs << std::endl;
-
-    //LBPMatcher::createLBPEnhanced("/home/gbugaj/share/devbox/data1/face004.tif", 0, 0);
-    //LBPMatcher::createLBP("/home/gbugaj/share/devbox/data1/face004.tif");
-
-    //LBPMatcher::createLBPEnhanced("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/27.png");
-    //LBPMatcher::createLBPEnhanced("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/27.png", 1, 8);
-    //LBPMatcher::createLBP("/home/gbugaj/share/devbox/data1/anna-300x300.jpg");
-    //LBPMatcher::createLBPEnhanced("/home/gbugaj/share/devbox/data1/anna-300x300.jpg", 0, 0);
-    //auto lbp = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/clion.png");
-  //  return 0;
-}
-
-int mainDIFF()
+void test_hash_001()
 {
 //    auto h1 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/44.png", ImageHash::DIFFERENCE);
 //    auto h2 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/45.png", ImageHash::DIFFERENCE);
@@ -211,18 +158,15 @@ int mainDIFF()
      auto h1 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/zeros/29.png", ImageHash::DIFFERENCE);
      auto h2 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/zeros/56.png", ImageHash::DIFFERENCE);
 
-
     HashDistance hs ;
     auto val = hs.distance(h1, h2);
     auto norm = hs.normalized(h1, h2);
 
     std::cout<< "Distance   = " << val << "\n";
     std::cout<< "Normalized = " << norm << "\n";
-
-    return 0;
 }
 
-int mainaxxa()
+void test_hash_002()
 {
     fs::path path = fs::path("/home/gbugaj/share/devbox/hashing/001/");
 
@@ -235,8 +179,6 @@ int mainaxxa()
         auto duration = duration_cast<milliseconds>(t2 - t1).count();
         std::cout<< h1  << ", "  << duration << ", " <<p <<std::endl;
     }
-
-    return 0;
 }
 
 hash_t bucket(hash_t key, const std::set <hash_t> & keys)
@@ -261,7 +203,7 @@ hash_t bucket(hash_t key, const std::set <hash_t> & keys)
   return maxh;
 }
 
-int mainsdfsdf()
+int test_hash_003()
 {
     //fs::path path = fs::path("/home/gbugaj/share/devbox/hashing/001/");
     fs::path path = fs::path("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01");
@@ -365,8 +307,7 @@ int mainsdfsdf()
     return 0;
 }
 
-
-int mainxas()
+void test_hash_004()
 {
     auto h1 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/002/16.png", ImageHash::DIFFERENCE);
     auto h2 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/002/17.png", ImageHash::DIFFERENCE);
@@ -379,17 +320,11 @@ int mainxas()
     auto norm = hs.normalized(h1, h2);
 
     std::cout<< "Distance   = " << std::dec << val <<  " :: " << norm << "\n";
-
-    return 0;
 }
 
 
-int main()
+void test_histogram_scores()
 {
-    fs::path path = fs::current_path();
-
-    std::cout<< "Current Directory : " << path;
-
     LBPModel model(4);
     LBPModel sample(4);
 
@@ -422,6 +357,4 @@ int main()
     std::cout<< "Euclidean         = " << r5 << "\n";
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
     std::cout<< "Absolute Value    = " << r7 << "\n";
-
-    return 0;
 }

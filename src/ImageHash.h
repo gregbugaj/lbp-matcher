@@ -16,6 +16,9 @@ public :
 
     bool debug = true;
 
+    /**
+     * Method used to hash the image
+     */
     enum HashMethod
     {
         AVERAGE,
@@ -29,26 +32,27 @@ public :
      * Generate hash for given input image
      *
      * @param pix input image
+     *
      * @return  64 bit hash value
      */
     virtual hash_t hash(PIX* pix) const = 0;
-
 
     /**
      * Get hash value from image
      *
      * @param pix input image
      * @param method the method used to obtain hash
+     *
      * @return 64 bit hash value
      */
     static hash_t hash(PIX* pix, const HashMethod& method);
 
-
     /**
      * Get hash value from image provided via filename
      *
-     * @param pix input image
+     * @param filename input image
      * @param method the method used to obtain hash
+     *
      * @return 64 bit hash value
      */
     static hash_t hash(const std::string& filename, const HashMethod& method);
@@ -59,6 +63,7 @@ protected:
 
     /***
      * Debug trace
+     *
      * @param out
      * @param pos
      * @param one
@@ -72,7 +77,6 @@ protected:
                       << std::setw(16) << out << " : " << one << " :: " << bs << std::endl;
         }
     }
-
 
 private:
 

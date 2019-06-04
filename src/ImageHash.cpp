@@ -17,7 +17,6 @@ hash_t ImageHash::hash(PIX* pix, const HashMethod& method)
     return handler->hash(pix);
 }
 
-
 hash_t ImageHash::hash(const std::string &filename, const ImageHash::HashMethod &method)
 {
     validateFileExists(filename);

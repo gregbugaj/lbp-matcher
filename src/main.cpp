@@ -239,7 +239,6 @@ int mainaxxa()
     return 0;
 }
 
-
 hash_t bucket(hash_t key, const std::set <hash_t> & keys)
 {
     HashDistance hs ;
@@ -387,10 +386,14 @@ int mainxas()
 
 int main()
 {
+    fs::path path = fs::current_path();
+
+    std::cout<< "Current Directory : " << path;
+
     LBPModel model(4);
     LBPModel sample(4);
 
-    model.bins[0] = 10;
+    model.bins[0] = 20;
     model.bins[1] = 20;
     model.bins[2] = 30;
     model.bins[3] = 40;
@@ -406,6 +409,9 @@ int main()
     auto r2 = histogram.compare(model, sample,  HistogramComparison::CompareType::CHI_SQUARED);
     auto r3 = histogram.compare(model, sample,  HistogramComparison::CompareType::LOG_LIKELIHOOD);
     auto r4 = histogram.compare(model, sample,  HistogramComparison::CompareType::KULLBACK_LEIBLER_DIVERGENCE);
+    auto r5 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE);
+    auto r6 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE_NORMALIZED);
+    auto r7 = histogram.compare(model, sample,  HistogramComparison::CompareType::ABSOLUTE_VALUE);
 
 
     std::cout<< "---------------------------------\n";
@@ -413,6 +419,9 @@ int main()
     std::cout<< "Chi Squared       = " << r2 << "\n";
     std::cout<< "LogLikehood       = " << r3 << "\n";
     std::cout<< "Kullback-Leibler  = " << r4 << "\n";
+    std::cout<< "Euclidean         = " << r5 << "\n";
+    std::cout<< "Euclidean normalized  = " << r6 << "\n";
+    std::cout<< "Absolute Value    = " << r7 << "\n";
 
     return 0;
 }

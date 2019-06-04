@@ -139,8 +139,6 @@ double HistogramComparison::scoreKullbackLeiblerDivergence(const LBPModel &model
     return d;
 }
 
-
-
 double scoreKullbackLeiblerDivergenceORG(const LBPModel &model, const LBPModel &sample)
 {
     double d = 0;
@@ -209,8 +207,6 @@ double  HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected
 
     return sum;
 }
-
-
 
 double scoreChiSquaredORG(const LBPModel &model, const LBPModel &sample)
 {

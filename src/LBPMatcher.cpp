@@ -36,6 +36,7 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
         double t = (2 * M_PI * p) / points;
         int xp = round(x + radius * cos(t));
         int yp = round(y - radius * sin(t));
+
         out.push_back(std::make_pair(xp, yp));
     }
     return out;
@@ -147,7 +148,7 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
     int ws = ceil((double) w / (double) vbin);
 
     /*
-         std::cout<<"\n hbin = "<< hbin;
+    std::cout<<"\n hbin = "<< hbin;
     std::cout<<"\n wbin = "<< vbin;
     std::cout<<"\n bins = "<< bins;
     std::cout<<"\n hs = "<< hs;
@@ -270,7 +271,6 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
         }
     }
 
-
     pixWritePng("/home/gbugaj/share/devbox/data1/lbp-uniform.png", pixUniform, 1);
     pixWritePng("/home/gbugaj/share/devbox/data1/lbp-nonuniform.png", pixNonUniform, 1);
 
@@ -283,12 +283,10 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
 
     /*
        std::cout<< " START \n ";
-
     for(int i =0, s = featureHistogram.size; i< s; ++i)
     {
         std::cout<< std::dec<< featureHistogram.bins[i] << "\n";
     }
-
      */
     return featureHistogram;
 }

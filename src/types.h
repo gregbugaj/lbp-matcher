@@ -34,11 +34,18 @@ public:
     int* bins;
     int size;
 
+    /**
+     * Output histogram to ouptut histogram
+     *
+     * @param os
+     * @param model
+     * @return
+     */
     friend std::ostream& operator << (std::ostream &os, const LBPModel &model)
     {
         for(int i = 0, s = model.size; i< s; ++i)
         {
-           os << model.bins[i] << ",";
+           os << model.bins[i] << ", ";
         }
 
         return os;

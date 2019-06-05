@@ -66,7 +66,7 @@ private :
     double scoreAbsoluteValueDistance(const LBPModel& expected,const LBPModel& observed) const;
 
     /**
-     * Perform histogram intersection
+     * Perform histogram intersection, value will be normalized in [0..1] range
      *
      * @param model
      * @param sample

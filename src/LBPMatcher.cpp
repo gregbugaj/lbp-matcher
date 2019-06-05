@@ -24,7 +24,6 @@ void clamp(std::pair<int_t, int_t>& p, const int& w,const int& h)
     p.second = std::min(std::max(p.second, 0), h - 1);
 }
 
-
 // typical configurations
 // P, R = (8, 1), (16, 2) and (8, 2)
 neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
@@ -42,22 +41,30 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
     return out;
 }
 
-
 // Statics
 
-LBPModel LBPMatcher::createLBPEnhanced(PIX *pix, int_t points, int_t radius)
+LBPModel LBPMatcher::createLBPEnhanced(PIX* pix, int_t points, int_t radius)
 {
     LBPModel model(256);
-    std::cout<<"pix->d = "<< pix->d;
+    std::cout<<"pix->d = "<< pix->d << std::endl;
+    // convert color(32) to grayscale
     PIX* pdata = pixConvertTo8(pix, 0);
+ //   pdata = pixThreshold8(pdata, 8, 32, 0);
 
-    //pixWritePng("/home/gbugaj/share/devbox/data1/lbp-pdata.png", pdata, 1);
+    pdata = reduce(pix, 400, 0);
+    pdata = pixConvertTo8(pdata, 0);
+//    pdata = reduce(pdata, 500, 300);
 
-    int_t w = pix->w;
-    int_t h = pix->h;
-    int_t d = pix->d;
+//    PIX* pdata = normalize(pix);
+    pixWritePng("/tmp/lbp-matcher/lbp-pdata.png", pdata, 1);
+    std::cout<<"pix->d = "<< pdata->d << std::endl;
+
+    int_t w = pdata->w;
+    int_t h = pdata->h;
+    int_t d = pdata->d;
 
     PIX* pixout = pixCreate(w, h, 8);
+
     // We assume 300 dpi
     pixSetResolution(pixout, 300, 300);
 
@@ -78,25 +85,35 @@ LBPModel LBPMatcher::createLBPEnhanced(PIX *pix, int_t points, int_t radius)
             l_uint32 p7 = pixAtGet(pdata, x - 1, y + 1);
 
             l_uint32 p8 = pixAtGet(pdata, x - 1, y    );
-            double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
+            double mean =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
 
             byte_t  out = 0;
-            out |=   ((m > p1) << 7)
-                     | ((m > p2) << 6)
-                     | ((m > p3) << 5)
-                     | ((m > p4) << 4)
-                     | ((m > p5) << 3)
-                     | ((m > p6) << 2)
-                     | ((m > p7) << 1)
-                     | ((m > p8) << 0);
 
+            // normal
+                 out |=   ((p0 > p1) << 7)
+                     | ((p0 > p2) << 6)
+                     | ((p0 > p3) << 5)
+                     | ((p0 > p4) << 4)
+                     | ((p0 > p5) << 3)
+                     | ((p0 > p6) << 2)
+                     | ((p0 > p7) << 1)
+                     | ((p0 > p8) << 0);
 
+            // enhanced
+           /* out |=     ((mean > p1) << 7)
+                     | ((mean > p2) << 6)
+                     | ((mean > p3) << 5)
+                     | ((mean > p4) << 4)
+                     | ((mean > p5) << 3)
+                     | ((mean > p6) << 2)
+                     | ((mean > p7) << 1)
+                     | ((mean > p8) << 0);
+*/
             pixAtSet(pixout, x, y, out);
         }
     }
 
-    pixWritePng("/home/gbugaj/share/devbox/data1/lbp-pixout-enhanced.png", pixout, 1);
-
+    pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
     return model;
 }
 
@@ -130,7 +147,15 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
     int padT = 1;
     int padB = 1;
 
-    //PIX* pdata = pixConvertTo8(pix, 0);
+    if(true)
+    {
+        createLBPEnhanced(pix, 0, 0);
+
+        LBPModel ret(1);
+        std::cout << ret << std::endl;
+        return ret;
+    }
+
     PIX* pdata = normalize(pix, 0, 0, 0, 0);
 
     int_t w = pdata->w;
@@ -186,7 +211,7 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
             int ystart = row * hs;
             int xstart = col * ws;
 
-//            std::cout<<" indexs = "<< index << " pos : " << ystart << ":"<<ystart << ", offset : " << offset << std::endl;
+//          std::cout<<" indexs = "<< index << " pos : " << ystart << ":"<<ystart << ", offset : " << offset << std::endl;
             for (int_t y =  std::max(1, ystart), yend = std::min(ystart + hs, h - 1); y < yend; ++y)
             {
                 for (int_t x = std::max(1, xstart), xend = std::min(xstart + ws, w - 1); x < xend; ++x)
@@ -296,10 +321,9 @@ int LBPMatcher::sign(l_int32 point, l_int32  center)
     return (point - center) >= 0 ? 1 : 0;
 }
 
-
 LBPModel LBPMatcher::createLBP(const std::string &filename)
 {
-    std::cout << "\n Reading file : " << filename;
+    std::cout << "reateLBP reading file : " << filename << std::endl;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
     validateFileExists(filename);
@@ -310,7 +334,7 @@ LBPModel LBPMatcher::createLBP(const std::string &filename)
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
-    std::cout<<  "createLBP Time : "  << duration << std::endl;
+    std::cout <<  "createLBP Time : "  << duration << std::endl;
 
     return model;
 }

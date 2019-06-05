@@ -15,6 +15,15 @@
  */
 void dump(PIX* pix);
 
+
+/**
+ * Create grayscale image
+ *
+ * @param pix the pix to convert to grayscale
+ * @return
+ */
+PIX* create_grayscale(PIX* pix);
+
 /**
  * Sum pixel values
  *
@@ -61,11 +70,12 @@ PIX* normalize(PIX *pix);
 
 /**
  * Convert to correct format, this may involve up/down conversion.
+ * If the image is binary then the image will be converted to grayscale
  *
- * @param padLeft
- * @param padRight
- * @param padTop
- * @param padBottom
+ * @param padLeft the amount of padding to add
+ * @param padRight  the amount of padding to add
+ * @param padTop  the amount of padding to add
+ * @param padBottom  the amount of padding to add
  * @param pix the pix to convert
  * @return converted pix
  */
@@ -73,6 +83,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom);
 
 /**
  * Reduce the size of given pix to given size
+ *
  * @param pix the pix to reduce
  * @param width  the width to reduce to
  * @param height the height to reduce to

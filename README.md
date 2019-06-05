@@ -1,5 +1,16 @@
+# TODO / Implement
+
+# Noise reduction by using a threashold
+# 
+
+
+# References 
+* https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4438071/
+* http://www.cse.oulu.fi/wsgi/CMV/Downloads/LBPMatlab
+
 
 # Catch2 Testing Framework
+
 
 Test cases are build with Catch2 test framework
 

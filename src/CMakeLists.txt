@@ -19,3 +19,9 @@ set(SOURCE_FILES main.cpp ImageHash.cpp ImageHash.h AverageHash.cpp AverageHash.
 add_executable(lbp_matcher ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(lbp_matcher lept stdc++fs)
+
+# copy test-deck files
+message("++ EnvParameter : CMAKE_BINARY_DIR     = ${CMAKE_BINARY_DIR}")
+
+file(GLOB MY_TESTDECK_FILES "${CMAKE_SOURCE_DIR}/test-deck")
+file(COPY ${MY_TESTDECK_FILES} DESTINATION "${CMAKE_BINARY_DIR}/")

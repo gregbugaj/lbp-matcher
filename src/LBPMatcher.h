@@ -3,9 +3,11 @@
 
 
 #include <leptonica/allheaders.h>
+#include <experimental/filesystem>
 #include "types.h"
 #include "fileutil.h"
 
+namespace  fs = std::experimental::filesystem;
 
 class LBPMatcher
 {
@@ -35,7 +37,7 @@ public :
     static LBPModel createLBP(PIX* pix);
 
     /***
-     * Create LBP for given image
+     * Create LBP for given image file
      *
      * @param filename to create model for
      * @return LBP Model representation of the image

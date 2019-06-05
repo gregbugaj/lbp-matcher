@@ -13,24 +13,31 @@
 #include <chrono>
 #include <set>
 
+#include <unistd.h>
+#include <stdio.h>
+#include <limits.h>
+
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
 
 void test_histogram_scores();
+void test_lbp_001();
+void test_lbp_000();
 
 int main(int argc, char* argv[])
 {
-    fs::path path = fs::current_path();
-    std::cout<< "Current Directory : " << path << std::endl;
 
-    test_histogram_scores();
+//    test_histogram_scores();
+//    test_lbp_001();
+    test_lbp_000();
+
     return 0;
 }
 
 int test_extractor_001()
 {
-    std::string document = "/home/gbugaj/share/devbox/data1/claim001.tif";
-    std::string snip     = "/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/27.png";
+    std::string document = "claim001.tif";
+    std::string snip     = "deck-01/27.png";
 
     Extractor extractor;
     extractor.extract(document, snip);
@@ -58,11 +65,53 @@ void test_segmenter_01()
     */
 }
 
+fs::path getTestDeckDirectory(const std::string& folder)
+{
+    auto path = fs::current_path();
+    path /= "../test-deck";
+    path /= folder;
+    return path;
+}
+
+
+void test_lbp_000()
+{
+    auto deck = getTestDeckDirectory("set1");
+    auto f1 = deck / "20181114_201326.jpg";
+
+    std::cout <<"Test deck dir : " << deck << std::endl;
+    std::cout <<"Test f1 : " << f1 << std::endl;
+
+    auto m0 = LBPMatcher::createLBP(f1);
+
+    std::cout << "Histograms " << std::endl;
+    std::cout << m0 << std::endl;
+}
+
+
 void test_lbp_001()
 {
-    HistogramComparison comp;
+    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "0.png";
+    auto f2 = deck / "1.png";
 
-    auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/8.png");
+    std::cout <<"Test deck dir : " << deck << std::endl;
+    std::cout <<"Test f1 : " << f1 << std::endl;
+    std::cout <<"Test f2 : " << f2 << std::endl;
+
+    auto m0 = LBPMatcher::createLBP(f1);
+
+    std::cout << "Histograms " << std::endl;
+    std::cout << m0 << std::endl;
+
+    HistogramComparison comp;
+    auto type = HistogramComparison::CompareType::INTERSECTION;
+    auto s0 = comp.compare(m0, m0, type);
+
+    std::cout << "\nScores : " << std::endl;
+    std::cout << "s0 : " << std::dec << s0  << std::endl;
+
+    /*
     auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/9.png");
 
     auto type = HistogramComparison::CompareType::INTERSECTION;
@@ -81,14 +130,13 @@ void test_lbp_001()
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
+
+   */
 }
 
 void test_lbp_002()
 {
     HistogramComparison comp;
-
-    //auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/27.png");
-    //auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/28.png");
 
     auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/0.png");
     auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/1.png");
@@ -336,7 +384,7 @@ void test_histogram_scores()
     model.bins[2] = 30;
     model.bins[3] = 40;
 
-    sample.bins[0] = 10;
+    sample.bins[0] = 20;
     sample.bins[1] = 50;
     sample.bins[2] = 30;
     sample.bins[3] = 40;

@@ -65,7 +65,6 @@ l_uint32 sum(PIX* pix)
     return sum;
 }
 
-
 BOX* boxaBoundingRegion(BOXA* boxes)
 {
     BOX* box = NULL;
@@ -112,52 +111,50 @@ void pixAtSet(PIX* pix, int_t x, int_t y, byte_t value)
 
 PIX* create_grayscale(PIX* pix)
 {
-    PIX* pixt = pixCopy(NULL, pix);
+    PIX* gray = pixCopy(NULL, pix);
 
-    pixt = pixConvert1To8(NULL, pixt, 255, 0);
-    pixt = pixScaleGray2xLI(pixt);
-    pixt = pixScaleGray2xLI(pixt);
-    pixt = pixBlockconv(pixt, 1, 1);
-    pixt = pixBlockconv(pixt, 1, 1);
-    pixt = pixBlockconv(pixt, 1, 1);
-    pixt = pixScaleAreaMap2(pixt);
-    pixt = pixScaleAreaMap2(pixt);
+    gray = pixConvert1To8(NULL, gray, 255, 0);
+    gray = pixScaleGray2xLI(gray);
+    gray = pixBlockconv(gray, 1, 1);
+    gray = pixScaleAreaMap2(gray);
 
-    return pixt;
+    return gray;
 }
-
 
 PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom)
 {
     static int counter = 0;
     counter++;
-    // Binary Image
+
     if(pix->d == 1)
     {
-        PIX*  gray     = pixConvertTo8(pix, NULL); //create_grayscale(pix);
-        //PIX*  gray     = create_grayscale(pix); -- CAUSES TOO MANY ARTIFACTS
+        //PIX*  gray     = pixConvertTo8(pix, NULL); //create_grayscale(pix);
+        PIX*  gray     = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
         BOXA* boxes    = pixConnComp(pix, NULL, 4);
         BOX*  box      = boxaBoundingRegion(boxes);
-        PIX*  cliped   = pixClipRectangle(gray, box, NULL);
+        PIX*  clipped  = pixClipRectangle(gray, box, NULL);
 
-        PIX* padded = pixCreate(box->w+(padLeft + padRight), box->h + (padBottom + padTop), 8);
-        pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, cliped, 0, 0);
+        PIX* padded = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
+        pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
 
         if(debug_pix)
         {
-
             char f1[255];
-            sprintf(f1, "/home/gbugaj/share/devbox/tmp/gray-%d.png", counter);
-            sprintf(f1, "/home/gbugaj/share/devbox/tmp/padded-%d.png", counter);
-            sprintf(f1, "/home/gbugaj/share/devbox/tmp/cliped-%d.png", counter);
 
+            sprintf(f1, "/tmp/lbp-matcher/norm-pix-%d.png", counter);
+            pixWritePng(f1, pix, 0);
+
+            sprintf(f1, "/tmp/lbp-matcher/norm-gray-%d.png", counter);
             pixWritePng(f1, gray, 0);
-            pixWritePng(f1, padded, 0);
-            pixWritePng(f1, cliped, 0);
 
+            sprintf(f1, "/tmp/lbp-matcher/norm-padded-%d.png", counter);
+            pixWritePng(f1, padded, 0);
+
+            sprintf(f1, "/tmp/lbp-matcher/norm-clipped-%d.png", counter);
+            pixWritePng(f1, clipped, 0);
         }
 
-        pixDestroy(&cliped);
+        pixDestroy(&clipped);
         pixDestroy(&gray);
         boxaDestroy(&boxes);
         boxDestroy(&box);
@@ -172,29 +169,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom)
         int_t yres = pixGetYRes(pix);
         PIX*  pix8 = pixConvertTo8(pix, 0);
 
-        if(true)
-            return pix8;
-
-        PIX *binary;
-        pixOtsuAdaptiveThreshold(pix8, (xres * 0.25 + 0.5), (yres * 0.25 + 0.5), 150, 150, 0.1, NULL, &binary);
-
-        BOXA* boxes = pixConnComp(binary, NULL, 4);
-        BOX*  box   = boxaBoundingRegion(boxes);
-        PIX*  out   = pixClipRectangle(pix8, box, NULL);
-
-        if (debug_pix)
-        {
-            pixWritePng("/tmp/lbp-matcher/out.png", out, 1);
-            pixWritePng("/tmp/lbp-matcher/binary.png", binary, 1);
-        }
-
-        pixDestroy(&pix8);
-        pixDestroy(&binary);
-        boxaDestroy(&boxes);
-        boxDestroy(&box);
-        boxDestroy(&box);
-
-        return out;
+        return pix8;
     }
 }
 
@@ -202,7 +177,6 @@ PIX* normalize(PIX *pix)
 {
     return normalize(pix, 0, 0, 0, 0);
 }
-
 
 PIX* reduce(PIX *pix, int width, int height)
 {

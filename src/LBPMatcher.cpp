@@ -41,6 +41,19 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
     return out;
 }
 
+l_uint32 pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
+{
+    if(x < 0 || x > w || y < 0 || y > h)
+        return 0;
+
+    l_int32 wpl    = pixGetWpl(pix);
+    l_uint32* data = pixGetData(pix);
+    l_uint32* line = data + y * wpl;
+    l_uint32 value = GET_DATA_BYTE(line, x);
+
+    return value;
+}
+
 // Statics
 
 LBPModel LBPMatcher::createLBPEnhanced(PIX* pix, int_t points, int_t radius)
@@ -64,40 +77,40 @@ LBPModel LBPMatcher::createLBPEnhanced(PIX* pix, int_t points, int_t radius)
     int_t d = pdata->d;
 
     PIX* pixout = pixCreate(w, h, 8);
-
     // We assume 300 dpi
     pixSetResolution(pixout, 300, 300);
+    int a = 2;
 
     for (int_t y = 0; y < h; ++y)
     {
         for (int_t x = 0; x < w; ++x)
         {
-            l_uint32 p0 = pixAtGet(pdata, x,     y    ); // Center
+            // enhanced 2
+            l_int32 p0 = pixAtGetSan(pdata, x,     y    , w , h); // Center
+            l_int32 p1 = pixAtGetSan(pdata, x - 1, y - 1, w , h);
+            l_int32 p2 = pixAtGetSan(pdata, x,     y - 1, w , h);
+            l_int32 p3 = pixAtGetSan(pdata, x + 1, y - 1, w , h);
+            l_int32 p4 = pixAtGetSan(pdata, x + 1, y    , w , h);
+            l_int32 p5 = pixAtGetSan(pdata, x + 1, y + 1, w , h);
+            l_int32 p6 = pixAtGetSan(pdata, x    , y + 1, w , h);
+            l_int32 p7 = pixAtGetSan(pdata, x - 1, y + 1, w , h);
+            l_int32 p8 = pixAtGetSan(pdata, x - 1, y    , w , h);
 
-            l_uint32 p1 = pixAtGet(pdata, x - 1, y - 1);
-            l_uint32 p2 = pixAtGet(pdata, x,     y - 1);
-            l_uint32 p3 = pixAtGet(pdata, x + 1, y - 1);
-
-            l_uint32 p4 = pixAtGet(pdata, x + 1, y    );
-
-            l_uint32 p5 = pixAtGet(pdata, x + 1, y + 1);
-            l_uint32 p6 = pixAtGet(pdata, x    , y + 1);
-            l_uint32 p7 = pixAtGet(pdata, x - 1, y + 1);
-
-            l_uint32 p8 = pixAtGet(pdata, x - 1, y    );
-            double mean =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
-
+            double mean =  (p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 9;
             byte_t  out = 0;
 
-            // normal
-                 out |=   ((p0 > p1) << 7)
-                     | ((p0 > p2) << 6)
-                     | ((p0 > p3) << 5)
-                     | ((p0 > p4) << 4)
-                     | ((p0 > p5) << 3)
-                     | ((p0 > p6) << 2)
-                     | ((p0 > p7) << 1)
-                     | ((p0 > p8) << 0);
+            /*
+          // normal
+               out |=   ((p0 > p1) << 7)
+                   | ((p0 > p2) << 6)
+                   | ((p0 > p3) << 5)
+                   | ((p0 > p4) << 4)
+                   | ((p0 > p5) << 3)
+                   | ((p0 > p6) << 2)
+                   | ((p0 > p7) << 1)
+                   | ((p0 > p8) << 0);
+
+           */
 
             // enhanced
            /* out |=     ((mean > p1) << 7)
@@ -109,27 +122,22 @@ LBPModel LBPMatcher::createLBPEnhanced(PIX* pix, int_t points, int_t radius)
                      | ((mean > p7) << 1)
                      | ((mean > p8) << 0);
 */
+            out += sign(p1, p0 + a) * std::pow(2, 0);
+            out += sign(p2, p0 + a) * std::pow(2, 1);
+            out += sign(p3, p0 + a) * std::pow(2, 2);
+            out += sign(p4, p0 + a) * std::pow(2, 3);
+            out += sign(p5, p0 + a) * std::pow(2, 4);
+            out += sign(p6, p0 + a) * std::pow(2, 5);
+            out += sign(p7, p0 + a) * std::pow(2, 6);
+            out += sign(p8, p0 + a) * std::pow(2, 7);
+
             pixAtSet(pixout, x, y, out);
         }
     }
 
-    pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
+    pixWritePng("/tmp/lbp-matcher/lbp-enhanced-1.png", pixout, 1);
     return model;
 }
-
-l_uint32 pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
-{
-    if(x < 0 || x > w || y < 0 || y > h)
-        return 0;
-
-    l_int32 wpl    = pixGetWpl(pix);
-    l_uint32* data = pixGetData(pix);
-    l_uint32* line = data + y * wpl;
-    l_uint32 value = GET_DATA_BYTE(line, x);
-
-    return value;
-}
-
 
 enum MicroTexton
 {

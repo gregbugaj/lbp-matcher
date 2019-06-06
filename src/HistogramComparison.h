@@ -23,6 +23,7 @@ public :
         ABSOLUTE_VALUE,
         LOG_LIKELIHOOD,
         CHI_SQUARED,
+        COSINE_SIMILARITY,
         KULLBACK_LEIBLER_DIVERGENCE
     };
 
@@ -100,6 +101,15 @@ private :
      */
     double scoreKullbackLeiblerDivergence(const LBPModel &expected, const LBPModel &observed) const;
 
+
+    /**
+     * Cosine similarity metric
+     *
+     * @param expected
+     * @param observed
+     * @return
+     */
+    double scoreCosineSimilarity(const LBPModel& expected,const LBPModel& observed) const;
 };
 
 

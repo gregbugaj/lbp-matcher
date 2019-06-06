@@ -9,44 +9,56 @@
 
 namespace  fs = std::experimental::filesystem;
 
+enum LbpType
+{
+    NORMAL,
+    ENHANCED,
+    SIGNED
+};
+
+enum MicroTexton
+{
+    SPOT      = 0x00, // 0000 0000
+    SPOT_FLAT = 0xFF, // 1111 1111
+    LINE_END  = 0x30, // 0011 0000
+    EDGE      = 0xE1, // 1110 0001
+    CORNER    = 0x70  // 0111 0000
+};
+
 class LBPMatcher
 {
 
 public :
 
     /**
-     * Crate Enhanced (improved) Local Binary Pattern image
-     * Typical configurations :
-     * P, R = (8, 1), (16, 2) and (8, 2)
+     * Create a LBP model and populate the lbp matrix
      *
-     * @param pix to create pattern for
-     * @param points to use
-     * @param radius to use
-     * @return LBPModel
+     * @param matrix
+     * @param type
+     * @param pix
      */
-    static LBPModel createLBPEnhanced(PIX* pix, int_t points, int_t radius);
-
-    static LBPModel createLBPEnhanced(const std::string& filename, int_t points, int_t radius);
+    static void createLBP(int** matrix, LbpType type, PIX* pix);
 
     /**
-     * Crate Local Binary Pattern image
+     * Extracted uniform local binary pattern (LBP) from a grayscale image.
+     * The LBP features encode local texture information.
      *
-     * @param pix to create pattern ofr
-     * @return LBPModel
+     * @param pix to extract features form
+     * @return LBPModel of extracted features
      */
     static LBPModel createLBP(PIX* pix);
 
     /***
-     * Create LBP for given image file
-     *
+     * Extracted uniform local binary pattern (LBP) from a grayscale image.
+     * The LBP features encode local texture information.
+     * *
      * @param filename to create model for
-     * @return LBP Model representation of the image
+     * @return LBPModel of extracted features
      */
     static LBPModel createLBP(const std::string& filename);
 
 private:
 
-    static int sign(l_int32 point, l_int32 center);
 };
 
 

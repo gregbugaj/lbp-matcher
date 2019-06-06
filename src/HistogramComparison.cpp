@@ -30,6 +30,8 @@ double HistogramComparison::compare(const LBPModel &expected, const LBPModel &ob
             return scoreEuclideanDistanceNormalized(expected, observed);
         case ABSOLUTE_VALUE:
             return scoreAbsoluteValueDistance(expected, observed);
+        case COSINE_SIMILARITY:
+            return scoreCosineSimilarity(expected, observed);
     }
 
     throw "Compare type not handled";
@@ -192,7 +194,7 @@ double HistogramComparison::scoreEuclideanDistanceNormalized(const LBPModel& exp
     return std::sqrt(sum / n);
 }
 
-double  HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected, const LBPModel& observed) const
+double HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected, const LBPModel& observed) const
 {
     if(expected.size != observed.size)
         throw std::runtime_error("expected size != observed size");
@@ -208,6 +210,18 @@ double  HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected
 
     return sum;
 }
+
+double HistogramComparison::scoreCosineSimilarity(const LBPModel& expected, const LBPModel& observed) const
+{
+    if(expected.size != observed.size)
+        throw std::runtime_error("expected size != observed size");
+
+    if(expected.size == 0)
+        throw std::runtime_error("expected or observed size is zero");
+
+    return 0;
+}
+
 
 double scoreChiSquaredORG(const LBPModel &model, const LBPModel &sample)
 {

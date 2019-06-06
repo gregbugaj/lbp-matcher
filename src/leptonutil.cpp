@@ -121,24 +121,28 @@ PIX* create_grayscale(PIX* pix)
     return gray;
 }
 
-PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom)
-{
+/**
+ * Smoothing and converting binary image to grayscale image
+ *
+ * @param pix the pix to normalize
+ * @return normalized pix
+ */
+PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     static int counter = 0;
     counter++;
 
-    if(pix->d == 1)
+    if (pix->d == 1)
     {
         //PIX*  gray     = pixConvertTo8(pix, NULL); //create_grayscale(pix);
-        PIX*  gray     = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
-        BOXA* boxes    = pixConnComp(pix, NULL, 4);
-        BOX*  box      = boxaBoundingRegion(boxes);
-        PIX*  clipped  = pixClipRectangle(gray, box, NULL);
+        PIX *gray = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
+        BOXA *boxes = pixConnComp(pix, NULL, 4);
+        BOX *box = boxaBoundingRegion(boxes);
+        PIX *clipped = pixClipRectangle(gray, box, NULL);
 
-        PIX* padded = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
+        PIX *padded = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
         pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
 
-        if(debug_pix)
-        {
+        if (debug_pix) {
             char f1[255];
 
             sprintf(f1, "/tmp/lbp-matcher/norm-pix-%d.png", counter);
@@ -160,6 +164,21 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom)
         boxDestroy(&box);
 
         return padded;
+    }
+    else if (pix->d == 8)
+    {
+
+    }
+    else if (pix->d == 32)
+    {
+      /*
+      // convert color(32) to grayscale
+      PIX* pdata = pixConvertTo8(pix, 0);
+      //   pdata = pixThreshold8(pdata, 8, 32, 0);
+      pdata = reduce(pix, 400, 0);
+      pdata = pixConvertTo8(pdata, 0);
+      //    pdata = reduce(pdata, 500, 300);
+      */
     }
     else
     {

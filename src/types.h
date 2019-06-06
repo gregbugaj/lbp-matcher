@@ -1,10 +1,11 @@
 #ifndef LBP_MATCHER_TYPES_H
 #define LBP_MATCHER_TYPES_H
 
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <leptonica/allheaders.h>
-
+#include <vector>
 
 typedef double               double_t;
 typedef bool                 bool_t;
@@ -14,28 +15,36 @@ typedef int                  int_t;
 typedef unsigned long int    uinit64_t; // 8 bytes(64 bits)
 typedef uinit64_t            hash_t;
 
-struct LBPModel
-{
+struct LBPModel {
 public:
-    LBPModel(int msize) : size(msize)
-    {
-        bins = new int[msize];
-        for(int i = 0, s = msize; i< s; ++i)
-        {
+    LBPModel(int msize) : size(msize) {
+        bins.resize(size);
+
+        for (int i = 0, s = msize; i < s; ++i) {
             bins[i] = 0;
         }
     }
 
-    ~LBPModel()
-    {
-        delete bins;
+    ~LBPModel() {
+        bins.clear();
     }
 
-    int* bins;
+    void append(const LBPModel &model)
+    {
+        std::cout << " append  "  << model << std::endl;
+        int start = bins.size();
+        bins.resize(bins.size() + model.size);
+
+        for (int i = 0, s =  model.size; i < s; ++i) {
+            bins[start + i] = model.bins[i];
+        }
+    }
+
+    std::vector<int> bins; // size of the vector starts at 0
     int size;
 
     /**
-     * Output histogram to ouptut histogram
+     * Output histogram
      *
      * @param os
      * @param model
@@ -43,16 +52,20 @@ public:
      */
     friend std::ostream& operator << (std::ostream &os, const LBPModel &model)
     {
-        for(int i = 0, s = model.size; i< s; ++i)
+        std::string delim =  ", ";
+        os << "Size (" << model.size << ") [";
+
+        for(int i = 0, s = model.size; i < s; ++i)
         {
-           os << model.bins[i] << ", ";
+            if(i == s - 1)
+                delim = "";
+           os << model.bins[i] << delim;
         }
+        os << "]";
 
         return os;
     }
 };
-
-
 
 template<class T, class D = std::default_delete<T>>
 struct shared_ptr_with_deleter : public std::shared_ptr<T>

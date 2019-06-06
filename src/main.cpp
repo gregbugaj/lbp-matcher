@@ -27,10 +27,9 @@ void test_lbp_000();
 int main(int argc, char* argv[])
 {
 
+//    test_lbp_000();
+    test_lbp_001();
 //    test_histogram_scores();
-//    test_lbp_001();
-    test_lbp_000();
-
     return 0;
 }
 
@@ -73,47 +72,36 @@ fs::path getTestDeckDirectory(const std::string& folder)
     return path;
 }
 
-
 void test_lbp_000()
 {
-    auto deck = getTestDeckDirectory("set1");
-    auto f1 = deck / "20181114_201326.jpg";
+    auto deck = getTestDeckDirectory("template-claim");
+    auto f1 = deck / "0.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
 
     auto m0 = LBPMatcher::createLBP(f1);
-
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
 }
-
 
 void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "0.png";
-    auto f2 = deck / "1.png";
+    auto f2 = deck / "5.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
     std::cout <<"Test f2 : " << f2 << std::endl;
 
     auto m0 = LBPMatcher::createLBP(f1);
+    auto m1 = LBPMatcher::createLBP(f2);
 
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::INTERSECTION;
-    auto s0 = comp.compare(m0, m0, type);
-
-    std::cout << "\nScores : " << std::endl;
-    std::cout << "s0 : " << std::dec << s0  << std::endl;
-
-    /*
-    auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/9.png");
-
     auto type = HistogramComparison::CompareType::INTERSECTION;
 
     auto s0 = comp.compare(m0, m0, type);
@@ -121,17 +109,15 @@ void test_lbp_001()
     auto s2 = comp.compare(m0, m1, type);
     auto s3 = comp.compare(m1, m0, type);
 
-    std::cout << "\nScores :" << std::endl;
-    std::cout << "s0 :" << std::dec << s0  << std::endl;
-    std::cout << "s1 :" << std::dec << s1  << std::endl;
-    std::cout << "s2 :" << std::dec << s2  << std::endl;
-    std::cout << "s3 :" << std::dec << s3  << std::endl;
+    std::cout << "Scores :" << std::endl;
+    std::cout << "s0 : " << std::dec << s0  << std::endl;
+    std::cout << "s1 : " << std::dec << s1  << std::endl;
+    std::cout << "s2 : " << std::dec << s2  << std::endl;
+    std::cout << "s3 : " << std::dec << s3  << std::endl;
 
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
-
-   */
 }
 
 void test_lbp_002()
@@ -398,6 +384,7 @@ void test_histogram_scores()
     auto r5 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE);
     auto r6 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE_NORMALIZED);
     auto r7 = histogram.compare(model, sample,  HistogramComparison::CompareType::ABSOLUTE_VALUE);
+    auto r8 = histogram.compare(model, sample,  HistogramComparison::CompareType::COSINE_SIMILARITY);
 
 
     std::cout<< "---------------------------------\n";
@@ -408,4 +395,5 @@ void test_histogram_scores()
     std::cout<< "Euclidean             = " << r5 << "\n";
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
     std::cout<< "Absolute Value        = " << r7 << "\n";
+    std::cout<< "Cosine Similarity     = " << r8 << "\n";
 }

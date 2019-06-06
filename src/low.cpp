@@ -7,7 +7,7 @@ int transitions(int a)
     return popcnt(c);
 }
 
- int transition_lbp(byte_t a)
+int transition_lbp(byte_t a)
 {
     // shift in the sign bit as logical shift with pull in 0
     byte_t sign = (a & (1 << 7)) == 0x80 ? 0x80 : 0x00;

@@ -17,31 +17,54 @@ typedef uinit64_t            hash_t;
 
 struct LBPModel {
 public:
-    LBPModel(int msize) : size(msize) {
-        bins.resize(size);
-
-        for (int i = 0, s = msize; i < s; ++i) {
-            bins[i] = 0;
-        }
+    LBPModel(int size)
+    {
+        bins.resize(size, 0);
     }
 
     ~LBPModel() {
         bins.clear();
     }
 
+    void checkIndex(int index) const {
+        if(index < 0 || index > bins.size())
+            throw std::runtime_error("Array index out of bound,: " + std::to_string(index));
+    }
+    /**
+     * Overloading [] operator to access elements in array style
+     * This function must return a reference as array element can be put on left side
+     * example :
+     * <code>
+     * model[i] = 0
+     * int val = model[i]
+     * </code>
+     *
+     * @param index
+     * @return
+     */
+    int& operator[](int index)
+    {
+        checkIndex(index);
+        return bins[index];
+    }
+
+    int operator[](int index) const
+    {
+        checkIndex(index);
+        return bins[index];
+    }
+
+    unsigned long size() const
+    {
+        return bins.size();
+    }
+
     void append(const LBPModel &model)
     {
         std::cout << " append  "  << model << std::endl;
-        int start = bins.size();
-        bins.resize(bins.size() + model.size);
-
-        for (int i = 0, s =  model.size; i < s; ++i) {
-            bins[start + i] = model.bins[i];
-        }
+        bins.resize(bins.size() + model.size());
+        bins.insert(std::end(bins), std::begin(model.bins), std::end(model.bins));
     }
-
-    std::vector<int> bins; // size of the vector starts at 0
-    int size;
 
     /**
      * Output histogram
@@ -53,9 +76,9 @@ public:
     friend std::ostream& operator << (std::ostream &os, const LBPModel &model)
     {
         std::string delim =  ", ";
-        os << "Size (" << model.size << ") [";
+        os << "Size (" << model.size() << ") [";
 
-        for(int i = 0, s = model.size; i < s; ++i)
+        for(int i = 0, s = model.size(); i < s; ++i)
         {
             if(i == s - 1)
                 delim = "";
@@ -65,6 +88,9 @@ public:
 
         return os;
     }
+
+private :
+    std::vector<int> bins; // size of the vector starts at 0
 };
 
 template<class T, class D = std::default_delete<T>>

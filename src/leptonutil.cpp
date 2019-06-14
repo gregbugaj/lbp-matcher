@@ -131,18 +131,39 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     static int counter = 0;
     counter++;
 
+    padTop = 10;
+    padBottom = 10;
+    padLeft = 10;
+    padRight = 10;
+
     if (pix->d == 1)
     {
         //PIX*  gray     = pixConvertTo8(pix, NULL); //create_grayscale(pix);
-        PIX *gray = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
-        BOXA *boxes = pixConnComp(pix, NULL, 4);
-        BOX *box = boxaBoundingRegion(boxes);
-        PIX *clipped = pixClipRectangle(gray, box, NULL);
+        PIX* gray = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
+        BOXA* boxes = pixConnComp(pix, NULL, 4);
+        BOX* box = boxaBoundingRegion(boxes);
+        PIX* clipped = pixClipRectangle(gray, box, NULL);
+        PIX* padded  = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
 
-        PIX *padded = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
-        pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
+        if(true)
+            return clipped;
 
-        if (debug_pix) {
+        pixSetResolution(padded, 300, 300);
+        pixSetAll(padded);
+//        pixSetBlackOrWhite(padded, L_SET_BLACK);
+
+//        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
+//        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC ^ PIX_DST, clipped, 0, 0);
+//        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_DST, clipped, 0, 0);
+//        l_int32 status = pixRasterop(padded, padLeft, padTop, clipped->w, clipped->h, PIX_SRC | PIX_DST , clipped, 0, 0);
+
+//        std::cout<<" out :: " << status;
+
+        pixWritePng("/tmp/lbp-matcher/clipped-pdata.png", clipped, 1);
+        pixWritePng("/tmp/lbp-matcher/padded-pdata.png", padded, 1);
+
+        if (debug_pix)
+        {
             char f1[255];
 
             sprintf(f1, "/tmp/lbp-matcher/norm-pix-%d.png", counter);
@@ -163,6 +184,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
         boxaDestroy(&boxes);
         boxDestroy(&box);
 
+
         return padded;
     }
     else if (pix->d == 8)
@@ -171,14 +193,14 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     }
     else if (pix->d == 32)
     {
-      /*
-      // convert color(32) to grayscale
-      PIX* pdata = pixConvertTo8(pix, 0);
-      //   pdata = pixThreshold8(pdata, 8, 32, 0);
-      pdata = reduce(pix, 400, 0);
-      pdata = pixConvertTo8(pdata, 0);
-      //    pdata = reduce(pdata, 500, 300);
-      */
+        /*
+        // convert color(32) to grayscale
+        PIX* pdata = pixConvertTo8(pix, 0);
+        //   pdata = pixThreshold8(pdata, 8, 32, 0);
+        pdata = reduce(pix, 400, 0);
+        pdata = pixConvertTo8(pdata, 0);
+        //    pdata = reduce(pdata, 500, 300);
+        */
     }
     else
     {

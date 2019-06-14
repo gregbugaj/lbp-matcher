@@ -27,8 +27,8 @@ void test_lbp_000();
 int main(int argc, char* argv[])
 {
 
-//    test_lbp_000();
-    test_lbp_001();
+    test_lbp_000();
+//    test_lbp_001();
 //    test_histogram_scores();
     return 0;
 }
@@ -365,15 +365,15 @@ void test_histogram_scores()
     LBPModel model(4);
     LBPModel sample(4);
 
-    model.bins[0] = 20;
-    model.bins[1] = 20;
-    model.bins[2] = 30;
-    model.bins[3] = 40;
+    model[0] = 20;
+    model[1] = 20;
+    model[2] = 30;
+    model[3] = 40;
 
-    sample.bins[0] = 20;
-    sample.bins[1] = 50;
-    sample.bins[2] = 30;
-    sample.bins[3] = 40;
+    sample[0] = 20;
+    sample[1] = 50;
+    sample[2] = 30;
+    sample[3] = 40;
 
     HistogramComparison histogram;
 

@@ -299,7 +299,6 @@ int test_hash_003()
     if(true)
         return 1;
 
-
     // Cluster into buckets
     std::multimap<hash_t, std::string> clusters;
     for(auto it = set.begin(); it != set.end();)
@@ -311,7 +310,6 @@ int test_hash_003()
         set.erase(it);
         ++it;
     }
-
 
     for (auto itr = map.begin(); itr != map.end(); )
     {
@@ -371,8 +369,8 @@ void test_hash_004()
 
 void test_histogram_scores()
 {
-    LBPModel model(4);
-    LBPModel sample(4);
+    Histogram model(4);
+    Histogram sample(4);
 
     model[0] = 20;
     model[1] = 20;
@@ -409,9 +407,9 @@ void test_histogram_scores()
 
 void test_histogram_append()
 {
-    LBPModel m1(3);
-    LBPModel m2(3);
-    LBPModel m3(3);
+    Histogram m1(3);
+    Histogram m2(3);
+    Histogram m3(3);
 
     m1[0] = 1;
     m1[1] = 2;
@@ -425,7 +423,7 @@ void test_histogram_append()
     m3[1] = 8;
     m3[2] = 9;
 
-    LBPModel r(0);
+    Histogram r(0);
     r.append(m1);
     r.append(m2);
     r.append(m3);

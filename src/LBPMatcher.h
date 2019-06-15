@@ -46,7 +46,7 @@ public :
      * @param pix to extract features form
      * @return LBPModel of extracted features
      */
-    static LBPModel createLBP(PIX* pix);
+    static Histogram createLBP(PIX* pix);
 
     /***
      * Extracted uniform local binary pattern (LBP) from a grayscale image.
@@ -55,7 +55,7 @@ public :
      * @param filename to create model for
      * @return LBPModel of extracted features
      */
-    static LBPModel createLBP(const std::string& filename);
+    static Histogram createLBP(const std::string& filename);
 };
 
 

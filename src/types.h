@@ -15,14 +15,14 @@ typedef int                  int_t;
 typedef unsigned long int    uinit64_t; // 8 bytes(64 bits)
 typedef uinit64_t            hash_t;
 
-struct LBPModel {
+struct Histogram {
 public:
-    LBPModel(int size)
+    Histogram(int size)
     {
         bins.resize(size, 0);
     }
 
-    ~LBPModel() {
+    ~Histogram() {
         bins.clear();
     }
 
@@ -61,7 +61,7 @@ public:
      *
      * @param model the model to append
      */
-    void append(const LBPModel &model)
+    void append(const Histogram &model)
     {
         bins.insert(std::end(bins), std::begin(model.bins), std::end(model.bins));
     }
@@ -73,7 +73,7 @@ public:
      * @param model
      * @return
      */
-    friend std::ostream& operator << (std::ostream &os, const LBPModel &model)
+    friend std::ostream& operator << (std::ostream &os, const Histogram &model)
     {
         std::string delim =  ", ";
         os << "Size (" << model.size() << ") [";

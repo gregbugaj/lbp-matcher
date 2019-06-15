@@ -87,7 +87,7 @@ Manhatan Distance Instead of Hamming Distance
     std::cout<<"\n nbin = "<< nbin;
      */
 
-    LBPModel featureHistogram(nbin);
+    Histogram featureHistogram(nbin);
 
     PIX* pixUniform = pixCreate(w, h, 8);
     PIX* pixNonUniform = pixCreate(w, h, 8);

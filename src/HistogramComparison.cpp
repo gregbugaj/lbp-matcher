@@ -2,8 +2,15 @@
 #include <iostream>
 #include <iomanip>
 
-
-double round(double val, int precision)
+/**
+ * round value
+ *
+ * @param val
+ * @param precision
+ * @return
+ */
+template <class T>
+double round(T val, int precision)
 {
     std::stringstream s;
     s << std::setprecision(precision) << std::setiosflags(std::ios_base::fixed) << val;
@@ -11,7 +18,7 @@ double round(double val, int precision)
     return val;
 }
 
-double HistogramComparison::compare(const LBPModel &expected, const LBPModel &observed,
+double HistogramComparison::compare(const Histogram &expected, const Histogram &observed,
                                     HistogramComparison::CompareType type) const
 {
     switch (type)
@@ -37,13 +44,12 @@ double HistogramComparison::compare(const LBPModel &expected, const LBPModel &ob
     throw "Compare type not handled";
 }
 
-double HistogramComparison::scoreHistogramIntersection(const LBPModel &expected, const LBPModel &observed) const
+double HistogramComparison::scoreHistogramIntersection(const Histogram &expected, const Histogram &observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
 
-    double d = 0,s1 = 0,s2 = 0;
-
+    double d = 0, s1 = 0, s2 = 0;
     for (int_t i = 0, s = expected.size(); i < s; ++i)
     {
         d  += expected[i] + observed[i] - std::abs(expected[i] - observed[i]);
@@ -55,7 +61,7 @@ double HistogramComparison::scoreHistogramIntersection(const LBPModel &expected,
     return round((0.5 * d) / std::fmax(s1, s2), 2);
 }
 
-double HistogramComparison::scoreLogLikelihood(const LBPModel &expected, const LBPModel &observed) const
+double HistogramComparison::scoreLogLikelihood(const Histogram &expected, const Histogram &observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -71,7 +77,7 @@ double HistogramComparison::scoreLogLikelihood(const LBPModel &expected, const L
     return -d;
 }
 
-double HistogramComparison::scoreChiSquared(const LBPModel &expected, const LBPModel &observed) const
+double HistogramComparison::scoreChiSquared(const Histogram &expected, const Histogram &observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -90,7 +96,7 @@ double HistogramComparison::scoreChiSquared(const LBPModel &expected, const LBPM
     return d;
 }
 
-double scoreChiSquaredGoodnesOfFit(const LBPModel &expected, const LBPModel &observed)
+double scoreChiSquaredGoodnesOfFit(const Histogram &expected, const Histogram &observed)
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -113,7 +119,7 @@ double scoreChiSquaredGoodnesOfFit(const LBPModel &expected, const LBPModel &obs
 
 
 // Kullback-Leibler divergence and Jefrey divergence
-double HistogramComparison::scoreKullbackLeiblerDivergence(const LBPModel &model, const LBPModel &sample) const
+double HistogramComparison::scoreKullbackLeiblerDivergence(const Histogram &model, const Histogram &sample) const
 {
     double d = 0;
 
@@ -142,7 +148,7 @@ double HistogramComparison::scoreKullbackLeiblerDivergence(const LBPModel &model
     return d;
 }
 
-double scoreKullbackLeiblerDivergenceORG(const LBPModel &model, const LBPModel &sample)
+double scoreKullbackLeiblerDivergenceORG(const Histogram &model, const Histogram &sample)
 {
     double d = 0;
     for (int_t i = 0, s = model.size(); i < s; ++i)
@@ -158,7 +164,7 @@ double scoreKullbackLeiblerDivergenceORG(const LBPModel &model, const LBPModel &
     return d;
 }
 
-double HistogramComparison::scoreEuclideanDistance(const LBPModel& expected, const LBPModel& observed) const
+double HistogramComparison::scoreEuclideanDistance(const Histogram& expected, const Histogram& observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -176,7 +182,7 @@ double HistogramComparison::scoreEuclideanDistance(const LBPModel& expected, con
 }
 
 
-double HistogramComparison::scoreEuclideanDistanceNormalized(const LBPModel& expected, const LBPModel& observed) const
+double HistogramComparison::scoreEuclideanDistanceNormalized(const Histogram& expected, const Histogram& observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -194,7 +200,7 @@ double HistogramComparison::scoreEuclideanDistanceNormalized(const LBPModel& exp
     return std::sqrt(sum / n);
 }
 
-double HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected, const LBPModel& observed) const
+double HistogramComparison::scoreAbsoluteValueDistance(const Histogram& expected, const Histogram& observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -211,7 +217,7 @@ double HistogramComparison::scoreAbsoluteValueDistance(const LBPModel& expected,
     return sum;
 }
 
-double HistogramComparison::scoreCosineSimilarity(const LBPModel& expected, const LBPModel& observed) const
+double HistogramComparison::scoreCosineSimilarity(const Histogram& expected, const Histogram& observed) const
 {
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
@@ -238,7 +244,7 @@ double HistogramComparison::scoreCosineSimilarity(const LBPModel& expected, cons
     return round(dotProduct / (std::sqrt(expectedNorm) * std::sqrt(observedNorm)), 3);
 }
 
-double scoreChiSquaredORG(const LBPModel &model, const LBPModel &sample)
+double scoreChiSquaredORG(const Histogram &model, const Histogram &sample)
 {
     double d = 0;
     for (int_t i = 0, s = model.size(); i < s; ++i)

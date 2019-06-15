@@ -35,7 +35,7 @@ public :
      * @param type Type of comparison
      * @return score in range 0..1, 0 = No similarity, 1 = Identical
      */
-    double compare(const LBPModel& expected, const LBPModel& observed, CompareType type) const;
+    double compare(const Histogram& expected, const Histogram& observed, CompareType type) const;
 
 private :
 
@@ -46,7 +46,7 @@ private :
      * @param observed
      * @return
      */
-    double scoreEuclideanDistance(const LBPModel& expected, const LBPModel& observed) const;
+    double scoreEuclideanDistance(const Histogram& expected, const Histogram& observed) const;
 
     /**
      * Euclidian distance normalized
@@ -55,7 +55,7 @@ private :
      * @param observed
      * @return
      */
-    double scoreEuclideanDistanceNormalized(const LBPModel& expected,const LBPModel& observed) const;
+    double scoreEuclideanDistanceNormalized(const Histogram& expected,const Histogram& observed) const;
 
     /**
      * Euclidian distance normalized
@@ -64,7 +64,7 @@ private :
      * @param observed
      * @return
      */
-    double scoreAbsoluteValueDistance(const LBPModel& expected,const LBPModel& observed) const;
+    double scoreAbsoluteValueDistance(const Histogram& expected,const Histogram& observed) const;
 
     /**
      * Perform histogram intersection, value will be normalized in [0..1] range
@@ -73,7 +73,7 @@ private :
      * @param sample
      * @return
      */
-    double scoreHistogramIntersection(const LBPModel& expected,const LBPModel& observed) const;
+    double scoreHistogramIntersection(const Histogram& expected,const Histogram& observed) const;
 
     /**
      * Perform log likehood scoring
@@ -82,7 +82,7 @@ private :
      * @param sample
      * @return
      */
-    double scoreLogLikelihood(const LBPModel &expected, const LBPModel &observed) const;
+    double scoreLogLikelihood(const Histogram &expected, const Histogram &observed) const;
 
     /**
      * Perform chi-squared goodness of fit test
@@ -91,7 +91,7 @@ private :
      * @param observed
      * @return
      */
-    double scoreChiSquared(const LBPModel& expected,const LBPModel& observed) const;
+    double scoreChiSquared(const Histogram& expected,const Histogram& observed) const;
 
     /**
      * Perform Kullback Leibler Divergence
@@ -99,7 +99,7 @@ private :
      * @param sample
      * @return
      */
-    double scoreKullbackLeiblerDivergence(const LBPModel &expected, const LBPModel &observed) const;
+    double scoreKullbackLeiblerDivergence(const Histogram &expected, const Histogram &observed) const;
 
 
     /**
@@ -115,7 +115,7 @@ private :
      *
      * @return similarity in range 0..1
      */
-    double scoreCosineSimilarity(const LBPModel& expected,const LBPModel& observed) const;
+    double scoreCosineSimilarity(const Histogram& expected,const Histogram& observed) const;
 };
 
 

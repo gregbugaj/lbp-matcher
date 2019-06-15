@@ -213,7 +213,7 @@ bool isUniform(byte_t a)
     return transition_lbp(a) <= 2;
 }
 
-LBPModel LBPMatcher::createLBP(PIX *pix)
+Histogram LBPMatcher::createLBP(PIX *pix)
 {
     int padL = 1;
     int padR = 1;
@@ -280,7 +280,7 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
     std::cout<<" gridWidth = "<< gridWidth << std::endl;
     std::cout<<" gridHeight = "<< gridHeight << std::endl;
 
-    LBPModel result(0);
+    Histogram result(0);
 
     for (int row = 0; row < verticalPartitions; ++row)
     {
@@ -311,7 +311,7 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
                 pixDestroy(&snip);
             }
 
-            LBPModel boxModel(59);
+            Histogram boxModel(59);
             for (int_t y = std::max(0, yStart); y < yEnd; ++y)
             {
                 for (int_t x = std::max(0, xStart); x < xEnd; ++x)
@@ -334,7 +334,7 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
     return result;
 }
 
-LBPModel LBPMatcher::createLBP(const std::string &filename)
+Histogram LBPMatcher::createLBP(const std::string &filename)
 {
     std::cout << "createLBP reading file : " << filename << std::endl;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();

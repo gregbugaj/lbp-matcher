@@ -219,9 +219,24 @@ double HistogramComparison::scoreCosineSimilarity(const LBPModel& expected, cons
     if(expected.size() == 0)
         throw std::runtime_error("expected or observed size is zero");
 
-    return 0;
-}
+    auto dotProduct = 0;
+    auto expectedNorm = 0;
+    auto observedNorm = 0;
 
+    for (int_t i = 0, s = expected.size(); i < s; ++i)
+    {
+        auto v1 = expected[i];
+        auto v2 = observed[i];
+        dotProduct += v1 * v2;
+        expectedNorm += v1 * v1;
+        observedNorm += v2 * v2;
+    }
+
+    if(expectedNorm == 0 || observedNorm == 0)
+        return 0;
+
+    return round(dotProduct / (std::sqrt(expectedNorm) * std::sqrt(observedNorm)), 3);
+}
 
 double scoreChiSquaredORG(const LBPModel &model, const LBPModel &sample)
 {

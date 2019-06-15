@@ -112,7 +112,6 @@ void pixAtSet(PIX* pix, int_t x, int_t y, byte_t value)
 PIX* create_grayscale(PIX* pix)
 {
     PIX* gray = pixCopy(NULL, pix);
-
     gray = pixConvert1To8(NULL, gray, 255, 0);
     gray = pixScaleGray2xLI(gray);
     gray = pixBlockconv(gray, 1, 1);
@@ -131,13 +130,14 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     static int counter = 0;
     counter++;
 
-    padTop = 10;
-    padBottom = 10;
-    padLeft = 10;
-    padRight = 10;
+    padTop = 1;
+    padBottom = 1;
+    padLeft = 1;
+    padRight = 1;
 
     if (pix->d == 1)
     {
+
         //PIX*  gray     = pixConvertTo8(pix, NULL); //create_grayscale(pix);
         PIX* gray = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
         BOXA* boxes = pixConnComp(pix, NULL, 4);
@@ -145,19 +145,16 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
         PIX* clipped = pixClipRectangle(gray, box, NULL);
         PIX* padded  = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
 
-        if(true)
-            return clipped;
-
         pixSetResolution(padded, 300, 300);
-        pixSetAll(padded);
-//        pixSetBlackOrWhite(padded, L_SET_BLACK);
+//        pixSetAll(padded);
+        pixSetBlackOrWhite(padded, L_SET_BLACK);
 
-//        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
+        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC ^ PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, clipped->w, clipped->h, PIX_SRC | PIX_DST , clipped, 0, 0);
 
-//        std::cout<<" out :: " << status;
+        std::cout<<" out :: " << status;
 
         pixWritePng("/tmp/lbp-matcher/clipped-pdata.png", clipped, 1);
         pixWritePng("/tmp/lbp-matcher/padded-pdata.png", padded, 1);
@@ -183,7 +180,6 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
         pixDestroy(&gray);
         boxaDestroy(&boxes);
         boxDestroy(&box);
-
 
         return padded;
     }

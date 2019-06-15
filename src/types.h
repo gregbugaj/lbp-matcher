@@ -26,10 +26,7 @@ public:
         bins.clear();
     }
 
-    void checkIndex(int index) const {
-        if(index < 0 || index > bins.size())
-            throw std::runtime_error("Array index out of bound,: " + std::to_string(index));
-    }
+
     /**
      * Overloading [] operator to access elements in array style
      * This function must return a reference as array element can be put on left side
@@ -59,10 +56,13 @@ public:
         return bins.size();
     }
 
+    /**
+     * Append model to current model
+     *
+     * @param model the model to append
+     */
     void append(const LBPModel &model)
     {
-        std::cout << " append  "  << model << std::endl;
-        bins.resize(bins.size() + model.size());
         bins.insert(std::end(bins), std::begin(model.bins), std::end(model.bins));
     }
 
@@ -89,8 +89,18 @@ public:
         return os;
     }
 
+    std::vector<int> getVector() const {
+        return bins;
+    }
 private :
-    std::vector<int> bins; // size of the vector starts at 0
+
+    std::vector<int> bins;
+
+    void checkIndex(int index) const {
+        if(index < 0 || index > bins.size())
+            throw std::runtime_error("Array index out of bound : " + std::to_string(index));
+    }
+
 };
 
 template<class T, class D = std::default_delete<T>>

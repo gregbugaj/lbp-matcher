@@ -22,13 +22,17 @@ namespace  fs = std::experimental::filesystem;
 
 void test_histogram_scores();
 void test_lbp_001();
+void test_lbp_003();
 void test_lbp_000();
+void test_histogram_append();
 
 int main(int argc, char* argv[])
 {
 
+//    test_histogram_append();
     test_lbp_000();
 //    test_lbp_001();
+//    test_lbp_003();
 //    test_histogram_scores();
     return 0;
 }
@@ -43,7 +47,6 @@ int test_extractor_001()
 
     return 0;
 }
-
 
 void test_segmenter_01()
 {
@@ -89,7 +92,7 @@ void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "0.png";
-    auto f2 = deck / "5.png";
+    auto f2 = deck / "1.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -122,11 +125,16 @@ void test_lbp_001()
 
 void test_lbp_002()
 {
+    auto deck = getTestDeckDirectory("template-processed");
     HistogramComparison comp;
 
-    auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/0.png");
-    auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/1.png");
-    auto m2 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/2.png");
+    auto f1 = deck / "0.png";
+    auto f2 = deck / "1.png";
+    auto f3 = deck / "2.png";
+
+    auto m0 = LBPMatcher::createLBP(f1);
+    auto m1 = LBPMatcher::createLBP(f2);
+    auto m2 = LBPMatcher::createLBP(f3);
 
     auto type = HistogramComparison::CompareType::INTERSECTION;
 
@@ -142,22 +150,23 @@ void test_lbp_002()
 
 void test_lbp_003()
 {
+    auto deck = getTestDeckDirectory("template-claim");
     HistogramComparison comp;
 
-    auto m = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/9.png");
+    auto m = LBPMatcher::createLBP(deck / "9.png");
 
-    auto m0 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/0.png");
-    auto m1 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/1.png");
-    auto m2 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/2.png");
-    auto m3 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/3.png");
-    auto m4 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/4.png");
-    auto m5 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/5.png");
-    auto m6 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/6.png");
-    auto m7 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/7.png");
-    auto m8 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/8.png");
-    auto m9 = LBPMatcher::createLBP("/home/gbugaj/dev/lbp-matcher/test-deck/template-claim/9.png");
+    auto m0 = LBPMatcher::createLBP(deck / "0.png");
+    auto m1 = LBPMatcher::createLBP(deck / "1.png");
+    auto m2 = LBPMatcher::createLBP(deck / "2.png");
+    auto m3 = LBPMatcher::createLBP(deck / "3.png");
+    auto m4 = LBPMatcher::createLBP(deck / "4.png");
+    auto m5 = LBPMatcher::createLBP(deck / "5.png");
+    auto m6 = LBPMatcher::createLBP(deck / "6.png");
+    auto m7 = LBPMatcher::createLBP(deck / "7.png");
+    auto m8 = LBPMatcher::createLBP(deck / "8.png");
+    auto m9 = LBPMatcher::createLBP(deck / "9.png");
 
-    auto type = HistogramComparison::CompareType::INTERSECTION;
+    auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
 
     auto s0 = comp.compare(m, m0, type);
     auto s1 = comp.compare(m, m1, type);
@@ -396,4 +405,33 @@ void test_histogram_scores()
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
     std::cout<< "Absolute Value        = " << r7 << "\n";
     std::cout<< "Cosine Similarity     = " << r8 << "\n";
+}
+
+void test_histogram_append()
+{
+    LBPModel m1(3);
+    LBPModel m2(3);
+    LBPModel m3(3);
+
+    m1[0] = 1;
+    m1[1] = 2;
+    m1[2] = 3;
+
+    m2[0] = 4;
+    m2[1] = 5;
+    m2[2] = 6;
+
+    m3[0] = 7;
+    m3[1] = 8;
+    m3[2] = 9;
+
+    LBPModel r(0);
+    r.append(m1);
+    r.append(m2);
+    r.append(m3);
+
+    std::cout<< "m1  = " << m1 << "\n";
+    std::cout<< "m2  = " << m2 << "\n";
+    std::cout<< "m3  = " << m3 << "\n";
+    std::cout<< "r   = " << r << "\n";
 }

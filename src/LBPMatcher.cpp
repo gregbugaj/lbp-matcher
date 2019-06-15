@@ -19,7 +19,9 @@ using namespace std::chrono;
 
 typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
-void clamp(std::pair<int_t, int_t>& p, const int& w,const int& h)
+bool debug_box_pix = true;
+
+void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
     p.first = std::min(std::max(p.first, 0), w - 1);
     p.second = std::min(std::max(p.second, 0), h - 1);
@@ -190,21 +192,13 @@ void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
         throw std::runtime_error("Pix BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
     if(type == LbpType ::NORMAL)
-    {
         generateLbpNormal(matrix, pix);
-    }
     else if(type == LbpType ::ENHANCED)
-    {
         generateLbpEnhanced(matrix, pix);
-    }
     else if(type == LbpType ::SIGNED)
-    {
         generateLbpSigned(matrix, pix);
-    }
     else
-    {
         throw std::runtime_error("Unhandled lbp type");
-    }
 }
 
 bool isUniform(byte_t a)
@@ -227,45 +221,42 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
     int padB = 1;
 
     std::cout<<"pix->d = "<< pix->d << std::endl;
-    PIX* pdata = normalize(pix);
-    pixWritePng("/tmp/lbp-matcher/lbp-pdata.png", pdata, 1);
-    std::cout<<"pix->d = "<< pdata->d << std::endl;
+    PIX* normalized = normalize(pix);
+    pixWritePng("/tmp/lbp-matcher/lbp-normalized.png", normalized, 1);
+    std::cout<<"pix->d = "<< normalized->d << std::endl;
 
-    int_t w = pdata->w;
-    int_t h = pdata->h;
+    int_t w = normalized->w;
+    int_t h = normalized->h;
 
-    // lbp matrix that will be populated, data is in row-major order
+    // matrix that will be populated with LBP, data is in row-major order
+
     int** matrix = new int*[h];
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];
 
-    createLBP(matrix, LbpType::ENHANCED, pdata);
+    createLBP(matrix, LbpType::ENHANCED, normalized);
 
     // dump the lbp model
-    PIX* pixout = pixCreate(w, h, 8);
-    pixSetResolution(pixout, 300, 300);
-
-    for (int_t y = 0; y < h; ++y)
+    if(debug_box_pix)
     {
-        for (int_t x = 0; x < w; ++x)
+        PIX* pixout = pixCreate(w, h, 8);
+        pixSetResolution(pixout, 300, 300);
+
+        for (int_t y = 0; y < h; ++y)
         {
-            pixAtSet(pixout, x, y, matrix[y][x]);
+            for (int_t x = 0; x < w; ++x)
+            {
+                pixAtSet(pixout, x, y, matrix[y][x]);
+            }
         }
+
+        pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
+        pixDestroy(&pixout);
     }
-
-    pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
-
-    // partition the image and create histograms
-    PIX* pixUniform = pixCreate(w, h, 8);
-    PIX* pixNonUniform = pixCreate(w, h, 8);
-
-    pixSetResolution(pixUniform, 300, 300);
-    pixSetResolution(pixNonUniform, 300, 300);
 
     // Map the LBP codes to one of 58 uniform codes
     // Calculate uniform code table for all 255 grayscale codes
     // There are 58 codes and bin 59 is for everything else
-
     std::vector<int> uniforms;
     uniforms.resize(255);
 
@@ -277,110 +268,70 @@ LBPModel LBPMatcher::createLBP(PIX *pix)
             uniforms[i] = 59;
     }
 
-    LBPModel histogram(59);
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        for (int_t x = 0; x < w; ++x)
-        {
-            auto out = matrix[y][x];
-            auto bin = uniforms[out];
-            auto uniform = bin != 59;
-            histogram[bin]++;
-
-            if(false)
-            {
-                std::bitset<CHAR_BIT * sizeof(byte_t)> bs(out);
-                std::cout << "[" << std::dec << std::setw(6) << y <<"," << std::setw(6) << x << "] "
-                          << std::setw(6)  << (int)out << " : 0x"
-                          << std::setw(8) << std::hex  << (int)out << " : "
-                          << std::setw(4) << std::dec  << (int)out << " : "
-                          << bs <<  "\tuniform : " << uniform  << "  bin : " << bin << std::endl;
-
-                if(uniform)
-                    pixAtSet(pixUniform, x, y, out);
-                else
-                    pixAtSet(pixNonUniform, x, y, out);
-            }
-        }
-    }
-
-    /* pixWritePng("/tmp/lbp-matcher/lbp-uniform.png", pixUniform, 1);
-     pixWritePng("/tmp/lbp-matcher/lbp-nonuniform.png", pixNonUniform, 1);
- */
-    std::cout << "Model histogram" << std::endl;
-    std::cout << histogram << std::endl;
-
-    /*   if(true)
-           return histogram;*/
-
-    int_t vp = 2; // vertical  partitions
-    int_t hp = 2; // horizontal partitions
+    auto verticalPartitions = 2; // vertical  partitions
+    auto horizontalPartitions = 4; // horizontal partitions
 
     // horizontal / vertical groups
-    int gridHeight = ceil((double) h / (double) vp);
-    int gridWidth = ceil((double) w / (double) hp);
+    int gridHeight = ceil((double) h / (double) verticalPartitions);
+    int gridWidth = ceil((double) w / (double) horizontalPartitions);
 
-    int bins = vp * hp;
-
-    std::cout<<" hp = "<< hp << std::endl;
-    std::cout<<" vp = "<< vp << std::endl;
+    std::cout<<" horizontalPartitions = "<< horizontalPartitions << std::endl;
+    std::cout<<" verticalPartitions = "<< verticalPartitions << std::endl;
     std::cout<<" gridWidth = "<< gridWidth << std::endl;
     std::cout<<" gridHeight = "<< gridHeight << std::endl;
 
-    LBPModel concatenated(0);
+    LBPModel result(0);
 
-    for (int row = 0; row < vp; ++row)
+    for (int row = 0; row < verticalPartitions; ++row)
     {
-        for (int col = 0; col < hp; ++col)
+        for (int col = 0; col < horizontalPartitions; ++col)
         {
-            int index  = row * hp + col;
-            int ystart = row * gridHeight;
-            int xstart = col * gridWidth;
+            auto index  = row * horizontalPartitions + col;
+            auto yStart = row * gridHeight;
+            auto xStart = col * gridWidth;
 
-            int_t y = std::max(0, ystart);
-            int_t x = std::max(0, xstart);
+            auto yEnd = std::min(yStart + gridHeight, h);
+            auto xEnd = std::min(xStart + gridWidth, w);
 
-            int yend = std::min(ystart + gridHeight, h);
-            int xend = std::min(xstart + gridWidth, w);
-            std::cout<<" ** index = "<< index <<  " row/col " << row  << " : " << col << " pos = " << y << ", "<< x  << " == "  <<  yend  << " : " << xend  <<std::endl;
-
+            // dump region box
+            if(debug_box_pix)
             {
-                BOX*  box    = boxCreate(xstart, ystart, gridWidth, gridHeight);
-                PIX*  snip   = pixClipRectangle(pdata, box, NULL);
+                auto y = std::max(0, yStart);
+                auto x = std::max(0, xStart);
+                std::cout<<" ** index = "<< index <<  " row/col " << row  << " : " << col << " pos = " << y << ", "<< x  << " == "  <<  yEnd  << " : " << xEnd  <<std::endl;
+
+                BOX*  box    = boxCreate(xStart, yStart, gridWidth, gridHeight);
+                PIX*  snip   = pixClipRectangle(normalized, box, NULL);
 
                 char f[255];
                 sprintf(f, "/tmp/lbp-matcher/box-%d-%d.png", row, col);
                 pixWritePng(f, snip, 0);
+
                 boxDestroy(&box);
                 pixDestroy(&snip);
             }
 
-            LBPModel hist(59);
-
-            for (;y < yend; ++y)
+            LBPModel boxModel(59);
+            for (int_t y = std::max(0, yStart); y < yEnd; ++y)
             {
-                for (; x < xend; ++x)
+                for (int_t x = std::max(0, xStart); x < xEnd; ++x)
                 {
                     auto out = matrix[y][x];
+                    if(out == 0 || out == 255)
+                        continue;
+
                     auto bin = uniforms[out];
-                    hist[bin]++;
-                    //std::cout << "[" << std::dec << std::setw(6) << y <<"," << std::setw(6) << x << "] "  << std::endl;
+                    boxModel[bin]++;
                 }
             }
 
-            concatenated.append(hist);
-            std::cout << "AX [" << std::dec << std::setw(3) << row <<"," << std::setw(3) << col << "] "  << hist << std::endl;
-
-//            std::cout << " local  hist "  << hist << std::endl;
-//            std::cout << " concat hist "  << concatenated << std::endl;
-            std::cout << " "  << std::endl << std::endl;
+            result.append(boxModel);
         }
     }
 
-    std::cout << " concat hist "  << concatenated << std::endl;
+    std::cout << " concat hist "  << result << std::endl;
 
-    return concatenated;
+    return result;
 }
 
 LBPModel LBPMatcher::createLBP(const std::string &filename)

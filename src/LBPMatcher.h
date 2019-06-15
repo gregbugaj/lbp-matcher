@@ -33,9 +33,9 @@ public :
     /**
      * Create a LBP model and populate the lbp matrix
      *
-     * @param matrix
-     * @param type
-     * @param pix
+     * @param matrix the matrix to populate
+     * @param type the type of LBP to use
+     * @param pix the pix to create the LBP for
      */
     static void createLBP(int** matrix, LbpType type, PIX* pix);
 
@@ -56,9 +56,6 @@ public :
      * @return LBPModel of extracted features
      */
     static LBPModel createLBP(const std::string& filename);
-
-private:
-
 };
 
 

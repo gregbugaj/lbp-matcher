@@ -13,7 +13,7 @@ public :
     /**
      * Type of the metric to use for histogram comparison
      *
-     * Similarity are measured in the range 0 to 1 [0,1]
+     * Similarity are measured in the range 0 to 1
      */
     enum CompareType
     {
@@ -104,10 +104,16 @@ private :
 
     /**
      * Cosine similarity metric
+     * The cosine similarity of two models will range from 0 to 1 since the angle between the two vectors can't be more than 90 degrees
+     * 1 - exactly similar (angle between them is 0)
+     * 0 - orthogonal vectors (angle between them is 90)
+     *
+     * similarity(A, B) = A . B / ||A|| * ||B||
      *
      * @param expected
      * @param observed
-     * @return
+     *
+     * @return similarity in range 0..1
      */
     double scoreCosineSimilarity(const LBPModel& expected,const LBPModel& observed) const;
 };

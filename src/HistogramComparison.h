@@ -58,7 +58,7 @@ private :
     double scoreEuclideanDistanceNormalized(const Histogram& expected,const Histogram& observed) const;
 
     /**
-     * Euclidian distance normalized
+     * Euclidean distance normalized
      *
      * @param expected
      * @param observed

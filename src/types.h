@@ -26,7 +26,6 @@ public:
         bins.clear();
     }
 
-
     /**
      * Overloading [] operator to access elements in array style
      * This function must return a reference as array element can be put on left side
@@ -51,6 +50,11 @@ public:
         return bins[index];
     }
 
+    /**
+     * Get size of histogram
+     *
+     * @return size of histogram
+     */
     unsigned long size() const
     {
         return bins.size();
@@ -82,15 +86,38 @@ public:
         {
             if(i == s - 1)
                 delim = "";
-           os << model.bins[i] << delim;
+           os << model[i] << delim;
         }
         os << "]";
 
         return os;
     }
 
+    /**
+     * Get underlying vector
+     *
+     * @return
+     */
     std::vector<int> getVector() const {
         return bins;
+    }
+
+    /**
+     * Normalize histogram based on the maximum value, values will be in 0..1 range
+     */
+    void normalize()
+    {
+        auto max = 0;
+        for(int i = 0, s = bins.size(); i < s; ++i)
+        {
+            if(bins[i] > max)
+                max = bins[i];
+        }
+
+        for(int i = 0, s = bins.size(); i < s; ++i)
+        {
+             bins[i] /= max;
+        }
     }
 private :
 

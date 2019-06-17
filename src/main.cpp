@@ -25,12 +25,14 @@ void test_lbp_001();
 void test_lbp_003();
 void test_lbp_000();
 void test_histogram_append();
+void test_histogram_normalize();
 
 int main(int argc, char* argv[])
 {
 
+    test_histogram_normalize();
 //    test_histogram_append();
-    test_lbp_000();
+//    test_lbp_000();
 //    test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
@@ -432,4 +434,18 @@ void test_histogram_append()
     std::cout<< "m2  = " << m2 << "\n";
     std::cout<< "m3  = " << m3 << "\n";
     std::cout<< "r   = " << r << "\n";
+}
+
+void test_histogram_normalize()
+{
+    Histogram m1(3);
+
+    m1[0] = 10;
+    m1[1] = 20;
+    m1[2] = 100;
+
+    std::cout<< "m1  = " << m1 << "\n";
+
+    m1.normalize();
+    std::cout<< "m1  = " << m1 << "\n";
 }

@@ -82,43 +82,38 @@ double HistogramComparison::scoreChiSquared(const Histogram &expected, const His
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
 
-    double d = 0;
-    for (int_t i = 0, s = expected.size(); i < s; ++i)
-    {
-        double m = observed[i] + expected[i];
+    auto bins = expected.size();
 
-        if (m != 0)
+    // make sure both histograms are normalized, i.e. their entries sum up to one
+    auto expectedSum = .0;
+    auto observedSum = .0;
+    for (int_t i = 0, s = bins; i < s; ++i)
+    {
+        expectedSum += expected[i];
+        observedSum += observed[i];
+    }
+
+    if(expectedSum != 1.0 || observedSum != 1.0)
+        throw std::runtime_error("expected and observer histograms need to be normalized and sum to 1");
+
+    double d = 0;
+    for (int_t i = 0, s = bins; i < s; ++i)
+    {
+        double q = expected[i] + observed[i];
+
+        if (q != 0)
         {
-            double d1 = std::pow(expected[i] - m, 2);
-            d += (d1 / m);
+            double d1 = std::pow(expected[i] - observed[i], 2);
+            d += d1 / q;
+            std::cout<<"\n q " << q  <<" d1 " << d1 <<"  d = "<< d << std::endl;
         }
     }
-    return d;
-}
 
-double scoreChiSquaredGoodnesOfFit(const Histogram &expected, const Histogram &observed)
-{
-    if(expected.size() != observed.size())
-        throw std::runtime_error("expected size != observed size");
-
-    if(expected.size() < 2 || observed.size() < 2)
-        throw std::runtime_error("expected or observed size is smaller than 2");
-
-    double d = 0;
-    for (int_t i = 0, s = expected.size(); i < s; ++i)
-    {
-        // ensure that neither sample is 0
-        if(observed[i] == 0 ||  expected[i] == 0)
-            return 0;
-
-        double d1 = std::pow(observed[i] - expected[i], 2);
-        d += (d1 / expected[i]);
-    }
     return d;
 }
 
 
-// Kullback-Leibler divergence and Jefrey divergence
+// Kullback-Leibler divergence and Jeffrey divergence
 double HistogramComparison::scoreKullbackLeiblerDivergence(const Histogram &model, const Histogram &sample) const
 {
     double d = 0;
@@ -242,20 +237,4 @@ double HistogramComparison::scoreCosineSimilarity(const Histogram& expected, con
         return 0;
 
     return round(dotProduct / (std::sqrt(expectedNorm) * std::sqrt(observedNorm)), 3);
-}
-
-double scoreChiSquaredORG(const Histogram &model, const Histogram &sample)
-{
-    double d = 0;
-    for (int_t i = 0, s = model.size(); i < s; ++i)
-    {
-        double q = sample[i] + model[i];
-
-        if (q != 0)
-        {
-            double d1 = std::pow(sample[i] - model[i], 2);
-            d += d1 / q;
-        }
-    }
-    return d;
 }

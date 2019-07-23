@@ -241,7 +241,6 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     {
         PIX* pixout = pixCreate(w, h, 8);
         pixSetResolution(pixout, 300, 300);
-
         for (int_t y = 0; y < h; ++y)
         {
             for (int_t x = 0; x < w; ++x)
@@ -249,7 +248,6 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 pixAtSet(pixout, x, y, matrix[y][x]);
             }
         }
-
         pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
         pixDestroy(&pixout);
     }
@@ -338,10 +336,9 @@ Histogram LBPMatcher::createLBP(const std::string &filename)
 {
     std::cout << "createLBP reading file : " << filename << std::endl;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
     validateFileExists(filename);
 
-    PIX* pix = pixRead(filename.c_str());
+    auto pix = pixRead(filename.c_str());
     auto model = createLBP(pix);
     pixDestroy(&pix);
 

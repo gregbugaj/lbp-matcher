@@ -87,6 +87,10 @@ private :
     /**
      * Perform chi-squared goodness of fit test
      *
+     * https://stats.stackexchange.com/questions/184101/comparing-two-histograms-using-chi-square-distance
+     * <pre>
+     * ∑i=1n  (xi−yi)^2 / (xi+yi)
+     * </pre>
      * @param expected
      * @param observed
      * @return
@@ -95,6 +99,7 @@ private :
 
     /**
      * Perform Kullback Leibler Divergence
+     * 
      * @param model
      * @param sample
      * @return

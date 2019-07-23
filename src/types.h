@@ -38,13 +38,13 @@ public:
      * @param index
      * @return
      */
-    int& operator[](int index)
+    double& operator[](int index)
     {
         checkIndex(index);
         return bins[index];
     }
 
-    int operator[](int index) const
+    double operator[](int index) const
     {
         checkIndex(index);
         return bins[index];
@@ -98,7 +98,7 @@ public:
      *
      * @return
      */
-    std::vector<int> getVector() const {
+    std::vector<double> getVector() const {
         return bins;
     }
 
@@ -108,20 +108,34 @@ public:
     void normalize()
     {
         auto max = 0;
-        for(int i = 0, s = bins.size(); i < s; ++i)
+        auto s = bins.size();
+        for(int i = 0; i < s; ++i)
         {
             if(bins[i] > max)
                 max = bins[i];
         }
 
-        for(int i = 0, s = bins.size(); i < s; ++i)
-        {
+        for(int i = 0; i < s; ++i)
              bins[i] /= max;
-        }
     }
+
+    /**
+     * Create frequency distribution where bin entries sum up to 1
+    */
+    void frequency()
+    {
+        auto sum = 0;
+        auto s = bins.size();
+        for(int i = 0; i < s; ++i)
+                sum += bins[i];
+
+        for(int i = 0; i < s; ++i)
+            bins[i] /= sum;
+    }
+
 private :
 
-    std::vector<int> bins;
+    std::vector<double> bins;
 
     void checkIndex(int index) const {
         if(index < 0 || index > bins.size())

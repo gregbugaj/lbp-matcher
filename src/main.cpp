@@ -30,12 +30,12 @@ void test_histogram_normalize();
 int main(int argc, char* argv[])
 {
 
-    test_histogram_normalize();
+//    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
 //    test_lbp_001();
 //    test_lbp_003();
-//    test_histogram_scores();
+    test_histogram_scores();
     return 0;
 }
 
@@ -375,14 +375,17 @@ void test_histogram_scores()
     Histogram sample(4);
 
     model[0] = 20;
-    model[1] = 20;
+    model[1] = 35;
     model[2] = 30;
     model[3] = 40;
 
     sample[0] = 20;
-    sample[1] = 50;
+    sample[1] = 20;
     sample[2] = 30;
     sample[3] = 40;
+
+    model.frequency();
+    sample.frequency();
 
     HistogramComparison histogram;
 
@@ -394,7 +397,6 @@ void test_histogram_scores()
     auto r6 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE_NORMALIZED);
     auto r7 = histogram.compare(model, sample,  HistogramComparison::CompareType::ABSOLUTE_VALUE);
     auto r8 = histogram.compare(model, sample,  HistogramComparison::CompareType::COSINE_SIMILARITY);
-
 
     std::cout<< "---------------------------------\n";
     std::cout<< "Intersection          = " << r1 << "\n";
@@ -443,9 +445,11 @@ void test_histogram_normalize()
     m1[0] = 10;
     m1[1] = 20;
     m1[2] = 100;
+    m1[2] = 200;
 
     std::cout<< "m1  = " << m1 << "\n";
 
-    m1.normalize();
+//    m1.normalize();
+    m1.frequency();
     std::cout<< "m1  = " << m1 << "\n";
 }

@@ -375,7 +375,7 @@ void test_histogram_scores()
     Histogram sample(4);
 
     model[0] = 20;
-    model[1] = 35;
+    model[1] = 20;
     model[2] = 30;
     model[3] = 40;
 

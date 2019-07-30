@@ -82,8 +82,10 @@ void test_lbp_000()
 //    auto deck = getTestDeckDirectory("template-claim");
 //    auto f1 = deck / "0.png";
 //
+//    auto f2 = deck / "27_scale_125_.png";
+
     auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "1.png";
+    auto f1 = deck / "27_scale_90_.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;

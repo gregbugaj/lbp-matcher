@@ -103,37 +103,28 @@ public:
     }
 
     /**
-     * Normalize histogram based on the maximum value, values will be in 0..1 range
+     * The normalized count is the count in a class divided by the total number of observations.
+     * In this case the relative counts are normalized to sum to one
      */
     void normalize()
     {
-        auto max = 0;
-        auto s = bins.size();
-        for(int i = 0; i < s; ++i)
-        {
-            if(bins[i] > max)
-                max = bins[i];
-        }
+        if(normalized)
+            throw std::runtime_error("Histogram already normalized");
 
-        for(int i = 0; i < s; ++i)
-             bins[i] /= max;
-    }
-
-    /**
-     * Create frequency distribution where bin entries sum up to 1
-    */
-    void frequency()
-    {
+        normalized = true;
         auto sum = 0;
         auto s = bins.size();
         for(int i = 0; i < s; ++i)
-                sum += bins[i];
+            sum += bins[i];
 
         for(int i = 0; i < s; ++i)
             bins[i] /= sum;
     }
 
+
 private :
+
+    bool normalized;
 
     std::vector<double> bins;
 

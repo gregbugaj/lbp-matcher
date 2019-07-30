@@ -30,12 +30,12 @@ void test_histogram_normalize();
 int main(int argc, char* argv[])
 {
 
-//    test_histogram_normalize();
+    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
 //    test_lbp_001();
 //    test_lbp_003();
-    test_histogram_scores();
+//    test_histogram_scores();
     return 0;
 }
 
@@ -384,8 +384,8 @@ void test_histogram_scores()
     sample[2] = 30;
     sample[3] = 40;
 
-    model.frequency();
-    sample.frequency();
+    model.normalize();
+    sample.normalize();
 
     HistogramComparison histogram;
 
@@ -448,8 +448,6 @@ void test_histogram_normalize()
     m1[2] = 200;
 
     std::cout<< "m1  = " << m1 << "\n";
-
-//    m1.normalize();
-    m1.frequency();
+    m1.normalize();
     std::cout<< "m1  = " << m1 << "\n";
 }

@@ -27,28 +27,22 @@ void test_lbp_000();
 void test_histogram_append();
 void test_histogram_normalize();
 
+void test_extractor_001();
+
 int main(int argc, char* argv[])
 {
 
 //    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
-    test_lbp_001();
+ test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
+
+//    test_extractor_001();
     return 0;
 }
 
-int test_extractor_001()
-{
-    std::string document = "claim001.tif";
-    std::string snip     = "deck-01/27.png";
-
-    Extractor extractor;
-    extractor.extract(document, snip);
-
-    return 0;
-}
 
 void test_segmenter_01()
 {
@@ -77,6 +71,17 @@ fs::path getTestDeckDirectory(const std::string& folder)
     return path;
 }
 
+
+void test_extractor_001()
+{
+    std::string document = "claim001.tif";
+    std::string snip     = "deck-01/27.png";
+
+    Extractor extractor;
+    extractor.extract(document, snip);
+}
+
+
 void test_lbp_000()
 {
 //    auto deck = getTestDeckDirectory("template-claim");
@@ -98,8 +103,8 @@ void test_lbp_000()
 void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "1.png";
-    auto f2 = deck / "2.png";
+    auto f1 = deck / "0.png";
+    auto f2 = deck / "0.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -112,7 +117,14 @@ void test_lbp_001()
     std::cout << m0 << std::endl;
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::CHI_SQUARED;
+    auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
+
+    std::cout << "Histograms Raw " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    if(true)
+        return;
 
     m0.normalize();
     m1.normalize();

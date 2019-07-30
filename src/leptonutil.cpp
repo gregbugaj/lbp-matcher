@@ -130,10 +130,10 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     static int counter = 0;
     counter++;
 
-    padTop = 1;
-    padBottom = 1;
-    padLeft = 1;
-    padRight = 1;
+    padTop = 0;
+    padBottom = 0;
+    padLeft = 0;
+    padRight = 0;
 
     PIX* gray = NULL;
 
@@ -170,7 +170,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     PIX* padded  = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
     pixSetResolution(padded, 300, 300);
 //        pixSetAll(padded);
-    pixSetBlackOrWhite(padded, L_SET_BLACK);
+    //pixSetBlackOrWhite(padded, L_SET_BLACK);
 
     l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC ^ PIX_DST, clipped, 0, 0);

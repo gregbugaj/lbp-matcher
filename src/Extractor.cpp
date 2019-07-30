@@ -9,7 +9,7 @@
 #include "HistogramComparison.h"
 
 
-void Extractor::extract(const std::string &document, const std::string &templ)
+PIX* Extractor::extract(const std::string &document, const std::string &templ)
 {
     validateFileExists(document);
     validateFileExists(templ);
@@ -17,13 +17,15 @@ void Extractor::extract(const std::string &document, const std::string &templ)
     PIX* src = pixRead(document.c_str());
     PIX* snip = pixRead(templ.c_str());
 
-    extract(src, snip);
+    PIX* data = extract(src, snip);
 
     pixDestroy(&src);
     pixDestroy(&snip);
+
+    return data;
 }
 
-void Extractor::extract(PIX* document, PIX* templ)
+PIX*  Extractor::extract(PIX* document, PIX* templ)
 {
     PIX* documentNorm = document; //normalize(document);
     PIX* templNorm    = templ ;// normalize(templ);
@@ -45,7 +47,6 @@ void Extractor::extract(PIX* document, PIX* templ)
 
     HistogramComparison comp;
 
-
     if(true)
     {
         auto type = HistogramComparison::CompareType::INTERSECTION;
@@ -64,10 +65,10 @@ void Extractor::extract(PIX* document, PIX* templ)
             if(snip !=  NULL)
             {
                 auto m1 = LBPMatcher::createLBP(snip);
-                auto type = HistogramComparison::CompareType::INTERSECTION;
+                auto type = HistogramComparison::CompareType::CHI_SQUARED;
                 auto s0 = comp.compare(m0, m1, type);
-
                 grayValue = s0 * 255;
+
                 pixAtSet(bumpmap, segment.col, segment.row, grayValue);
                 std::cout<<"\nROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," << (int)grayValue<< "\n";
 
@@ -86,4 +87,5 @@ void Extractor::extract(PIX* document, PIX* templ)
         pixWritePng("/home/gbugaj/share/devbox/tmp/bumpmap.png", bumpmap, 0);
     }
 
+    return NULL;
 }

@@ -36,6 +36,14 @@ public :
      */
     double compare(const Histogram& expected, const Histogram& observed, CompareType type) const;
 
+    /**
+    * Compare two histograms using best metric
+    *
+    * @param expected the model we comparing to
+    * @param type Type of comparison
+    * @return score in range 0..1, 0 = No similarity, 1 = Identical
+    */
+    double compare(const Histogram& expected, const Histogram& observed) const;
 private :
 
     /**

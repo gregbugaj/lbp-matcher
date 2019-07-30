@@ -34,6 +34,11 @@ double HistogramComparison::compare(const Histogram &expected, const Histogram &
     throw "Compare type not handled";
 }
 
+double HistogramComparison::compare(const Histogram &expected, const Histogram &observed) const
+{
+    return compare(expected, observed, CompareType::COSINE_SIMILARITY);
+}
+
 double HistogramComparison::scoreHistogramIntersection(const Histogram &expected, const Histogram &observed) const
 {
     if(expected.size() != observed.size())

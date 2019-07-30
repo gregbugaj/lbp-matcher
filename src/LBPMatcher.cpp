@@ -189,7 +189,7 @@ void generateLbpSigned(int** matrix, PIX* pix)
 void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
 {
     if(pix->d != 8)
-        throw std::runtime_error("Pix BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
     if(type == LbpType ::NORMAL)
         generateLbpNormal(matrix, pix);
@@ -235,12 +235,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         matrix[y] = new int[w];
 
     createLBP(matrix, LbpType::ENHANCED, normalized);
-
     // dump the lbp model
     if(debug_box_pix)
     {
         PIX* pixout = pixCreate(w, h, 8);
         pixSetResolution(pixout, 300, 300);
+
         for (int_t y = 0; y < h; ++y)
         {
             for (int_t x = 0; x < w; ++x)
@@ -248,13 +248,14 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 pixAtSet(pixout, x, y, matrix[y][x]);
             }
         }
+
         pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
         pixDestroy(&pixout);
     }
 
     // Map the LBP codes to one of 58 uniform codes
     // Calculate uniform code table for all 255 grayscale codes
-    // There are 58 codes and bin 59 is for everything else
+    // There are 58 codes and bin 59 is for everything else (since 0 based bin 59 -> 58)
     std::vector<int> uniforms;
     uniforms.resize(255);
 
@@ -263,7 +264,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         if(isUniform(i))
             uniforms[i] = index++;
         else
-            uniforms[i] = 59;
+            uniforms[i] = 58;
     }
 
     auto verticalPartitions = 2; // vertical  partitions
@@ -317,13 +318,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                     auto out = matrix[y][x];
                     if(out == 0 || out == 255)
                         continue;
-
                     auto bin = uniforms[out];
                     boxModel[bin]++;
                 }
             }
 
-            result.append(boxModel);
+             result.append(boxModel);
         }
     }
 
@@ -335,16 +335,18 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 Histogram LBPMatcher::createLBP(const std::string &filename)
 {
     std::cout << "createLBP reading file : " << filename << std::endl;
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
     validateFileExists(filename);
-
     auto pix = pixRead(filename.c_str());
+
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     auto model = createLBP(pix);
     pixDestroy(&pix);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
-    std::cout <<  "createLBP Time : "  << duration << std::endl;
+
+    std::cout <<  "createLBP Time (ms) : "  << duration << std::endl;
 
     return model;
 }

@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 //    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
-//    test_lbp_001();
+    test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
     return 0;
@@ -79,8 +79,11 @@ fs::path getTestDeckDirectory(const std::string& folder)
 
 void test_lbp_000()
 {
-    auto deck = getTestDeckDirectory("template-claim");
-    auto f1 = deck / "0.png";
+//    auto deck = getTestDeckDirectory("template-claim");
+//    auto f1 = deck / "0.png";
+//
+    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "1.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -93,8 +96,8 @@ void test_lbp_000()
 void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "0.png";
-    auto f2 = deck / "1.png";
+    auto f1 = deck / "1.png";
+    auto f2 = deck / "2.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -107,7 +110,10 @@ void test_lbp_001()
     std::cout << m0 << std::endl;
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::INTERSECTION;
+    auto type = HistogramComparison::CompareType::CHI_SQUARED;
+
+    m0.normalize();
+    m1.normalize();
 
     auto s0 = comp.compare(m0, m0, type);
     auto s1 = comp.compare(m1, m1, type);

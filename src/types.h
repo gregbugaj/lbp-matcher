@@ -10,12 +10,6 @@
 
 #include <leptonica/allheaders.h>
 
-/**
- * Ref
- * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
- * https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
- */
-
 typedef double               double_t;
 typedef bool                 bool_t;
 typedef char                 char_t;
@@ -43,16 +37,28 @@ double round(T val, int precision)
 /**
  * Check if two values are equal
  *
+ * Ref
+ * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+ * https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
+ * http://realtimecollisiondetection.net/blog/?p=89
+ * https://stackoverflow.com/questions/41213480/comparing-doubles-properly-using-aliasing-with-integer-representations-and-ulps
+ *
  * @tparam T the type of the parameter
  * @param a
  * @param b
+ * @param epsilon
  * @return true if the value is within epsilon value
  */
-template <class T>
-bool equal(T a, T b)
+
+inline bool equal(double a, double b, double epsilon)
 {
-    auto epsilon = std::numeric_limits<T>::epsilon();
-    auto val = std::abs(a -  b) < epsilon;
+    // assume small positive epsilon
+    if(!(epsilon >= 0.0f && epsilon <= 1.0f))
+        throw std::runtime_error("epislon value out of range 0.0 .. 1.0  got : " + std::to_string(epsilon));
+    // for relative equality
+    // |a - b| < = epsilon * max(|a|, |b|)
+    //auto epsilon = std::numeric_limits<double>::epsilon();
+    auto val = std::abs(a -  b) <= epsilon;
     return val;
 }
 
@@ -176,7 +182,7 @@ public:
             total += bins[i];
         }
 
-        if(!equal(1.0, total))
+        if(!equal(1.0, total, 0.100000))
             throw std::runtime_error("Normalized total not equal to 1.0(+-)epsilon got : " + std::to_string(total));
 
         normalized = true;

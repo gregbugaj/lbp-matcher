@@ -45,8 +45,8 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
     }
     return out;
 }
-
-l_uint32 pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
+// https://tpgit.github.io/Leptonica/arithlow_8c_source.html#l00161
+l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
 {
     if(x < 0 || x > w || y < 0 || y > h)
     {
@@ -57,7 +57,7 @@ l_uint32 pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
     l_int32 wpl    = pixGetWpl(pix);
     l_uint32* data = pixGetData(pix);
     l_uint32* line = data + y * wpl;
-    l_uint32 value = GET_DATA_BYTE(line, x);
+    l_int32  value = GET_DATA_BYTE(line, x);
 
     std::cout << x << ", " << y << "  " << value  << " | ";
     return value;

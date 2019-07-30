@@ -2,10 +2,13 @@
 #define LBP_MATCHER_TYPES_H
 
 #include <iostream>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <sstream>
-#include <leptonica/allheaders.h>
 #include <vector>
+
+#include <leptonica/allheaders.h>
 
 typedef double               double_t;
 typedef bool                 bool_t;
@@ -15,10 +18,55 @@ typedef int                  int_t;
 typedef unsigned long int    uinit64_t; // 8 bytes(64 bits)
 typedef uinit64_t            hash_t;
 
+/**
+ * round value to specific precision
+ *
+ * @param val the value to round
+ * @param precision the precision to round to
+ * @return
+ */
+template <class T>
+double round(T val, int precision)
+{
+    std::stringstream s;
+    s << std::setprecision(precision) << std::setiosflags(std::ios_base::fixed) << val;
+    s >> val;
+    return val;
+}
+
+/**
+ * Check if two values are equal
+ *
+ * Ref
+ * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+ * https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
+ * http://realtimecollisiondetection.net/blog/?p=89
+ * https://stackoverflow.com/questions/41213480/comparing-doubles-properly-using-aliasing-with-integer-representations-and-ulps
+ *
+ * @tparam T the type of the parameter
+ * @param a
+ * @param b
+ * @param epsilon
+ * @return true if the value is within epsilon value
+ */
+
+inline bool equal(double a, double b, double epsilon)
+{
+    // assume small positive epsilon
+    if(!(epsilon >= 0.0f && epsilon <= 1.0f))
+        throw std::runtime_error("epislon value out of range 0.0 .. 1.0  got : " + std::to_string(epsilon));
+    // for relative equality
+    // |a - b| < = epsilon * max(|a|, |b|)
+    //auto epsilon = std::numeric_limits<double>::epsilon();
+    auto val = std::abs(a -  b) <= epsilon;
+    return val;
+}
+
 struct Histogram {
 public:
     Histogram(int size)
     {
+        normalized = false;
         bins.resize(size, 0);
     }
 
@@ -103,37 +151,46 @@ public:
     }
 
     /**
-     * Normalize histogram based on the maximum value, values will be in 0..1 range
+     * Check if histogram is normalized
+     * @return
+     */
+    bool isNormalized() const {
+        return normalized;
+    }
+    /**
+     * The normalized count is the count in a class divided by the total number of observations.
+     * In this case the relative counts are normalized to sum to one
      */
     void normalize()
     {
-        auto max = 0;
+        if(normalized)
+            throw std::runtime_error("Histogram already normalized");
+
+        auto sum = .0;
+        auto total = .0;
         auto s = bins.size();
+
+        for(int i = 0; i < s; ++i)
+            sum += bins[i];
+
+        if(sum == 0)
+            return;
+
         for(int i = 0; i < s; ++i)
         {
-            if(bins[i] > max)
-                max = bins[i];
+            bins[i] = bins[i] / sum;
+            total += bins[i];
         }
 
-        for(int i = 0; i < s; ++i)
-             bins[i] /= max;
-    }
+        if(!equal(1.0, total, 0.100000))
+            throw std::runtime_error("Normalized total not equal to 1.0(+-)epsilon got : " + std::to_string(total));
 
-    /**
-     * Create frequency distribution where bin entries sum up to 1
-    */
-    void frequency()
-    {
-        auto sum = 0;
-        auto s = bins.size();
-        for(int i = 0; i < s; ++i)
-                sum += bins[i];
-
-        for(int i = 0; i < s; ++i)
-            bins[i] /= sum;
+        normalized = true;
     }
 
 private :
+
+    bool normalized;
 
     std::vector<double> bins;
 

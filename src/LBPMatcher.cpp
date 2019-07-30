@@ -1,9 +1,6 @@
 #include <iostream>
 #include <algorithm>
-#include <climits>
 #include <bitset>
-#include <iomanip>
-
 #include <set>
 #include <iterator>
 #include <complex>
@@ -19,7 +16,7 @@ using namespace std::chrono;
 
 typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
-bool debug_box_pix = true;
+bool debug_box_pix = false;
 
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
@@ -48,17 +45,21 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
     }
     return out;
 }
-
-l_uint32 pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
+// https://tpgit.github.io/Leptonica/arithlow_8c_source.html#l00161
+l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
 {
     if(x < 0 || x > w || y < 0 || y > h)
+    {
+        std::cout << x << ", " << y << "  " <<  0  << " | ";
         return 0;
+    }
 
     l_int32 wpl    = pixGetWpl(pix);
     l_uint32* data = pixGetData(pix);
     l_uint32* line = data + y * wpl;
-    l_uint32 value = GET_DATA_BYTE(line, x);
+    l_int32  value = GET_DATA_BYTE(line, x);
 
+    std::cout << x << ", " << y << "  " << value  << " | ";
     return value;
 }
 
@@ -114,6 +115,13 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     int_t w = pix->w;
     int_t h = pix->h;
 
+    std::cout<< "pix : " << pix << std::endl;
+    std::cout<< "pix w: " << w << std::endl;
+    std::cout<< "pix h: " << h << std::endl;
+    std::cout << " ----- \n" ;
+
+    auto total = 0.0;
+
     for (int_t y = 0; y < h; ++y)
     {
         for (int_t x = 0; x < w; ++x)
@@ -139,9 +147,12 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
                        | ((m > p7) << 1)
                        | ((m > p8) << 0);
 
+            total += p7;
             matrix[y][x] = out;
         }
     }
+
+    std::cout<< "\nLBP Total : " << total <<std::endl;
 }
 
 /**
@@ -189,7 +200,7 @@ void generateLbpSigned(int** matrix, PIX* pix)
 void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
 {
     if(pix->d != 8)
-        throw std::runtime_error("Pix BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
     if(type == LbpType ::NORMAL)
         generateLbpNormal(matrix, pix);
@@ -221,13 +232,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     int padB = 1;
 
     std::cout<<"pix->d = "<< pix->d << std::endl;
-    PIX* normalized = normalize(pix);
-    pixWritePng("/tmp/lbp-matcher/lbp-normalized.png", normalized, 1);
+    PIX* normalized = pixConvertTo8(pix, 0);;// normalize(pix);
+    //pixWritePng("/tmp/lbp-matcher/lbp-normalized.png", normalized, 1);
     std::cout<<"pix->d = "<< normalized->d << std::endl;
 
     int_t w = normalized->w;
     int_t h = normalized->h;
-
     // matrix that will be populated with LBP, data is in row-major order
 
     int** matrix = new int*[h];
@@ -235,12 +245,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         matrix[y] = new int[w];
 
     createLBP(matrix, LbpType::ENHANCED, normalized);
-
     // dump the lbp model
     if(debug_box_pix)
     {
         PIX* pixout = pixCreate(w, h, 8);
         pixSetResolution(pixout, 300, 300);
+
         for (int_t y = 0; y < h; ++y)
         {
             for (int_t x = 0; x < w; ++x)
@@ -248,13 +258,14 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 pixAtSet(pixout, x, y, matrix[y][x]);
             }
         }
+
         pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
         pixDestroy(&pixout);
     }
 
     // Map the LBP codes to one of 58 uniform codes
     // Calculate uniform code table for all 255 grayscale codes
-    // There are 58 codes and bin 59 is for everything else
+    // There are 58 codes and bin 59 is for everything else (since 0 based bin 59 -> 58)
     std::vector<int> uniforms;
     uniforms.resize(255);
 
@@ -263,11 +274,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         if(isUniform(i))
             uniforms[i] = index++;
         else
-            uniforms[i] = 59;
+            uniforms[i] = 58;
     }
 
-    auto verticalPartitions = 2; // vertical  partitions
-    auto horizontalPartitions = 4; // horizontal partitions
+    // 2/4
+    auto verticalPartitions = 1; // vertical  partitions
+    auto horizontalPartitions = 1; // horizontal partitions
 
     // horizontal / vertical groups
     int gridHeight = ceil((double) h / (double) verticalPartitions);
@@ -309,42 +321,50 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 pixDestroy(&snip);
             }
 
+            auto total = 0;
             Histogram boxModel(59);
-            for (int_t y = std::max(0, yStart); y < yEnd; ++y)
+            for (int y = std::max(0, yStart); y < yEnd; ++y)
             {
-                for (int_t x = std::max(0, xStart); x < xEnd; ++x)
+                for (int x = std::max(0, xStart); x < xEnd; ++x)
                 {
                     auto out = matrix[y][x];
+//                    std::cout<< "pos = " << y  << ", " << x << " " << out << " \n";
+                    // remove background
                     if(out == 0 || out == 255)
                         continue;
 
                     auto bin = uniforms[out];
-                    boxModel[bin]++;
+                    total+=bin;
+//                    std::cout<<bin <<   " = " <<  boxModel[bin] << std::endl;
+                    boxModel[1]++;
                 }
             }
 
-            result.append(boxModel);
+             std::cout<<"BIN TOTAL" <<   " = " << total << std::endl;
+             result.append(boxModel);
         }
     }
 
     std::cout << " concat hist "  << result << std::endl;
-
+    delete[] matrix;
     return result;
 }
 
 Histogram LBPMatcher::createLBP(const std::string &filename)
 {
     std::cout << "createLBP reading file : " << filename << std::endl;
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
     validateFileExists(filename);
-
     auto pix = pixRead(filename.c_str());
+
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     auto model = createLBP(pix);
     pixDestroy(&pix);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
-    std::cout <<  "createLBP Time : "  << duration << std::endl;
+
+    std::cout <<  "createLBP Time (ms) : "  << duration << std::endl;
 
     return model;
 }

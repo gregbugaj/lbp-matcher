@@ -27,28 +27,22 @@ void test_lbp_000();
 void test_histogram_append();
 void test_histogram_normalize();
 
+void test_extractor_001();
+
 int main(int argc, char* argv[])
 {
 
 //    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
-//    test_lbp_001();
+ test_lbp_001();
 //    test_lbp_003();
-    test_histogram_scores();
+//    test_histogram_scores();
+
+//    test_extractor_001();
     return 0;
 }
 
-int test_extractor_001()
-{
-    std::string document = "claim001.tif";
-    std::string snip     = "deck-01/27.png";
-
-    Extractor extractor;
-    extractor.extract(document, snip);
-
-    return 0;
-}
 
 void test_segmenter_01()
 {
@@ -77,10 +71,26 @@ fs::path getTestDeckDirectory(const std::string& folder)
     return path;
 }
 
+
+void test_extractor_001()
+{
+    std::string document = "claim001.tif";
+    std::string snip     = "deck-01/27.png";
+
+    Extractor extractor;
+    extractor.extract(document, snip);
+}
+
+
 void test_lbp_000()
 {
-    auto deck = getTestDeckDirectory("template-claim");
-    auto f1 = deck / "0.png";
+//    auto deck = getTestDeckDirectory("template-claim");
+//    auto f1 = deck / "0.png";
+//
+//    auto f2 = deck / "27_scale_125_.png";
+
+    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "27_scale_90_.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -94,7 +104,7 @@ void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "0.png";
-    auto f2 = deck / "1.png";
+    auto f2 = deck / "0.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -107,7 +117,17 @@ void test_lbp_001()
     std::cout << m0 << std::endl;
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::INTERSECTION;
+    auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
+
+    std::cout << "Histograms Raw " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    if(true)
+        return;
+
+    m0.normalize();
+    m1.normalize();
 
     auto s0 = comp.compare(m0, m0, type);
     auto s1 = comp.compare(m1, m1, type);
@@ -384,8 +404,11 @@ void test_histogram_scores()
     sample[2] = 30;
     sample[3] = 40;
 
-    model.frequency();
-    sample.frequency();
+    model.normalize();
+    sample.normalize();
+
+    std::cout<< " model = " << model <<std::endl;
+    std::cout<< " sample = " << sample <<std::endl;
 
     HistogramComparison histogram;
 
@@ -393,7 +416,6 @@ void test_histogram_scores()
     auto r2 = histogram.compare(model, sample,  HistogramComparison::CompareType::CHI_SQUARED);
     auto r3 = histogram.compare(model, sample,  HistogramComparison::CompareType::LOG_LIKELIHOOD);
     auto r4 = histogram.compare(model, sample,  HistogramComparison::CompareType::KULLBACK_LEIBLER_DIVERGENCE);
-    auto r5 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE);
     auto r6 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE_NORMALIZED);
     auto r7 = histogram.compare(model, sample,  HistogramComparison::CompareType::ABSOLUTE_VALUE);
     auto r8 = histogram.compare(model, sample,  HistogramComparison::CompareType::COSINE_SIMILARITY);
@@ -403,7 +425,6 @@ void test_histogram_scores()
     std::cout<< "Chi Squared           = " << r2 << "\n";
     std::cout<< "LogLikehood           = " << r3 << "\n";
     std::cout<< "Kullback-Leibler      = " << r4 << "\n";
-    std::cout<< "Euclidean             = " << r5 << "\n";
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
     std::cout<< "Absolute Value        = " << r7 << "\n";
     std::cout<< "Cosine Similarity     = " << r8 << "\n";
@@ -440,16 +461,15 @@ void test_histogram_append()
 
 void test_histogram_normalize()
 {
-    Histogram m1(3);
+    Histogram model(5);
 
-    m1[0] = 10;
-    m1[1] = 20;
-    m1[2] = 100;
-    m1[2] = 200;
+    model[0] = 20.12123232;
+    model[1] = 35.33342222888444;
+    model[2] = 30.232322221111;
+    model[3] = 40.00000000031313;
+    model[4] = 10.00000000031313;
 
-    std::cout<< "m1  = " << m1 << "\n";
-
-//    m1.normalize();
-    m1.frequency();
-    std::cout<< "m1  = " << m1 << "\n";
+    std::cout<< "m1  = " << model << "\n";
+    model.normalize();
+    std::cout<< "m1  = " << model << "\n";
 }

@@ -30,7 +30,7 @@ void test_histogram_normalize();
 int main(int argc, char* argv[])
 {
 
-    test_histogram_normalize();
+//    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
 //    test_lbp_001();
@@ -374,8 +374,8 @@ void test_histogram_scores()
     Histogram model(4);
     Histogram sample(4);
 
-    model[0] = 20;
-    model[1] = 35;
+    model[0] = 10;
+    model[1] = 20;
     model[2] = 30;
     model[3] = 40;
 
@@ -387,13 +387,15 @@ void test_histogram_scores()
     model.normalize();
     sample.normalize();
 
+    std::cout<< " model = " << model <<std::endl;
+    std::cout<< " sample = " << sample <<std::endl;
+
     HistogramComparison histogram;
 
     auto r1 = histogram.compare(model, sample,  HistogramComparison::CompareType::INTERSECTION);
     auto r2 = histogram.compare(model, sample,  HistogramComparison::CompareType::CHI_SQUARED);
     auto r3 = histogram.compare(model, sample,  HistogramComparison::CompareType::LOG_LIKELIHOOD);
     auto r4 = histogram.compare(model, sample,  HistogramComparison::CompareType::KULLBACK_LEIBLER_DIVERGENCE);
-    auto r5 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE);
     auto r6 = histogram.compare(model, sample,  HistogramComparison::CompareType::EUCLIDEAN_DISTANCE_NORMALIZED);
     auto r7 = histogram.compare(model, sample,  HistogramComparison::CompareType::ABSOLUTE_VALUE);
     auto r8 = histogram.compare(model, sample,  HistogramComparison::CompareType::COSINE_SIMILARITY);
@@ -403,7 +405,6 @@ void test_histogram_scores()
     std::cout<< "Chi Squared           = " << r2 << "\n";
     std::cout<< "LogLikehood           = " << r3 << "\n";
     std::cout<< "Kullback-Leibler      = " << r4 << "\n";
-    std::cout<< "Euclidean             = " << r5 << "\n";
     std::cout<< "Euclidean normalized  = " << r6 << "\n";
     std::cout<< "Absolute Value        = " << r7 << "\n";
     std::cout<< "Cosine Similarity     = " << r8 << "\n";
@@ -440,14 +441,15 @@ void test_histogram_append()
 
 void test_histogram_normalize()
 {
-    Histogram m1(3);
+    Histogram model(5);
 
-    m1[0] = 10;
-    m1[1] = 20;
-    m1[2] = 100;
-    m1[2] = 200;
+    model[0] = 20.12123232;
+    model[1] = 35.33342222888444;
+    model[2] = 30.232322221111;
+    model[3] = 40.00000000031313;
+    model[4] = 10.00000000031313;
 
-    std::cout<< "m1  = " << m1 << "\n";
-    m1.normalize();
-    std::cout<< "m1  = " << m1 << "\n";
+    std::cout<< "m1  = " << model << "\n";
+    model.normalize();
+    std::cout<< "m1  = " << model << "\n";
 }

@@ -1,44 +1,34 @@
 #include "HistogramComparison.h"
 #include <iostream>
-#include <iomanip>
 
-/**
- * round value
- *
- * @param val
- * @param precision
- * @return
- */
-template <class T>
-double round(T val, int precision)
+double clip(double val)
 {
-    std::stringstream s;
-    s << std::setprecision(precision) << std::setiosflags(std::ios_base::fixed) << val;
-    s >> val;
-    return val;
+    return round(std::min(1.0, std::max(val, 0.0)), 5);
 }
 
 double HistogramComparison::compare(const Histogram &expected, const Histogram &observed,
                                     HistogramComparison::CompareType type) const
 {
+    // make sure both histograms are normalized, i.e. their entries sum up to one
+    if(!expected.isNormalized() || !observed.isNormalized())
+        throw std::runtime_error("expected and observer histograms need to be normalized before they can be compared");
+
     switch (type)
     {
         case INTERSECTION :
-            return scoreHistogramIntersection(expected, observed);
+            return clip(scoreHistogramIntersection(expected, observed));
         case LOG_LIKELIHOOD:
-            return scoreLogLikelihood(expected, observed);
+            return clip(scoreLogLikelihood(expected, observed));
         case CHI_SQUARED:
-            return scoreChiSquared(expected, observed);
+            return clip(scoreChiSquared(expected, observed));
         case KULLBACK_LEIBLER_DIVERGENCE:
-            return scoreKullbackLeiblerDivergence(expected, observed);
-        case EUCLIDEAN_DISTANCE:
-            return scoreEuclideanDistance(expected, observed);
+            return clip(scoreKullbackLeiblerDivergence(expected, observed));
         case EUCLIDEAN_DISTANCE_NORMALIZED:
-            return scoreEuclideanDistanceNormalized(expected, observed);
+            return clip(scoreEuclideanDistanceNormalized(expected, observed));
         case ABSOLUTE_VALUE:
-            return scoreAbsoluteValueDistance(expected, observed);
+            return clip(scoreAbsoluteValueDistance(expected, observed));
         case COSINE_SIMILARITY:
-            return scoreCosineSimilarity(expected, observed);
+            return clip(scoreCosineSimilarity(expected, observed));
     }
 
     throw "Compare type not handled";
@@ -58,7 +48,7 @@ double HistogramComparison::scoreHistogramIntersection(const Histogram &expected
     }
 
     // normalize [0..1]
-    return round((0.5 * d) / std::fmax(s1, s2), 2);
+    return (0.5 * d) / std::fmax(s1, s2);
 }
 
 double HistogramComparison::scoreLogLikelihood(const Histogram &expected, const Histogram &observed) const
@@ -82,21 +72,10 @@ double HistogramComparison::scoreChiSquared(const Histogram &expected, const His
     if(expected.size() != observed.size())
         throw std::runtime_error("expected size != observed size");
 
+
+    auto d = .0;
     auto bins = expected.size();
 
-    // make sure both histograms are normalized, i.e. their entries sum up to one
-    auto expectedSum = .0;
-    auto observedSum = .0;
-    for (int_t i = 0, s = bins; i < s; ++i)
-    {
-        expectedSum += expected[i];
-        observedSum += observed[i];
-    }
-
-    if(expectedSum != 1.0 || observedSum != 1.0)
-        throw std::runtime_error("expected and observer histograms need to be normalized and sum to 1");
-
-    double d = 0;
     for (int_t i = 0, s = bins; i < s; ++i)
     {
         double q = expected[i] + observed[i];
@@ -105,11 +84,11 @@ double HistogramComparison::scoreChiSquared(const Histogram &expected, const His
         {
             double d1 = std::pow(expected[i] - observed[i], 2);
             d += d1 / q;
-            std::cout<<"\n q " << q  <<" d1 " << d1 <<"  d = "<< d << std::endl;
         }
     }
 
-    return d;
+    // normalize in 1..0 range, 1 = full similarity
+    return 1.0 - d;
 }
 
 
@@ -137,45 +116,11 @@ double HistogramComparison::scoreKullbackLeiblerDivergence(const Histogram &mode
             if(!std::isnan(k))
                 d += k;
 
-            std::cout<<"\n m " << m <<" p " << p <<" q: " << q << " h : " << h<< " k : " << k << " d = "<< d << std::endl;
+//            std::cout<<"\n m " << m <<" p " << p <<" q: " << q << " h : " << h<< " k : " << k << " d = "<< d << std::endl;
         }
     }
     return d;
 }
-
-double scoreKullbackLeiblerDivergenceORG(const Histogram &model, const Histogram &sample)
-{
-    double d = 0;
-    for (int_t i = 0, s = model.size(); i < s; ++i)
-    {
-        double p = model[i];
-        double q = sample[i];
-
-        if (p != 0 && q != 0)
-        {
-            d += p * std::log(p / q);
-        }
-    }
-    return d;
-}
-
-double HistogramComparison::scoreEuclideanDistance(const Histogram& expected, const Histogram& observed) const
-{
-    if(expected.size() != observed.size())
-        throw std::runtime_error("expected size != observed size");
-
-    if(expected.size() == 0)
-        throw std::runtime_error("expected or observed size is zero");
-
-    double sum = 0;
-    for (int_t i = 0, s = expected.size(); i < s; ++i)
-    {
-        sum += std::pow(expected[i] - observed[i], 2);
-    }
-
-    return std::sqrt(sum);
-}
-
 
 double HistogramComparison::scoreEuclideanDistanceNormalized(const Histogram& expected, const Histogram& observed) const
 {
@@ -195,6 +140,7 @@ double HistogramComparison::scoreEuclideanDistanceNormalized(const Histogram& ex
     return std::sqrt(sum / n);
 }
 
+
 double HistogramComparison::scoreAbsoluteValueDistance(const Histogram& expected, const Histogram& observed) const
 {
     if(expected.size() != observed.size())
@@ -209,7 +155,7 @@ double HistogramComparison::scoreAbsoluteValueDistance(const Histogram& expected
         sum += std::abs(expected[i] - observed[i]);
     }
 
-    return sum;
+    return clip(1.0 - sum);
 }
 
 double HistogramComparison::scoreCosineSimilarity(const Histogram& expected, const Histogram& observed) const
@@ -220,9 +166,9 @@ double HistogramComparison::scoreCosineSimilarity(const Histogram& expected, con
     if(expected.size() == 0)
         throw std::runtime_error("expected or observed size is zero");
 
-    auto dotProduct = 0;
-    auto expectedNorm = 0;
-    auto observedNorm = 0;
+    auto dotProduct = .0;
+    auto expectedNorm = .0;
+    auto observedNorm = .0;
 
     for (int_t i = 0, s = expected.size(); i < s; ++i)
     {
@@ -234,7 +180,7 @@ double HistogramComparison::scoreCosineSimilarity(const Histogram& expected, con
     }
 
     if(expectedNorm == 0 || observedNorm == 0)
-        return 0;
+        return 0.0;
 
-    return round(dotProduct / (std::sqrt(expectedNorm) * std::sqrt(observedNorm)), 3);
+    return dotProduct / (std::sqrt(expectedNorm) * std::sqrt(observedNorm));
 }

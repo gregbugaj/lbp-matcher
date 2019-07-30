@@ -18,7 +18,6 @@ public :
     enum CompareType
     {
         INTERSECTION,
-        EUCLIDEAN_DISTANCE,
         EUCLIDEAN_DISTANCE_NORMALIZED,
         ABSOLUTE_VALUE,
         LOG_LIKELIHOOD,
@@ -40,16 +39,7 @@ public :
 private :
 
     /**
-     * Euclidean distance
-     *
-     * @param expected
-     * @param observed
-     * @return
-     */
-    double scoreEuclideanDistance(const Histogram& expected, const Histogram& observed) const;
-
-    /**
-     * Euclidian distance normalized
+     * Euclidean distance normalized
      *
      * @param expected
      * @param observed

@@ -2,10 +2,19 @@
 #define LBP_MATCHER_TYPES_H
 
 #include <iostream>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <sstream>
-#include <leptonica/allheaders.h>
 #include <vector>
+
+#include <leptonica/allheaders.h>
+
+/**
+ * Ref
+ * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+ * https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
+ */
 
 typedef double               double_t;
 typedef bool                 bool_t;
@@ -15,10 +24,43 @@ typedef int                  int_t;
 typedef unsigned long int    uinit64_t; // 8 bytes(64 bits)
 typedef uinit64_t            hash_t;
 
+/**
+ * round value to specific precision
+ *
+ * @param val the value to round
+ * @param precision the precision to round to
+ * @return
+ */
+template <class T>
+double round(T val, int precision)
+{
+    std::stringstream s;
+    s << std::setprecision(precision) << std::setiosflags(std::ios_base::fixed) << val;
+    s >> val;
+    return val;
+}
+
+/**
+ * Check if two values are equal
+ *
+ * @tparam T the type of the parameter
+ * @param a
+ * @param b
+ * @return true if the value is within epsilon value
+ */
+template <class T>
+bool equal(T a, T b)
+{
+    auto epsilon = std::numeric_limits<T>::epsilon();
+    auto val = std::abs(a -  b) < epsilon;
+    return val;
+}
+
 struct Histogram {
 public:
     Histogram(int size)
     {
+        normalized = false;
         bins.resize(size, 0);
     }
 
@@ -103,6 +145,13 @@ public:
     }
 
     /**
+     * Check if histogram is normalized
+     * @return
+     */
+    bool isNormalized() const {
+        return normalized;
+    }
+    /**
      * The normalized count is the count in a class divided by the total number of observations.
      * In this case the relative counts are normalized to sum to one
      */
@@ -111,16 +160,27 @@ public:
         if(normalized)
             throw std::runtime_error("Histogram already normalized");
 
-        normalized = true;
-        auto sum = 0;
+        auto sum = .0;
+        auto total = .0;
         auto s = bins.size();
+
         for(int i = 0; i < s; ++i)
             sum += bins[i];
 
-        for(int i = 0; i < s; ++i)
-            bins[i] /= sum;
-    }
+        if(sum == 0)
+            return;
 
+        for(int i = 0; i < s; ++i)
+        {
+            bins[i] = bins[i] / sum;
+            total += bins[i];
+        }
+
+        if(!equal(1.0, total))
+            throw std::runtime_error("Normalized total not equal to 1.0(+-)epsilon got : " + std::to_string(total));
+
+        normalized = true;
+    }
 
 private :
 

@@ -34,8 +34,8 @@ int main(int argc, char* argv[])
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-//    test_lbp_000();
- test_lbp_001();
+    test_lbp_000();
+// test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
 
@@ -89,8 +89,8 @@ void test_lbp_000()
 //
 //    auto f2 = deck / "27_scale_125_.png";
 
-    auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "27_scale_90_.png";
+    auto deck = getTestDeckDirectory("set-color");
+    auto f1 = deck / "20181114_201326.jpg";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -103,8 +103,9 @@ void test_lbp_000()
 void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "0.png";
-    auto f2 = deck / "0.png";
+    auto f1 = deck / "27.png";
+//    auto f2 = deck / "27_rotate_neg2.png";
+    auto f2 = deck / "27_scale_90_.png";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
@@ -123,8 +124,6 @@ void test_lbp_001()
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
 
-    if(true)
-        return;
 
     m0.normalize();
     m1.normalize();

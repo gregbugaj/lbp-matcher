@@ -4,6 +4,9 @@
 
 # References 
 
+https://pdfs.semanticscholar.org/82f9/0f605287e026e00ac5d4ee34af6e3ec8bb91.pdf
+
+
 Efficient Spatio-Temporal Local Binary Patterns for Spontaneous Facial Micro-Expression Recognition
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4438071/
 
@@ -220,3 +223,7 @@ Manhatan Distance Instead of Hamming Distance
     }
      */
     return featureHistogram;
+    
+    
+    
+    

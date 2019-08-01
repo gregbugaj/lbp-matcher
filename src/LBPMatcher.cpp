@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
-bool debug_box_pix = false;
+bool debug_box_pix = true;
 
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
@@ -46,21 +46,38 @@ neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
     return out;
 }
 // https://tpgit.github.io/Leptonica/arithlow_8c_source.html#l00161
-l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y, int_t w, int_t h)
+
+/**
+ * Get PIX value at specific location while performing bounds check.
+ *
+ * @param pix
+ * @param x
+ * @param y
+ * @return
+ */
+l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y)
 {
-    if(x < 0 || x > w || y < 0 || y > h)
-    {
-        std::cout << x << ", " << y << "  " <<  0  << " | ";
+    l_int32 w = pix->w;
+    l_int32 h = pix->h;
+
+   if(y < 0 || y >= h || x < 0 || x >= w)
         return 0;
-    }
 
     l_int32 wpl    = pixGetWpl(pix);
     l_uint32* data = pixGetData(pix);
     l_uint32* line = data + y * wpl;
-    l_int32  value = GET_DATA_BYTE(line, x);
+    l_uint32 val = 0;
 
-    std::cout << x << ", " << y << "  " << value  << " | ";
-    return value;
+    if(pix->d == 1)
+        val = GET_DATA_BIT(line, x);
+    else if(pix->d == 2)
+        val = GET_DATA_DIBIT(line, x);
+    else if(pix->d == 4)
+        val = GET_DATA_QBIT(line, x);
+    else // 8, 16, 32
+        val = GET_DATA_BYTE(line, x);
+
+    return val;
 }
 
 /**
@@ -78,15 +95,15 @@ void generateLbpNormal(int** matrix, PIX* pix)
     {
         for (int_t x = 0; x < w; ++x)
         {
-            l_int32 p0 = pixAtGetSan(pix, x,     y    , w , h); // Center
-            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1, w , h);
-            l_int32 p2 = pixAtGetSan(pix, x,     y - 1, w , h);
-            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1, w , h);
-            l_int32 p4 = pixAtGetSan(pix, x + 1, y    , w , h);
-            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1, w , h);
-            l_int32 p6 = pixAtGetSan(pix, x    , y + 1, w , h);
-            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1, w , h);
-            l_int32 p8 = pixAtGetSan(pix, x - 1, y    , w , h);
+            l_int32 p0 = pixAtGetSan(pix, x,     y    ); // Center
+            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1);
+            l_int32 p2 = pixAtGetSan(pix, x,     y - 1);
+            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1);
+            l_int32 p4 = pixAtGetSan(pix, x + 1, y    );
+            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1);
+            l_int32 p6 = pixAtGetSan(pix, x    , y + 1);
+            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1);
+            l_int32 p8 = pixAtGetSan(pix, x - 1, y);
 
             byte_t  out = 0;
 
@@ -114,27 +131,21 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
 {
     int_t w = pix->w;
     int_t h = pix->h;
-
-    std::cout<< "pix : " << pix << std::endl;
-    std::cout<< "pix w: " << w << std::endl;
-    std::cout<< "pix h: " << h << std::endl;
-    std::cout << " ----- \n" ;
-
     auto total = 0.0;
 
     for (int_t y = 0; y < h; ++y)
     {
         for (int_t x = 0; x < w; ++x)
         {
-            l_int32 p0 = pixAtGetSan(pix, x,     y    , w , h); // Center
-            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1, w , h);
-            l_int32 p2 = pixAtGetSan(pix, x,     y - 1, w , h);
-            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1, w , h);
-            l_int32 p4 = pixAtGetSan(pix, x + 1, y    , w , h);
-            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1, w , h);
-            l_int32 p6 = pixAtGetSan(pix, x    , y + 1, w , h);
-            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1, w , h);
-            l_int32 p8 = pixAtGetSan(pix, x - 1, y    , w , h);
+            l_int32 p0 = pixAtGetSan(pix, x,     y    ); // Center
+            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1);
+            l_int32 p2 = pixAtGetSan(pix, x,     y - 1);
+            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1);
+            l_int32 p4 = pixAtGetSan(pix, x + 1, y    );
+            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1);
+            l_int32 p6 = pixAtGetSan(pix, x    , y + 1);
+            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1);
+            l_int32 p8 = pixAtGetSan(pix, x - 1, y    );
 
             byte_t  out = 0;
             double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
@@ -147,12 +158,9 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
                        | ((m > p7) << 1)
                        | ((m > p8) << 0);
 
-            total += p7;
             matrix[y][x] = out;
         }
     }
-
-    std::cout<< "\nLBP Total : " << total <<std::endl;
 }
 
 /**
@@ -171,15 +179,15 @@ void generateLbpSigned(int** matrix, PIX* pix)
     {
         for (int_t x = 0; x < w; ++x)
         {
-            l_int32 p0 = pixAtGetSan(pix, x,     y    , w , h); // Center
-            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1, w , h);
-            l_int32 p2 = pixAtGetSan(pix, x,     y - 1, w , h);
-            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1, w , h);
-            l_int32 p4 = pixAtGetSan(pix, x + 1, y    , w , h);
-            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1, w , h);
-            l_int32 p6 = pixAtGetSan(pix, x    , y + 1, w , h);
-            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1, w , h);
-            l_int32 p8 = pixAtGetSan(pix, x - 1, y    , w , h);
+            l_int32 p0 = pixAtGetSan(pix, x,     y    ); // Center
+            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1);
+            l_int32 p2 = pixAtGetSan(pix, x,     y - 1);
+            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1);
+            l_int32 p4 = pixAtGetSan(pix, x + 1, y    );
+            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1);
+            l_int32 p6 = pixAtGetSan(pix, x    , y + 1);
+            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1);
+            l_int32 p8 = pixAtGetSan(pix, x - 1, y    );
 
             byte_t  out = 0;
 
@@ -226,15 +234,17 @@ bool isUniform(byte_t a)
 
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
+    static int counter = 0;
     int padL = 1;
     int padR = 1;
     int padT = 1;
     int padB = 1;
 
-    std::cout<<"pix->d = "<< pix->d << std::endl;
-    PIX* normalized = pixConvertTo8(pix, 0);;// normalize(pix);
-    //pixWritePng("/tmp/lbp-matcher/lbp-normalized.png", normalized, 1);
-    std::cout<<"pix->d = "<< normalized->d << std::endl;
+    PIX* normalized = normalize(pix);
+
+    char f1[255];
+    sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
+    pixWritePng(f1, normalized, 0);
 
     int_t w = normalized->w;
     int_t h = normalized->h;
@@ -244,7 +254,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];
 
-    createLBP(matrix, LbpType::ENHANCED, normalized);
+    createLBP(matrix, LbpType::SIGNED, normalized);
     // dump the lbp model
     if(debug_box_pix)
     {
@@ -259,7 +269,9 @@ Histogram LBPMatcher::createLBP(PIX *pix)
             }
         }
 
-        pixWritePng("/tmp/lbp-matcher/lbp-enhanced.png", pixout, 1);
+        char f1[255];
+        sprintf(f1, "/tmp/lbp-matcher/lbp-enhanced-%d.png", counter);
+        pixWritePng(f1, normalized, 1);
         pixDestroy(&pixout);
     }
 
@@ -330,13 +342,16 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                     auto out = matrix[y][x];
 //                    std::cout<< "pos = " << y  << ", " << x << " " << out << " \n";
                     // remove background
-                    if(out == 0 || out == 255)
+//                    if(out == 0 || out == 255)
+//                        continue;
+
+                    if(out == 255)
                         continue;
 
                     auto bin = uniforms[out];
                     total+=bin;
 //                    std::cout<<bin <<   " = " <<  boxModel[bin] << std::endl;
-                    boxModel[1]++;
+                    boxModel[bin]++;
                 }
             }
 
@@ -347,6 +362,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 
     std::cout << " concat hist "  << result << std::endl;
     delete[] matrix;
+    counter++;
     return result;
 }
 

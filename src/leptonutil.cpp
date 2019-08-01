@@ -45,10 +45,10 @@ l_uint32 sum(PIX* pix)
         throw std::runtime_error(std::string("PIX should be 8bpp, got : "+pix->d));
     }
 
-    int_t w = pix->w;
-    int_t h = pix->h;
+    l_int32 w = pix->w;
+    l_int32 h = pix->h;
 
-    int_t wpl      = pixGetWpl(pix);
+    l_int32 wpl     = pixGetWpl(pix);
     l_uint32* data = pixGetData(pix);
     l_uint32* line;
     l_uint32  sum = 0;
@@ -83,7 +83,6 @@ BOX* boxaBoundingRegion(BOXA* boxes)
     return box;
 }
 
-
 /**
  * Get Pixel value at given  point
  */
@@ -112,7 +111,8 @@ void pixAtSet(PIX* pix, int_t x, int_t y, byte_t value)
 PIX* create_grayscale(PIX* pix)
 {
     PIX* gray = pixCopy(NULL, pix);
-    gray = pixConvert1To8(NULL, gray, 255, 0);
+//    gray = pixConvert1To8(NULL, gray, 255, 0);
+    gray = pixConvertTo8(gray, 0);
     gray = pixScaleGray2xLI(gray);
     gray = pixBlockconv(gray, 1, 1);
     gray = pixScaleAreaMap2(gray);
@@ -147,15 +147,15 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     }
     else if (pix->d == 32)
     {
-        throw std::runtime_error("Conversion PIX BPP of 32 is not yet implemented");
-        /*
-        // convert color(32) to grayscale
+        //throw std::runtime_error("Conversion PIX BPP of 32 is not yet implemented");
+        gray = pixConvertTo8(pix, 0);
+    /*    // convert color(32) to grayscale
         PIX* pdata = pixConvertTo8(pix, 0);
         //   pdata = pixThreshold8(pdata, 8, 32, 0);
         pdata = reduce(pix, 400, 0);
         pdata = pixConvertTo8(pdata, 0);
-        //    pdata = reduce(pdata, 500, 300);
-        */
+        //    pdata = reduce(pdata, 500, 300);*/
+
     }
     else
     {
@@ -169,15 +169,14 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     PIX* clipped = pixClipRectangle(gray, box, NULL);
     PIX* padded  = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
     pixSetResolution(padded, 300, 300);
-//        pixSetAll(padded);
-    //pixSetBlackOrWhite(padded, L_SET_BLACK);
-
-    l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
+//    pixSetAll(padded);
+//    pixSetBlackOrWhite(padded, L_SET_BLACK);
+//    l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC | PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_SRC ^ PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, padded->w, padded->h, PIX_DST, clipped, 0, 0);
 //        l_int32 status = pixRasterop(padded, padLeft, padTop, clipped->w, clipped->h, PIX_SRC | PIX_DST , clipped, 0, 0);
-    pixWritePng("/tmp/lbp-matcher/clipped-pdata.png", clipped, 1);
-    pixWritePng("/tmp/lbp-matcher/padded-pdata.png", padded, 1);
+//    pixWritePng("/tmp/lbp-matcher/clipped-pdata.png", clipped, 1);
+//    pixWritePng("/tmp/lbp-matcher/padded-pdata.png", padded, 1);
 
     if (debug_pix)
     {
@@ -196,13 +195,13 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
         pixWritePng(f1, clipped, 0);
     }
 
-    pixDestroy(&clipped);
+//    pixDestroy(&clipped);
     pixDestroy(&one);
     pixDestroy(&gray);
     boxaDestroy(&boxes);
     boxDestroy(&box);
 
-    return padded;
+    return clipped;
 }
 
 PIX* normalize(PIX *pix)

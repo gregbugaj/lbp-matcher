@@ -34,12 +34,12 @@ int main(int argc, char* argv[])
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-    test_lbp_000();
+//    test_lbp_000();
 // test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
 
-//    test_extractor_001();
+    test_extractor_001();
     return 0;
 }
 
@@ -74,8 +74,9 @@ fs::path getTestDeckDirectory(const std::string& folder)
 
 void test_extractor_001()
 {
-    std::string document = "claim001.tif";
-    std::string snip     = "deck-01/27.png";
+    auto deck = getTestDeckDirectory("private");
+    auto document = deck / "clip.tif";
+    auto snip = deck / "0.png";
 
     Extractor extractor;
     extractor.extract(document, snip);
@@ -90,7 +91,10 @@ void test_lbp_000()
 //    auto f2 = deck / "27_scale_125_.png";
 
     auto deck = getTestDeckDirectory("set-color");
-    auto f1 = deck / "20181114_201326.jpg";
+    auto f1 = deck / "194045.jpg";
+
+ /*   auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "27.png";*/
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;

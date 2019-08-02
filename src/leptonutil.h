@@ -1,5 +1,6 @@
 #ifndef LBP_MATCHER_LEPTONUTIL_H
 #define LBP_MATCHER_LEPTONUTIL_H
+
 #include <leptonica/allheaders.h>
 #include "types.h"
 

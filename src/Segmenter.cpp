@@ -55,9 +55,7 @@ std::vector<Segmenter::Segment> Segmenter::segment(int w, int h, int templw, int
 std::vector<Segmenter::Segment> Segmenter::segment(int w, int h, int templw, int templh)
 {
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
     auto segments = std::vector<Segment>();
-
     // Create image patch that is the same size as the template
     // at each location x,y serving as a center
 
@@ -88,7 +86,7 @@ std::vector<Segmenter::Segment> Segmenter::segment(int w, int h, int templw, int
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
-    std::cout<< "Segmenter time :  "  << duration << std::endl;
+    std::cout<< "Segment time time :  "  << duration << std::endl;
 
     return segments;
 }

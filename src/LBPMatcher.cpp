@@ -235,11 +235,6 @@ bool isUniform(byte_t a)
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
     static int counter = 0;
-    int padL = 1;
-    int padR = 1;
-    int padT = 1;
-    int padB = 1;
-
     PIX* normalized = normalize(pix);
 
     char f1[255];
@@ -254,7 +249,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];
 
-    createLBP(matrix, LbpType::SIGNED, normalized);
+    createLBP(matrix, LbpType::ENHANCED, normalized);
     // dump the lbp model
     if(debug_box_pix)
     {
@@ -271,7 +266,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 
         char f1[255];
         sprintf(f1, "/tmp/lbp-matcher/lbp-enhanced-%d.png", counter);
-        pixWritePng(f1, normalized, 1);
+        pixWritePng(f1, pixout, 1);
         pixDestroy(&pixout);
     }
 

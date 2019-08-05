@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
-bool debug_box_pix = true;
+bool debug_box_pix = false;
 
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
@@ -80,6 +80,38 @@ l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y)
     return val;
 }
 
+
+l_int32  pixAtGetSan(PIX* pix, l_int32 wpl,l_uint32* data,  int_t x, int_t y)
+{
+    l_int32 w = pix->w;
+    l_int32 h = pix->h;
+
+    if(y < 0 || y >= h || x < 0 || x >= w)
+        return 0;
+
+    l_uint32* line = data + y * wpl;
+    l_uint32 val = 0;
+
+    if(pix->d == 1)
+        val = GET_DATA_BIT(line, x);
+    else if(pix->d == 2)
+        val = GET_DATA_DIBIT(line, x);
+    else if(pix->d == 4)
+        val = GET_DATA_QBIT(line, x);
+    else // 8, 16, 32
+        val = GET_DATA_BYTE(line, x);
+
+    return val;
+}
+
+inline l_int32 pixAtGetSan(int** data, int_t h, int_t w, int_t x, int_t y)
+{
+    if(y < 0 || y >= h || x < 0 || x >= w)
+        return 0;
+
+    return data[y][x];
+}
+
 /**
  * Crate Local Binary Pattern image
  *
@@ -128,6 +160,57 @@ void generateLbpNormal(int** matrix, PIX* pix)
  * @param pix the pix to generate lbp for
  */
 void generateLbpEnhanced(int** matrix, PIX* pix)
+{
+    int_t w = pix->w;
+    int_t h = pix->h;
+    auto total = 0.0;
+
+    // get image value with one pass
+    l_int32 wpl    = pixGetWpl(pix);
+    l_uint32* data = pixGetData(pix);
+
+    int** image = new int*[h];
+    for (int_t y = 0; y < h; ++y)
+        image[y] = new int[w];
+
+    for (int_t y = 0; y < h; ++y)
+    {
+        for (int_t x = 0; x < w; ++x)
+        {
+            image[y][x] = pixAtGetSan(pix, wpl, data, x, y);
+        }
+    }
+
+    for (int_t y = 0; y < h; ++y)
+    {
+        for (int_t x = 0; x < w; ++x)
+        {
+            l_int32 p0 = 0;// pixAtGetSan(image, h, w, x,     y    ); // Center
+            l_int32 p1 = 0;//pixAtGetSan(image, h, w,  x - 1, y - 1);
+            l_int32 p2 = 0;//pixAtGetSan(image, h, w,  x,     y - 1);
+            l_int32 p3 = 0;//pixAtGetSan(image, h, w,  x + 1, y - 1);
+            l_int32 p4 = 0;//pixAtGetSan(image, h, w,  x + 1, y    );
+            l_int32 p5 = 0;//pixAtGetSan(image, h, w,  x + 1, y + 1);
+            l_int32 p6 = 0;//pixAtGetSan(image, h, w,  x    , y + 1);
+            l_int32 p7 = 0;//pixAtGetSan(image, h, w,  x - 1, y + 1);
+            l_int32 p8 = 0;//pixAtGetSan(image, h, w,  x - 1, y    );
+
+            byte_t  out = 0;
+            double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
+            out |=     ((m > p1) << 7)
+                       | ((m > p2) << 6)
+                       | ((m > p3) << 5)
+                       | ((m > p4) << 4)
+                       | ((m > p5) << 3)
+                       | ((m > p6) << 2)
+                       | ((m > p7) << 1)
+                       | ((m > p8) << 0);
+
+            matrix[y][x] = out;
+        }
+    }
+}
+void generateLbpEnhancedSlow(int** matrix, PIX* pix)
 {
     int_t w = pix->w;
     int_t h = pix->h;
@@ -235,11 +318,14 @@ bool isUniform(byte_t a)
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
     static int counter = 0;
-    PIX* normalized = normalize(pix);
+    PIX* normalized = pix; //normalize(pix);
 
-    char f1[255];
-    sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
-    pixWritePng(f1, normalized, 0);
+    if(debug_box_pix)
+    {
+        char f1[255];
+        sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
+        pixWritePng(f1, normalized, 0);
+    }
 
     int_t w = normalized->w;
     int_t h = normalized->h;
@@ -291,11 +377,13 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     // horizontal / vertical groups
     int gridHeight = ceil((double) h / (double) verticalPartitions);
     int gridWidth = ceil((double) w / (double) horizontalPartitions);
+/*
 
     std::cout<<" horizontalPartitions = "<< horizontalPartitions << std::endl;
     std::cout<<" verticalPartitions = "<< verticalPartitions << std::endl;
     std::cout<<" gridWidth = "<< gridWidth << std::endl;
     std::cout<<" gridHeight = "<< gridHeight << std::endl;
+*/
 
     Histogram result(0);
 
@@ -350,12 +438,10 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 }
             }
 
-             std::cout<<"BIN TOTAL" <<   " = " << total << std::endl;
              result.append(boxModel);
         }
     }
 
-    std::cout << " concat hist "  << result << std::endl;
     delete[] matrix;
     counter++;
     return result;

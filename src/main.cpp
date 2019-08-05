@@ -75,7 +75,7 @@ fs::path getTestDeckDirectory(const std::string& folder)
 void test_extractor_001()
 {
     auto deck = getTestDeckDirectory("private");
-    auto document = deck / "clip.tif";
+    auto document = deck / "clip3.tif";
     auto snip = deck / "0.png";
 
     Extractor extractor;

@@ -1,7 +1,7 @@
 #include <sstream>
 #include "leptonutil.h"
 
-bool debug_pix = true;
+bool debug_pix = false;
 
 void dump(PIX* pix)
 {
@@ -166,6 +166,19 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     PIX* one = pixConvertTo1(gray, 127);
     BOXA* boxes = pixConnComp(one, NULL, 4);
     BOX* box = boxaBoundingRegion(boxes);
+
+    // there were not connected components so lets default box to w/h
+    if(box == nullptr)
+    {
+        char f1[255];
+
+        sprintf(f1, "/tmp/lbp-matcher/bad.png", counter);
+        pixWritePng(f1, pix, 0);
+
+        box = boxCreate(0,0, pix->w, pix->h);
+        //throw std::runtime_error("Bad box ");
+    }
+
     PIX* clipped = pixClipRectangle(gray, box, NULL);
     PIX* padded  = pixCreate(box->w + (padLeft + padRight), box->h + (padBottom + padTop), 8);
     pixSetResolution(padded, 300, 300);

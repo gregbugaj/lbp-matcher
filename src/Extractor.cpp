@@ -43,7 +43,7 @@ PIX*  Extractor::extract(PIX* document, PIX* templ)
 
     Segmenter seg;
     auto segments = seg.segment(dw, dh, bw, bh);
-    auto m0 = LBPMatcher::createLBP(templ);
+    auto m0 = LBPMatcher::createLBP(templNorm);
 
     HistogramComparison comp;
     auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
@@ -71,7 +71,7 @@ PIX*  Extractor::extract(PIX* document, PIX* templ)
 
            // if(counter > 600)
              //   break;
-            auto m1 = LBPMatcher::createLBP(snip);
+            //auto m1 = LBPMatcher::createLBP(snip);
            // auto type = HistogramComparison::CompareType::CHI_SQUARED;
             //auto s0 = comp.compare(m0, m1, type);
             //grayValue = s0 * 255;
@@ -89,9 +89,6 @@ PIX*  Extractor::extract(PIX* document, PIX* templ)
         boxDestroy(&box);
         pixDestroy(&snip);
     }
-
         //pixWritePng("/home/gbugaj/share/devbox/tmp/bumpmap.png", bumpmap, 0);
-
-
     return NULL;
 }

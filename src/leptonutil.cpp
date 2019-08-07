@@ -172,7 +172,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     {
         char f1[255];
 
-        sprintf(f1, "/tmp/lbp-matcher/bad.png", counter);
+        sprintf(f1, "/tmp/lbp-matcher/bad-%d.png", counter);
         pixWritePng(f1, pix, 0);
 
         box = boxCreate(0,0, pix->w, pix->h);

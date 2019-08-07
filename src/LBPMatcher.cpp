@@ -18,6 +18,8 @@ typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
 bool debug_box_pix = false;
 
+
+
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
     p.first = std::min(std::max(p.first, 0), w - 1);
@@ -317,43 +319,32 @@ bool isUniform(byte_t a)
 
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
+    if(pix->d != 8)
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+
     static int counter = 0;
-    PIX* normalized = pix; //normalize(pix);
+    int_t w = pix->w;
+    int_t h = pix->h;
 
     if(debug_box_pix)
     {
         char f1[255];
         sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
-        pixWritePng(f1, normalized, 0);
+        pixWritePng(f1, pix, 0);
     }
 
-    int_t w = normalized->w;
-    int_t h = normalized->h;
     // matrix that will be populated with LBP, data is in row-major order
-
     int** matrix = new int*[h];
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];
 
-    createLBP(matrix, LbpType::ENHANCED, normalized);
+    createLBP(matrix, LbpType::ENHANCED, pix);
     // dump the lbp model
     if(debug_box_pix)
     {
-        PIX* pixout = pixCreate(w, h, 8);
-        pixSetResolution(pixout, 300, 300);
-
-        for (int_t y = 0; y < h; ++y)
-        {
-            for (int_t x = 0; x < w; ++x)
-            {
-                pixAtSet(pixout, x, y, matrix[y][x]);
-            }
-        }
-
         char f1[255];
         sprintf(f1, "/tmp/lbp-matcher/lbp-enhanced-%d.png", counter);
-        pixWritePng(f1, pixout, 1);
-        pixDestroy(&pixout);
+        dump(matrix, h, w, f1);
     }
 
     // Map the LBP codes to one of 58 uniform codes
@@ -406,7 +397,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 std::cout<<" ** index = "<< index <<  " row/col " << row  << " : " << col << " pos = " << y << ", "<< x  << " == "  <<  yEnd  << " : " << xEnd  <<std::endl;
 
                 BOX*  box    = boxCreate(xStart, yStart, gridWidth, gridHeight);
-                PIX*  snip   = pixClipRectangle(normalized, box, NULL);
+                PIX*  snip   = pixClipRectangle(pix, box, NULL);
 
                 char f[255];
                 sprintf(f, "/tmp/lbp-matcher/box-%d-%d.png", row, col);
@@ -447,6 +438,30 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     return result;
 }
 
+
+void LBPMatcher::dump(int **matrix, int rows, int cols, char *filename)
+{
+    int w = cols;
+    int h = rows;
+
+    PIX* pix = pixCreate(w, h, 8);
+    pixSetResolution(pix, 300, 300);
+    l_int32 wpl = pixGetWpl(pix);
+    l_uint32* data = pixGetData(pix);
+
+    for (int_t y = 0; y < h; ++y)
+    {
+        l_uint32* line = data + y * wpl;
+        for (int_t x = 0; x < w; ++x)
+        {
+            SET_DATA_BYTE(line, x, matrix[y][x]);
+        }
+    }
+
+    pixWritePng(filename, pix, 1);
+    pixDestroy(&pix);
+}
+
 Histogram LBPMatcher::createLBP(const std::string &filename)
 {
     std::cout << "createLBP reading file : " << filename << std::endl;
@@ -465,3 +480,4 @@ Histogram LBPMatcher::createLBP(const std::string &filename)
 
     return model;
 }
+

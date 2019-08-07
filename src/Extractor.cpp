@@ -27,7 +27,7 @@ PIX* Extractor::extract(const std::string &document, const std::string &templ)
 PIX*  Extractor::extract(PIX* document, PIX* templ)
 {
     PIX* documentNorm = normalize(document);
-    PIX* templNorm    =  normalize(templ);
+    PIX* templNorm    = normalize(templ);
 
     pixWritePng("/tmp/lbp-matcher/documentNorm.png", documentNorm, 0);
     pixWritePng("/tmp/lbp-matcher/templNorm.png", templNorm, 0);

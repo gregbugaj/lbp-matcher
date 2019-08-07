@@ -1,7 +1,6 @@
 #ifndef LBP_MATCHER_LBPMATCHER_H
 #define LBP_MATCHER_LBPMATCHER_H
 
-
 #include <leptonica/allheaders.h>
 #include <experimental/filesystem>
 #include "types.h"
@@ -38,6 +37,16 @@ public :
      * @param pix the pix to create the LBP for
      */
     static void createLBP(int** matrix, LbpType type, PIX* pix);
+
+    /**
+     * Dump the LBP matrix
+     *
+     * @param matrix the lbp matrix to dump
+     * @param row the height of the matrix
+     * @param cols the width of the matrix
+     * @param filename the filename to output pix data to
+     */
+    static void dump(int **matrix, int rows, int cols, char* filename);
 
     /**
      * Extracted uniform local binary pattern (LBP) from a grayscale image.

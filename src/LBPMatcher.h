@@ -49,11 +49,11 @@ public :
     static void dump(int **matrix, int rows, int cols, char* filename);
 
     /**
-     * Extracted uniform local binary pattern (LBP) from a grayscale image.
+     * Create Extracted uniform local binary pattern (LBP) from a grayscale image.
      * The LBP features encode local texture information.
      *
-     * @param pix to extract features form
-     * @return LBPModel of extracted features
+     * @param pix to extract features from, expecting 8bpp image
+     * @return Histogram of extracted features with default partitioning
      */
     static Histogram createLBP(PIX* pix);
 
@@ -62,7 +62,7 @@ public :
      * The LBP features encode local texture information.
      * *
      * @param filename to create model for
-     * @return LBPModel of extracted features
+     * @return Histogram of extracted features
      */
     static Histogram createLBP(const std::string& filename);
 };

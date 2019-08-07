@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <limits.h>
 
+#include "leptonutil.h"
+
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
 
@@ -29,19 +31,26 @@ void test_histogram_normalize();
 
 void test_extractor_001();
 
+
+void test_image_normalization();
+
 int main(int argc, char* argv[])
 {
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-    test_lbp_000();
+//    test_lbp_000();
 // test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
 
 //    test_extractor_001();
+
+    test_image_normalization();
+
     return 0;
 }
+
 
 
 void test_segmenter_01()
@@ -69,6 +78,22 @@ fs::path getTestDeckDirectory(const std::string& folder)
     path /= "../test-deck";
     path /= folder;
     return path;
+}
+
+
+void test_image_normalization()
+{
+    auto deck = getTestDeckDirectory("private");
+    auto document = deck / "93126274.tif";
+    auto snip = deck / "0.png";
+
+
+    auto pix = pixRead(document.c_str());
+    auto upscale = pixUpscaleToGray(pix);
+
+    char f[255];
+    sprintf(f, "/tmp/lbp-matcher/upscale.png");
+    pixWritePng(f, upscale, 0);
 }
 
 

@@ -23,7 +23,7 @@ void dump(PIX* pix);
  * @param pix the pix to convert to grayscale
  * @return
  */
-PIX* create_grayscale(PIX* pix);
+PIX* pixUpscaleToGray(PIX* pix);
 
 /**
  * Sum pixel values

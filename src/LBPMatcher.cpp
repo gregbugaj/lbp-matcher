@@ -322,6 +322,8 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     if(pix->d != 8)
         throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
+    normalize(pix);
+
     static int counter = 0;
     int_t w = pix->w;
     int_t h = pix->h;
@@ -339,6 +341,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         matrix[y] = new int[w];
 
     createLBP(matrix, LbpType::ENHANCED, pix);
+
     // dump the lbp model
     if(debug_box_pix)
     {

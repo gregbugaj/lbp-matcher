@@ -69,17 +69,14 @@ BOX* boxaBoundingRegion(BOXA* boxes)
 {
     BOX* box = NULL;
     auto count = boxaGetCount(boxes);
-
     for(auto n = 0; n < count; ++n)
     {
         BOX* current = boxaGetBox(boxes, n, L_COPY);
-
         if(box != NULL)
             box = boxBoundingRegion(current, box);
         else
             box = current;
     }
-
     return box;
 }
 
@@ -108,17 +105,76 @@ void pixAtSet(PIX* pix, int_t x, int_t y, byte_t value)
     SET_DATA_BYTE(line, x, value);
 }
 
-PIX* create_grayscale(PIX* pix)
+PIX* pixUpscaleToGray(PIX* pix)
 {
+   if(pix->d != 1)
+       return pix;
+
+   /*
+         //   throw new std::runtime_error("pix dept is not 1");
     PIX* gray = pixCopy(NULL, pix);
 //    gray = pixConvert1To8(NULL, gray, 255, 0);
     gray = pixConvertTo8(gray, 0);
-    gray = pixScaleGray2xLI(gray);
+//    gray = pixScaleGray2xLI(gray);
+    gray = pixScaleGray4xLI(gray);
     gray = pixBlockconv(gray, 1, 1);
+    gray = pixScaleAreaMap2(gray);
+    gray = pixScaleAreaMap2(gray);
+    */
+    //   throw new std::runtime_error("pix dept is not 1");
+    PIX* gray = pixCopy(NULL, pix);
+    gray = pixConvertTo8(gray, 0);
+    gray = pixScaleGray2xLI(gray);
+    gray = pixBlockconv(gray, 2, 2);
     gray = pixScaleAreaMap2(gray);
 
     return gray;
 }
+
+
+PIX* normalize(PIX *pix)
+{
+    static int counter = 0;
+    counter++;
+    PIX* gray = NULL;
+
+    if (pix->d == 1)
+    {
+        gray = pixUpscaleToGray(pix); // -- CAUSES TOO MANY ARTIFACTS
+    }
+    else if (pix->d == 8)
+    {
+        gray = pixConvertTo8(pix, 0);
+    }
+    else if (pix->d == 32)
+    {
+        //throw std::runtime_error("Conversion PIX BPP of 32 is not yet implemented");
+        gray = pixConvertTo8(pix, 0);
+    /*    // convert color(32) to grayscale
+        PIX* pdata = pixConvertTo8(pix, 0);
+        //   pdata = pixThreshold8(pdata, 8, 32, 0);
+        pdata = reduce(pix, 400, 0);
+        pdata = pixConvertTo8(pdata, 0);
+        //    pdata = reduce(pdata, 500, 300);*/
+
+    }
+    else
+    {
+        // Grayscale 8bpp/ Color 16/32 bpp
+        gray = pixConvertTo8(pix, 0);
+    }
+    if (debug_pix)
+    {
+        char f1[255];
+        sprintf(f1, "/tmp/lbp-matcher/norm-pix-%d.png", counter);
+        pixWritePng(f1, pix, 0);
+        sprintf(f1, "/tmp/lbp-matcher/norm-gray-%d.png", counter);
+        pixWritePng(f1, gray, 0);
+    }
+
+    return gray;
+}
+
 
 /**
  * Smoothing and converting binary image to grayscale image
@@ -126,7 +182,7 @@ PIX* create_grayscale(PIX* pix)
  * @param pix the pix to normalize
  * @return normalized pix
  */
-PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
+PIX* normalizeOLD(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     static int counter = 0;
     counter++;
 
@@ -139,7 +195,7 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
 
     if (pix->d == 1)
     {
-        gray = create_grayscale(pix); // -- CAUSES TOO MANY ARTIFACTS
+        gray = pixUpscaleToGray(pix); // -- CAUSES TOO MANY ARTIFACTS
     }
     else if (pix->d == 8)
     {
@@ -215,11 +271,6 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom) {
     boxDestroy(&box);
 
     return clipped;
-}
-
-PIX* normalize(PIX *pix)
-{
-    return normalize(pix, 0, 0, 0, 0);
 }
 
 PIX* reduce(PIX *pix, int width, int height)

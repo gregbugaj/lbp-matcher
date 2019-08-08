@@ -75,8 +75,7 @@ double HistogramComparison::scoreLogLikelihood(const Histogram &expected, const 
 double HistogramComparison::scoreChiSquared(const Histogram &expected, const Histogram &observed) const
 {
     if(expected.size() != observed.size())
-        throw std::runtime_error("expected size != observed size");
-
+        throw std::runtime_error("Histograms must be of equal dimension, expected size != observed size");
 
     auto d = .0;
     auto bins = expected.size();
@@ -84,14 +83,12 @@ double HistogramComparison::scoreChiSquared(const Histogram &expected, const His
     for (int_t i = 0, s = bins; i < s; ++i)
     {
         double q = expected[i] + observed[i];
-
-        if (q != 0)
+        if (std::abs(q) > std::numeric_limits<double>::epsilon())
         {
-            double d1 = std::pow(expected[i] - observed[i], 2);
-            d += d1 / q;
+            double val = expected[i] - observed[i];
+            d += (val * val) / q;
         }
     }
-
     // normalize in 1..0 range, 1 = full similarity
     return 1.0 - d;
 }

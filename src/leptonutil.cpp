@@ -151,7 +151,6 @@ PIX* pixClipToBoundingBox(PIX* pix)
     return clipped;
 }
 
-
 PIX* normalize(PIX *pix)
 {
     static int counter = 0;

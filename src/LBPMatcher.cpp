@@ -349,7 +349,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 
     createLBP(matrix, LbpType::ENHANCED, pix);
 
-    createTexton(matrix, LbpType::ENHANCED, pix);
+//    createTexton(matrix, LbpType::ENHANCED, pix);
 
 
     // pixFromMatrix the lbp model

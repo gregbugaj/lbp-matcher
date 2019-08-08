@@ -8,7 +8,8 @@
 
 PIX *heatmap(PIX *pix)
 {
-    int w = pix->w;
+   /*
+    * int w = pix->w;
     int h = pix->h;
     PIXCMAP* cmap = pixcmapRead("/tmp/lbp-matcher/cmap.txt");
     RGBA_QUAD* cta = (RGBA_QUAD *)cmap->array;
@@ -24,10 +25,10 @@ PIX *heatmap(PIX *pix)
         line = data + y * wpl;
         for (int_t x = 0; x < w; ++x)
         {
-  /*          l_uint32 pixel = GET_DATA_BYTE(line, x);
-            rval = cta[pixel].red;
-            gval = cta[pixel].green;
-            bval = cta[pixel].blue;*/
+//            l_uint32 pixel = GET_DATA_BYTE(line, x);
+//            rval = cta[pixel].red;
+//            gval = cta[pixel].green;
+//            bval = cta[pixel].blue;
 
 //            SET_DATA_BYTE(line, x, pixel);//
 
@@ -41,10 +42,13 @@ PIX *heatmap(PIX *pix)
 
     pixWritePng("/tmp/lbp-matcher/heat.png", dpix, 0);
     pixDestroy(&dpix);
+    */
 }
 
 void heatmapGenerateLookupTable(PIX* pix) {
-    std::cout << "Color map : " << pix->d << std::endl;
+
+    /*
+         std::cout << "Color map : " << pix->d << std::endl;
     int w = pix->w;
     int h = pix->h;
     int d = pix->d;
@@ -76,13 +80,14 @@ void heatmapGenerateLookupTable(PIX* pix) {
             std::cout << j << " : " << pixel << " =  " << rval << ", " << gval << ", " << bval << std::endl;
         }
     }
-    else /* d == 32 */
+    else // d == 32
     {
-            for (int j = 0; j < w; ++j)
-            {
-                l_uint32 pixel = line[j];
-                extractRGBValues(pixel, &rval, &gval, &bval);
-                std::cout << j << " : " << pixel << " =  " << rval << ", " << gval << ", " << bval << std::endl;
-            }
+        for (int j = 0; j < w; ++j)
+        {
+            l_uint32 pixel = line[j];
+            extractRGBValues(pixel, &rval, &gval, &bval);
+            std::cout << j << " : " << pixel << " =  " << rval << ", " << gval << ", " << bval << std::endl;
+        }
     }
+     */
 }

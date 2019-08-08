@@ -303,6 +303,14 @@ void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
         throw std::runtime_error("Unhandled lbp type");
 }
 
+void LBPMatcher::createTexton(int** textonMatrix, PIX* pix)
+{
+    if(pix->d != 8)
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+
+}
+
+
 bool isUniform(byte_t a)
 {
     // Uniform descriptors
@@ -340,6 +348,9 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         matrix[y] = new int[w];
 
     createLBP(matrix, LbpType::ENHANCED, pix);
+
+    createTexton(matrix, LbpType::ENHANCED, pix);
+
 
     // pixFromMatrix the lbp model
     if(debug_box_pix)

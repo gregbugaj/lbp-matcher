@@ -6,7 +6,6 @@
 
 https://pdfs.semanticscholar.org/82f9/0f605287e026e00ac5d4ee34af6e3ec8bb91.pdf
 
-
 Efficient Spatio-Temporal Local Binary Patterns for Spontaneous Facial Micro-Expression Recognition
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4438071/
 
@@ -59,10 +58,15 @@ http://www.cse.psu.edu/~rtc12/CSE598G/LKintro_6pp.pdf
 https://docs.opencv.org/2.4/modules/imgproc/doc/object_detection.html?highlight=matchtemplate#matchtemplate
 https://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/template_matching/template_matching.html
 
-
 Manhatan Distance Instead of Hamming Distance
-
 
 Profiler setup
 =====
 https://www.jetbrains.com/help/clion/cpu-profiler.html
+
+# Textons
+
+https://www.researchgate.net/figure/Different-texture-primitives-detected-by-the-LBP_fig3_251202290
+https://www.researchgate.net/publication/251202290_Texture_analysis_with_local_binary_patterns
+http://www.mecs-press.org/ijigsp/ijigsp-v4-n7/IJIGSP-V4-N7-6.pdf 
+https://www.researchgate.net/publication/268349505_Texton_Based_Shape_Features_on_Local_Binary_Pattern_for_Age_Classification

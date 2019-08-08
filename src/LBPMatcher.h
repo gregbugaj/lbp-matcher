@@ -15,6 +15,7 @@ enum LbpType
     SIGNED
 };
 
+
 enum MicroTexton
 {
     SPOT      = 0x00, // 0000 0000
@@ -37,6 +38,15 @@ public :
      * @param pix the pix to create the LBP for
      */
     static void createLBP(int** matrix, LbpType type, PIX* pix);
+
+    /**
+     * Create Texton from the input image
+     * Textons will use 2x2 grid and create 4 distinct features
+     *
+     * @param textonMatrix
+     * @param pix the pix to create textion for
+     */
+    static void createTexton(int** textonMatrix, PIX* pix);
 
     /**
      * Dump the LBP matrix

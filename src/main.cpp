@@ -32,7 +32,7 @@ void test_histogram_normalize();
 void test_extractor_001();
 void test_image_normalization();
 
-void test_heatmap_001();
+//void test_heatmap_001();
 
 int main(int argc, char* argv[])
 {
@@ -40,11 +40,11 @@ int main(int argc, char* argv[])
 //    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
-//      test_lbp_001();
+      test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
 //    test_extractor_001();
-    test_heatmap_001();
+//    test_heatmap_001();
     //test_image_normalization();
     return 0;
 }

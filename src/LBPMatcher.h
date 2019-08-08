@@ -32,6 +32,8 @@ public :
 
     /**
      * Create a LBP model and populate the lbp matrix
+     * Input image will be padded by each method individually to account for edges
+     * Padding will be performed with value of 255 (because we are dealing with paper)
      *
      * @param matrix the matrix to populate
      * @param type the type of LBP to use

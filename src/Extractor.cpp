@@ -83,7 +83,7 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
                 BOX* box1 = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
                 PIX* snip1 = pixClipRectangle(documentNorm, box1, NULL);
                 char f1[255];
-                sprintf(f1, "/tmp/lbp-matcher/best-%d.png", counter);
+                sprintf(f1, "/tmp/lbp-matcher/best-%d-%d.png", counter, grayValue);
                 pixWritePng(f1, snip1, 1);
                 counter++;
 

@@ -39,10 +39,10 @@ int main(int argc, char* argv[])
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-//    test_lbp_000();
+    test_lbp_000();
 //      test_lbp_001();
 //    test_lbp_003();
-    test_histogram_scores();
+//    test_histogram_scores();
 //    test_extractor_001();
 //    test_heatmap_001();
     //test_image_normalization();
@@ -131,7 +131,9 @@ void test_lbp_000()
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
 
-    auto m0 = LBPMatcher::createLBP(f1);
+    PIX* pix1 = pixUpscaleToGray(f1.c_str());
+
+    auto m0 = LBPMatcher::createLBP(pix1);
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
 }

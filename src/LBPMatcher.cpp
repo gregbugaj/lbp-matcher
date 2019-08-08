@@ -431,8 +431,8 @@ Histogram LBPMatcher::createLBP(PIX *pix)
             uniforms[i] = 58;
     }
     // 2/4
-    auto verticalPartitions = 2; // vertical  partitions
-    auto horizontalPartitions = 2; // horizontal partitions
+    auto verticalPartitions = 1; // vertical  partitions
+    auto horizontalPartitions = 1; // horizontal partitions
 
     // horizontal / vertical groups
     int gridHeight = ceil((double) h / (double) verticalPartitions);
@@ -478,9 +478,10 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 for (int x = std::max(0, xStart); x < xEnd; ++x)
                 {
                     auto out = matrix[y][x];
-                    // remove background
-                    if(out == 0 || out == 255)
-                        continue;
+             /*       // remove background
+                    if(out == 255 || out == 0)
+                        continue;*/
+
                     auto bin = uniforms[out];
                     boxModel[bin]++;
                 }

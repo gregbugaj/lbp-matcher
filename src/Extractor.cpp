@@ -41,33 +41,35 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
 
     Segmenter seg;
     auto segments = seg.segment(dw, dh, bw, bh);
+
     auto m0 = LBPMatcher::createLBP(snippetNorm);
     m0.normalize();
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
-    std::cout << "\n-----------------------\n";
+    auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
     // default to sensible min
     double max = .5;
     Segmenter::Segment best;
 
     int counter = 0 ;
+    int index = 0;
+
     for(auto& segment: segments)
     {
         BOX* box = boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
         if(box == NULL)
             continue;
+
         PIX* snip = pixClipRectangle(documentNorm, box, NULL);
 
         if(snip !=  NULL)
         {
             int_t grayValue = 0;
-            /* char f1[255];
+             char f1[255];
              sprintf(f1, "/tmp/lbp-matcher/patch-%d.png", counter);
-             pixWritePng(f1, snip, 0);
+             //pixWritePng(f1, snip, 0);
              ++counter;
-             */
 
             auto m1 = LBPMatcher::createLBP(snip);
             m1.normalize();
@@ -101,15 +103,19 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
 
         boxDestroy(&box);
         pixDestroy(&snip);
+
+        ++index;
     }
 
     std::cout<<"\nMax : " << best.row << "," <<  best.col << " , "<< max <<" ," << std::endl;
     BOX* box = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
     PIX* snip = pixClipRectangle(documentNorm, box, NULL);
     char f1[255];
-    sprintf(f1, "/tmp/lbp-matcher/best.png");
+
+    sprintf(f1, "/tmp/lbp-matcher/bestpatch-%d.png", max);
 
     pixWritePng(f1, snip, 1);
+
     pixWritePng("/tmp/lbp-matcher/bumpmap.png", bumpmap, 1);
     return NULL;
 }

@@ -32,18 +32,18 @@ void test_histogram_normalize();
 void test_extractor_001();
 void test_image_normalization();
 
-//void test_heatmap_001();
+void test_heatmap_001();
 
 int main(int argc, char* argv[])
 {
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-    test_lbp_000();
+//    test_lbp_000();
 //      test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
-//    test_extractor_001();
+    test_extractor_001();
 //    test_heatmap_001();
     //test_image_normalization();
     return 0;
@@ -142,7 +142,8 @@ void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-patch");
     auto f1 = deck / "patch-1066.png";
-    auto f2 = deck / "patch-1184.png";
+//    auto f2 = deck / "patch-1184.png";
+    auto f2 = deck / "best-1260-249.png";
 
     /*auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "1.png";
@@ -165,7 +166,7 @@ void test_lbp_001()
     std::cout << m0 << std::endl;
 
     HistogramComparison comp;
-    auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
+    auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
     std::cout << "Histograms Raw " << std::endl;
     std::cout << m0 << std::endl;

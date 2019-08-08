@@ -173,8 +173,11 @@ public:
         for(int i = 0; i < s; ++i)
             sum += bins[i];
 
-        if(sum == 0)
+        if(sum == 0.0)
+        {
+            normalized = true;
             return;
+        }
 
         for(int i = 0; i < s; ++i)
         {

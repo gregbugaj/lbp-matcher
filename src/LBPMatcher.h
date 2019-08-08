@@ -46,7 +46,17 @@ public :
      * @param cols the width of the matrix
      * @param filename the filename to output pix data to
      */
-    static void dump(int **matrix, int rows, int cols, char* filename);
+    static void pixFromMatrix(int **matrix, int rows, int cols, char* filename);
+
+    /**
+     * Dump the LBP matrix
+     *
+     * @param matrix the lbp matrix to dump
+     * @param row the height of the matrix
+     * @param cols the width of the matrix
+     * @param filename the filename to output pix data to
+     */
+    static PIX* pixFromMatrix(int **matrix, int rows, int cols);
 
     /**
      * Create Extracted uniform local binary pattern (LBP) from a grayscale image.

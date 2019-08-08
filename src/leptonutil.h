@@ -16,7 +16,6 @@
  */
 void dump(PIX* pix);
 
-
 /**
  * Create grayscale image
  *
@@ -24,6 +23,22 @@ void dump(PIX* pix);
  * @return
  */
 PIX* pixUpscaleToGray(PIX* pix);
+
+/**
+ * Create grayscale image
+ *
+ * @param filename to convert to grayscale
+ * @return
+ */
+PIX* pixUpscaleToGray(const char* filename);
+
+/**
+ * Clip pix to bounding box
+ *
+ * @param pix the pix to clip
+ * @return
+ */
+PIX* pixClipToBoundingBox(PIX* pix);
 
 /**
  * Sum pixel values

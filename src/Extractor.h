@@ -16,19 +16,19 @@ public :
     * Compares a template against given document
     *
     * @param document the document to extract information from
-    * @param templ the template to search for
+    * @param snippet the template to search for
     * @return grayscale image, where each pixel denotes how much does the neighbourhood of that pixel match with template
     */
-    PIX* extract(PIX* document, PIX* templ);
+    PIX* extract(PIX* document, PIX* snippet);
 
     /**
      * Compares a template against given document
      *
      * @param document the document to extract information from
-     * @param templ the template to search for
+     * @param snippet the template to search for
      * @return grayscale image, where each pixel denotes how much does the neighbourhood of that pixel match with template
      */
-    PIX* extract(const std::string& document, const std::string& templ);
+    PIX* extract(const std::string& document, const std::string& snippet);
 };
 
 

@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <limits.h>
-
+#include "heatmap.h"
 #include "leptonutil.h"
 
 using namespace std::chrono;
@@ -26,13 +26,13 @@ void test_histogram_scores();
 void test_lbp_001();
 void test_lbp_003();
 void test_lbp_000();
+void test_lbp_patch();
 void test_histogram_append();
 void test_histogram_normalize();
-
 void test_extractor_001();
-
-
 void test_image_normalization();
+
+void test_heatmap_001();
 
 int main(int argc, char* argv[])
 {
@@ -40,18 +40,14 @@ int main(int argc, char* argv[])
 //    test_histogram_normalize();
 //    test_histogram_append();
 //    test_lbp_000();
-// test_lbp_001();
+//      test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
-
 //    test_extractor_001();
-
-    test_image_normalization();
-
+    test_heatmap_001();
+    //test_image_normalization();
     return 0;
 }
-
-
 
 void test_segmenter_01()
 {
@@ -80,13 +76,14 @@ fs::path getTestDeckDirectory(const std::string& folder)
     return path;
 }
 
-
+/***
+ * upscale the document
+ */
 void test_image_normalization()
 {
     auto deck = getTestDeckDirectory("private");
-    auto document = deck / "93126274.tif";
+    auto document = deck / "clip3.tif";
     auto snip = deck / "0.png";
-
 
     auto pix = pixRead(document.c_str());
     auto upscale = pixUpscaleToGray(pix);
@@ -96,17 +93,27 @@ void test_image_normalization()
     pixWritePng(f, upscale, 0);
 }
 
+void test_heatmap_001()
+{
+    auto deck = getTestDeckDirectory("heat");
+    auto colorscale = deck / "colorscale_jet.jpg";
+    /*auto pix = pixReadJpeg (colorscale.c_str(), 1, 1, nullptr, 0);
+    heatmapGenerateLookupTable(pix);*/
+
+//    Pix* p = pixRead("/tmp/lbp-matcher/bumpmap.png");
+    Pix* p = pixRead("/tmp/lbp-matcher/height-map-surface-representation.png");
+    heatmap(p);
+}
 
 void test_extractor_001()
 {
     auto deck = getTestDeckDirectory("private");
     auto document = deck / "clip3.tif";
-    auto snip = deck / "0.png";
+    auto snip = deck / "patch-1185.png";
 
     Extractor extractor;
     extractor.extract(document, snip);
 }
-
 
 void test_lbp_000()
 {
@@ -131,17 +138,26 @@ void test_lbp_000()
 
 void test_lbp_001()
 {
-    auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "27.png";
-//    auto f2 = deck / "27_rotate_neg2.png";
-    auto f2 = deck / "27_scale_90_.png";
+    auto deck = getTestDeckDirectory("deck-patch");
+    auto f1 = deck / "patch-1066.png";
+    auto f2 = deck / "patch-1184.png";
 
+    /*auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "1.png";
+    auto f2 = deck / "2.png";
+*/
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
     std::cout <<"Test f2 : " << f2 << std::endl;
 
-    auto m0 = LBPMatcher::createLBP(f1);
-    auto m1 = LBPMatcher::createLBP(f2);
+    PIX* pix1 = pixUpscaleToGray(f1.c_str());
+    PIX* pix2 = pixUpscaleToGray(f2.c_str());
+
+    auto m0 = LBPMatcher::createLBP(pix1);
+    auto m1 = LBPMatcher::createLBP(pix2);
+
+    pixDestroy(&pix1);
+    pixDestroy(&pix2);
 
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
@@ -152,7 +168,6 @@ void test_lbp_001()
     std::cout << "Histograms Raw " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
-
 
     m0.normalize();
     m1.normalize();
@@ -171,6 +186,7 @@ void test_lbp_001()
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
+
 }
 
 void test_lbp_002()

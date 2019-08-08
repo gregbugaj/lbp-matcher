@@ -4,6 +4,9 @@
 #include <vector>
 #include <ostream>
 
+/**
+ * Document segmenter
+ */
 class Segmenter
 {
 public :

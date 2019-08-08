@@ -3,92 +3,113 @@
 #include "Extractor.h"
 #include "Segmenter.h"
 #include "leptonutil.h"
-#include "HashDistance.h"
-#include "ImageHash.h"
 #include "LBPMatcher.h"
 #include "HistogramComparison.h"
+#include "heatmap.h"
 
-
-PIX* Extractor::extract(const std::string &document, const std::string &templ)
+PIX* Extractor::extract(const std::string &document, const std::string &snippet)
 {
     validateFileExists(document);
-    validateFileExists(templ);
+    validateFileExists(snippet);
 
     PIX* src = pixRead(document.c_str());
-    PIX* snip = pixRead(templ.c_str());
-    PIX* data = extract(src, snip);
+    PIX* snip = pixRead(snippet.c_str());
+    PIX* match = extract(src, snip);
 
     pixDestroy(&src);
     pixDestroy(&snip);
 
-    return data;
+    return match;
 }
 
-PIX*  Extractor::extract(PIX* document, PIX* templ)
+PIX*  Extractor::extract(PIX* document, PIX* snippet)
 {
     PIX* documentNorm = normalize(document);
-    PIX* templNorm    = normalize(templ);
+    PIX* snippetNorm  = normalize(snippet);
 
     pixWritePng("/tmp/lbp-matcher/documentNorm.png", documentNorm, 0);
-    pixWritePng("/tmp/lbp-matcher/templNorm.png", templNorm, 0);
+    pixWritePng("/tmp/lbp-matcher/snippetNorm.png", snippetNorm, 0);
 
-    // Scale our template
     int dw = documentNorm->w;
     int dh = documentNorm->h;
-
-    int bw = templ->w  ;
-    int bh = templ->h  ;
+    int bw = snippet->w;
+    int bh = snippet->h;
 
     std::cout << "Extract  : "<< dw << ", " << dh << "  ::  " << bw <<" , " <<bh <<"\n";
+    PIX* bumpmap = pixCreate(dw, dh, 8);
+    pixSetResolution(bumpmap, 300, 300);
 
     Segmenter seg;
     auto segments = seg.segment(dw, dh, bw, bh);
-    auto m0 = LBPMatcher::createLBP(templNorm);
+    auto m0 = LBPMatcher::createLBP(snippetNorm);
+    m0.normalize();
 
     HistogramComparison comp;
     auto type = HistogramComparison::CompareType::COSINE_SIMILARITY;
     std::cout << "\n-----------------------\n";
 
+    // default to sensible min
+    double max = .5;
+    Segmenter::Segment best;
+
     int counter = 0 ;
     for(auto& segment: segments)
     {
         BOX* box = boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
-        //std::cout << segment << "\n";
-
         if(box == NULL)
             continue;
-
         PIX* snip = pixClipRectangle(documentNorm, box, NULL);
-        byte_t grayValue = 0;
-        //std::cout << segment << "\n";
 
         if(snip !=  NULL)
         {
-            char f1[255];
-       /*     sprintf(f1, "/tmp/lbp-matcher/patch-%d.png", counter);
-            pixWritePng(f1, snip, 0);
-            ++counter;*/
+            int_t grayValue = 0;
+            /* char f1[255];
+             sprintf(f1, "/tmp/lbp-matcher/patch-%d.png", counter);
+             pixWritePng(f1, snip, 0);
+             ++counter;
+             */
 
-           // if(counter > 600)
-             //   break;
-            //auto m1 = LBPMatcher::createLBP(snip);
-           // auto type = HistogramComparison::CompareType::CHI_SQUARED;
-            //auto s0 = comp.compare(m0, m1, type);
-            //grayValue = s0 * 255;
+            auto m1 = LBPMatcher::createLBP(snip);
+            m1.normalize();
 
-            //pixAtSet(bumpmap, segment.col, segment.row, grayValue);
-          //  std::cout<<"\nROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," << (int)grayValue<< "\n";
+            auto s0 = comp.compare(m0, m1, type);
+            grayValue = s0 * 255;
 
-            /*
-            char f[255];
-            sprintf(f, "/home/gbugaj/share/devbox/tmp/extractor/segment-%d-%d.png", segment.row, segment.col);
-            pixWritePng(f, snip, 0);
-            */
+            if(s0 >= max)
+            {
+                max = s0;
+                best = segment;
+
+                BOX* box1 = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
+                PIX* snip1 = pixClipRectangle(documentNorm, box1, NULL);
+                char f1[255];
+                sprintf(f1, "/tmp/lbp-matcher/best-%d.png", counter);
+                pixWritePng(f1, snip1, 1);
+                counter++;
+
+                boxDestroy(&box1);
+                pixDestroy(&snip1);
+            }
+//
+            pixAtSet(bumpmap, segment.x, segment.y, 50);
+
+            if(grayValue > 180)
+                pixAtSet(bumpmap, segment.x, segment.y, grayValue);
+
+            std::cout<<"\nROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         }
 
         boxDestroy(&box);
         pixDestroy(&snip);
     }
-        //pixWritePng("/home/gbugaj/share/devbox/tmp/bumpmap.png", bumpmap, 0);
+
+    std::cout<<"\nMax : " << best.row << "," <<  best.col << " , "<< max <<" ," << std::endl;
+    BOX* box = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
+    PIX* snip = pixClipRectangle(documentNorm, box, NULL);
+    char f1[255];
+    sprintf(f1, "/tmp/lbp-matcher/best.png");
+
+    pixWritePng(f1, snip, 1);
+    pixWritePng("/tmp/lbp-matcher/bumpmap.png", bumpmap, 1);
     return NULL;
 }

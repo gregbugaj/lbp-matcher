@@ -18,8 +18,6 @@ typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
 
 bool debug_box_pix = false;
 
-
-
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
 {
     p.first = std::min(std::max(p.first, 0), w - 1);
@@ -82,8 +80,7 @@ l_int32  pixAtGetSan(PIX* pix, int_t x, int_t y)
     return val;
 }
 
-
-l_int32  pixAtGetSan(PIX* pix, l_int32 wpl,l_uint32* data,  int_t x, int_t y)
+l_int32  pixAtGetSan(PIX* pix, l_int32 wpl, l_uint32* data,  int_t x, int_t y)
 {
     l_int32 w = pix->w;
     l_int32 h = pix->h;
@@ -165,21 +162,19 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
 {
     int_t w = pix->w;
     int_t h = pix->h;
-    auto total = 0.0;
-
-    // get image value with one pass
     l_int32 wpl    = pixGetWpl(pix);
     l_uint32* data = pixGetData(pix);
 
     int** image = new int*[h];
     for (int_t y = 0; y < h; ++y)
-        image[y] = new int[w];
+          image[y] = new int[w];
 
     for (int_t y = 0; y < h; ++y)
     {
+        l_uint32* line = data + y * wpl;
         for (int_t x = 0; x < w; ++x)
         {
-            image[y][x] = pixAtGetSan(pix, wpl, data, x, y);
+            image[y][x] = GET_DATA_BYTE(line, x);
         }
     }
 
@@ -187,15 +182,15 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     {
         for (int_t x = 0; x < w; ++x)
         {
-            l_int32 p0 = 0;// pixAtGetSan(image, h, w, x,     y    ); // Center
-            l_int32 p1 = 0;//pixAtGetSan(image, h, w,  x - 1, y - 1);
-            l_int32 p2 = 0;//pixAtGetSan(image, h, w,  x,     y - 1);
-            l_int32 p3 = 0;//pixAtGetSan(image, h, w,  x + 1, y - 1);
-            l_int32 p4 = 0;//pixAtGetSan(image, h, w,  x + 1, y    );
-            l_int32 p5 = 0;//pixAtGetSan(image, h, w,  x + 1, y + 1);
-            l_int32 p6 = 0;//pixAtGetSan(image, h, w,  x    , y + 1);
-            l_int32 p7 = 0;//pixAtGetSan(image, h, w,  x - 1, y + 1);
-            l_int32 p8 = 0;//pixAtGetSan(image, h, w,  x - 1, y    );
+            l_int32 p0 = pixAtGetSan(image, h, w, x,     y    ); // Center
+            l_int32 p1 = pixAtGetSan(image, h, w,  x - 1, y - 1);
+            l_int32 p2 = pixAtGetSan(image, h, w,  x,     y - 1);
+            l_int32 p3 = pixAtGetSan(image, h, w,  x + 1, y - 1);
+            l_int32 p4 = pixAtGetSan(image, h, w,  x + 1, y    );
+            l_int32 p5 = pixAtGetSan(image, h, w,  x + 1, y + 1);
+            l_int32 p6 = pixAtGetSan(image, h, w,  x    , y + 1);
+            l_int32 p7 = pixAtGetSan(image, h, w,  x - 1, y + 1);
+            l_int32 p8 = pixAtGetSan(image, h, w,  x - 1, y    );
 
             byte_t  out = 0;
             double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
@@ -211,7 +206,10 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
             matrix[y][x] = out;
         }
     }
+    delete[] image;
 }
+
+
 void generateLbpEnhancedSlow(int** matrix, PIX* pix)
 {
     int_t w = pix->w;
@@ -319,10 +317,11 @@ bool isUniform(byte_t a)
 
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
+    if(pix == nullptr)
+        return Histogram(0);
+
     if(pix->d != 8)
         throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
-
-    normalize(pix);
 
     static int counter = 0;
     int_t w = pix->w;
@@ -342,12 +341,12 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 
     createLBP(matrix, LbpType::ENHANCED, pix);
 
-    // dump the lbp model
+    // pixFromMatrix the lbp model
     if(debug_box_pix)
     {
         char f1[255];
         sprintf(f1, "/tmp/lbp-matcher/lbp-enhanced-%d.png", counter);
-        dump(matrix, h, w, f1);
+        pixFromMatrix(matrix, h, w, f1);
     }
 
     // Map the LBP codes to one of 58 uniform codes
@@ -363,23 +362,21 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         else
             uniforms[i] = 58;
     }
-
     // 2/4
-    auto verticalPartitions = 1; // vertical  partitions
-    auto horizontalPartitions = 1; // horizontal partitions
+    auto verticalPartitions = 2; // vertical  partitions
+    auto horizontalPartitions = 2; // horizontal partitions
 
     // horizontal / vertical groups
     int gridHeight = ceil((double) h / (double) verticalPartitions);
     int gridWidth = ceil((double) w / (double) horizontalPartitions);
 /*
-
     std::cout<<" horizontalPartitions = "<< horizontalPartitions << std::endl;
     std::cout<<" verticalPartitions = "<< verticalPartitions << std::endl;
     std::cout<<" gridWidth = "<< gridWidth << std::endl;
     std::cout<<" gridHeight = "<< gridHeight << std::endl;
 */
-
     Histogram result(0);
+    PIX* lbpPix = pixFromMatrix(matrix, h, w);
 
     for (int row = 0; row < verticalPartitions; ++row)
     {
@@ -388,19 +385,16 @@ Histogram LBPMatcher::createLBP(PIX *pix)
             auto index  = row * horizontalPartitions + col;
             auto yStart = row * gridHeight;
             auto xStart = col * gridWidth;
-
             auto yEnd = std::min(yStart + gridHeight, h);
             auto xEnd = std::min(xStart + gridWidth, w);
 
-            // dump region box
             if(debug_box_pix)
             {
                 auto y = std::max(0, yStart);
                 auto x = std::max(0, xStart);
                 std::cout<<" ** index = "<< index <<  " row/col " << row  << " : " << col << " pos = " << y << ", "<< x  << " == "  <<  yEnd  << " : " << xEnd  <<std::endl;
-
                 BOX*  box    = boxCreate(xStart, yStart, gridWidth, gridHeight);
-                PIX*  snip   = pixClipRectangle(pix, box, NULL);
+                PIX*  snip   = pixClipRectangle(lbpPix, box, NULL);
 
                 char f[255];
                 sprintf(f, "/tmp/lbp-matcher/box-%d-%d.png", row, col);
@@ -410,43 +404,41 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 pixDestroy(&snip);
             }
 
-            auto total = 0;
             Histogram boxModel(59);
             for (int y = std::max(0, yStart); y < yEnd; ++y)
             {
                 for (int x = std::max(0, xStart); x < xEnd; ++x)
                 {
                     auto out = matrix[y][x];
-//                    std::cout<< "pos = " << y  << ", " << x << " " << out << " \n";
                     // remove background
-//                    if(out == 0 || out == 255)
-//                        continue;
-
-                    if(out == 255)
+                    if(out == 0 || out == 255)
                         continue;
-
                     auto bin = uniforms[out];
-                    total+=bin;
-//                    std::cout<<bin <<   " = " <<  boxModel[bin] << std::endl;
                     boxModel[bin]++;
                 }
             }
-
              result.append(boxModel);
         }
     }
 
-    delete[] matrix;
     counter++;
+    pixDestroy(&lbpPix);
+    delete[] matrix;
+
     return result;
 }
 
+void LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols, char *filename)
+{
+    PIX* pix = pixFromMatrix(matrix, rows, cols);
+    pixWritePng(filename, pix, 1);
+    pixDestroy(&pix);
+}
 
-void LBPMatcher::dump(int **matrix, int rows, int cols, char *filename)
+PIX* LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols)
 {
     int w = cols;
     int h = rows;
-
     PIX* pix = pixCreate(w, h, 8);
     pixSetResolution(pix, 300, 300);
     l_int32 wpl = pixGetWpl(pix);
@@ -460,9 +452,7 @@ void LBPMatcher::dump(int **matrix, int rows, int cols, char *filename)
             SET_DATA_BYTE(line, x, matrix[y][x]);
         }
     }
-
-    pixWritePng(filename, pix, 1);
-    pixDestroy(&pix);
+    return pix;
 }
 
 Histogram LBPMatcher::createLBP(const std::string &filename)

@@ -57,20 +57,17 @@ std::vector<Segmenter::Segment> Segmenter::segment(int w, int h, int templw, int
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
     auto segments = std::vector<Segment>();
     // Create image patch that is the same size as the template
-    // at each location x,y serving as a center
-
+    // at each location x, y serving as a center
     int templHalfW = ceil((double) w / (double) templw);
     int templHalfH = ceil((double) h / (double) templh);
 
-    for (int y = 0; y < h; ++y)
+    for (int y = 0; y < h; y = y + 1)
     {
-        for (int x = 0; x < w; ++x)
+        for (int x = 0; x < w; x = x + 1)
         {
             Segment seg;
-
 //            seg.x = x - templHalfW;
 //            seg.y = y - templHalfH;
-
             seg.x = x;
             seg.y = y;
 

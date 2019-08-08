@@ -105,23 +105,17 @@ void pixAtSet(PIX* pix, int_t x, int_t y, byte_t value)
     SET_DATA_BYTE(line, x, value);
 }
 
+PIX* pixUpscaleToGray(const char* filename)
+{
+    auto pix = pixRead(filename);
+    return pixUpscaleToGray(pix);
+}
+
 PIX* pixUpscaleToGray(PIX* pix)
 {
    if(pix->d != 1)
        return pix;
 
-   /*
-         //   throw new std::runtime_error("pix dept is not 1");
-    PIX* gray = pixCopy(NULL, pix);
-//    gray = pixConvert1To8(NULL, gray, 255, 0);
-    gray = pixConvertTo8(gray, 0);
-//    gray = pixScaleGray2xLI(gray);
-    gray = pixScaleGray4xLI(gray);
-    gray = pixBlockconv(gray, 1, 1);
-    gray = pixScaleAreaMap2(gray);
-    gray = pixScaleAreaMap2(gray);
-    */
-    //   throw new std::runtime_error("pix dept is not 1");
     PIX* gray = pixCopy(NULL, pix);
     gray = pixConvertTo8(gray, 0);
     gray = pixScaleGray2xLI(gray);
@@ -129,6 +123,32 @@ PIX* pixUpscaleToGray(PIX* pix)
     gray = pixScaleAreaMap2(gray);
 
     return gray;
+}
+
+PIX* pixClipToBoundingBox(PIX* pix)
+{
+    // debug
+    static int counter = 0;
+    counter++;
+
+    if(pix == nullptr)
+        return nullptr;
+
+    PIX* one = pixConvertTo1(pix, 127);
+    BOXA* boxes = pixConnComp(one, NULL, 4);
+    BOX* box = boxaBoundingRegion(boxes);
+
+    // there were not connected components so lets default box to w/h
+    if(box == nullptr)
+        box = boxCreate(0,0, pix->w, pix->h);
+
+    PIX* clipped = pixClipRectangle(pix, box, NULL);
+
+    boxDestroy(&box);
+    pixDestroy(&one);
+    boxaDestroy(&boxes);
+
+    return clipped;
 }
 
 

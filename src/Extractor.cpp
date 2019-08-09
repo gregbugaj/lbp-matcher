@@ -43,13 +43,14 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
     auto segments = seg.segment(dw, dh, bw, bh);
 
     auto m0 = LBPMatcher::createLBP(snippetNorm);
+
+    m0.normalizeOutliers();
     m0.normalize();
 
     HistogramComparison comp;
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
-    // default to sensible min
-    double max = .5;
+    double max = .8;
     Segmenter::Segment best;
 
     int counter = 0 ;
@@ -60,7 +61,6 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
         BOX* box = boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
         if(box == NULL)
             continue;
-
         PIX* snip = pixClipRectangle(documentNorm, box, NULL);
 
         if(snip !=  NULL)
@@ -72,6 +72,7 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
              ++counter;
 
             auto m1 = LBPMatcher::createLBP(snip);
+            m1.normalizeOutliers();
             m1.normalize();
 
             auto s0 = comp.compare(m0, m1, type);
@@ -91,14 +92,15 @@ PIX*  Extractor::extract(PIX* document, PIX* snippet)
 
                 boxDestroy(&box1);
                 pixDestroy(&snip1);
+
+                pixAtSet(bumpmap, segment.x, segment.y, grayValue);
+                std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+
             }
 //
-            pixAtSet(bumpmap, segment.x, segment.y, 50);
-
-            if(grayValue > 180)
-                pixAtSet(bumpmap, segment.x, segment.y, grayValue);
-
-            std::cout<<"\nROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+//            pixAtSet(bumpmap, segment.x, segment.y, 50);
+     /*       pixAtSet(bumpmap, segment.x, segment.y, grayValue);
+            std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";*/
         }
 
         boxDestroy(&box);

@@ -9,6 +9,8 @@
 #include <vector>
 
 #include <leptonica/allheaders.h>
+#include <cmath>
+#include <bits/stdc++.h>
 
 typedef double               double_t;
 typedef bool                 bool_t;
@@ -63,6 +65,8 @@ inline bool equal(double a, double b, double epsilon)
 }
 
 struct Histogram {
+
+
 public:
     Histogram(int size)
     {
@@ -168,9 +172,9 @@ public:
 
         auto sum = .0;
         auto total = .0;
-        auto s = bins.size();
+        auto n = bins.size();
 
-        for(int i = 0; i < s; ++i)
+        for(int i = 0; i < n; ++i)
             sum += bins[i];
 
         if(sum == 0.0)
@@ -179,7 +183,7 @@ public:
             return;
         }
 
-        for(int i = 0; i < s; ++i)
+        for(int i = 0; i < n; ++i)
         {
             bins[i] = bins[i] / sum;
             total += bins[i];
@@ -191,6 +195,143 @@ public:
         normalized = true;
     }
 
+    /**
+     * Normalize Outliers
+     * median absolute deviation from median, commonly shortened to the median absolute deviation (MAD)
+     * https://eurekastatistics.com/using-the-median-absolute-deviation-to-find-outliers/
+     */
+    void normalizeOutliers()
+    {
+        auto n = bins.size();
+        if(n == 0)
+            return;
+        std::vector<int> clone;
+        std::vector<int> absdev;
+
+        clone.resize(n, 0);
+        absdev.resize(n, 0);
+
+        for (int i = 0; i < bins.size(); i++)
+            clone[i] = bins[i];
+
+        std::sort(clone.begin(), clone.end());
+        int center = n / 2;
+        double median = clone[center];
+
+        for(int i = 0; i < n; ++i)
+        {
+            absdev[i] = std::abs(clone[i] - median);
+        }
+
+        std::sort(absdev.begin(), absdev.end());
+
+        double consistency = 1.4826;
+        double mad =  absdev[center];
+        double cutoff = median + 10 * mad;
+/*
+        std::cout<<"\nmedian:" << median;
+        std::cout<<"\nMAD :" << mad;
+        std::cout<<"\ncutoff :" << cutoff;
+*/
+
+        for(int i = 0; i < n; ++i)
+        {
+            double val =  bins[i];
+            if(val > cutoff)
+                bins[i]  = cutoff;
+        }
+    }
+
+    /**
+     * Normalize Outliers using MAD Mean absolute deviation
+     *
+     * https://eurekastatistics.com/using-the-median-absolute-deviation-to-find-outliers/
+     */
+    void normalizeOutliersXXX()
+    {
+        auto sum = .0;
+        auto n = bins.size();
+        if(n == 0)
+            return;
+
+        for(int i = 0; i < n; ++i)
+            sum += bins[i];
+
+        if(sum == 0.0)
+            return;
+
+        double mean = sum / n;
+        double total = 0.0;
+
+        for(int i = 0; i < n; ++i)
+        {
+            total += std::abs(bins[i] - mean);
+        }
+
+        double mad = total / n;
+        double cutoff = mean + 3 * mad;
+
+        if(mad == 0)
+            std::cout<<"\nsum :" << std::dec << sum;
+/*
+        std::cout<<"\nsum :" << std::dec << sum;
+        std::cout<<"\ntotal :" << std::dec << total;
+        std::cout<<"\nmean :" << mean;
+        std::cout<<"\nMAD :" << mad;
+        std::cout<<"\ncutoff :" << cutoff;
+*/
+
+        for(int i = 0; i < n; ++i)
+        {
+            double val =  bins[i];
+            if(val > cutoff)
+                bins[i]  = cutoff;
+        }
+    }
+
+    void normalizeOutliersStdDev()
+    {
+        auto sum = .0;
+        auto n = bins.size();
+
+        if(n == 0)
+            return;
+
+        for(int i = 0; i < n; ++i)
+            sum += bins[i];
+
+        if(sum == 0.0)
+            return;
+
+        double mean = sum / n;
+        double total = 0.0;
+
+        for(int i = 0; i < n; ++i)
+        {
+            double val =  std::pow(bins[i] - mean, 2);
+            total += val;
+        }
+
+        double variance = total / n;
+        double std = std::sqrt(variance);
+        double cutoff =  mean + 2 * std;
+/*
+
+        std::cout<<"\nsum :" << std::dec << sum;
+        std::cout<<"\ntotal :" << std::dec << total;
+        std::cout<<"\nmean :" << mean;
+        std::cout<<"\nvar :" << variance;
+        std::cout<<"\nstd :" << std;
+        std::cout<<"\ncutoff :" << cutoff;
+*/
+
+        for(int i = 0; i < n; ++i)
+        {
+            double val =  bins[i];
+            if(val > cutoff)
+                bins[i]  = cutoff;
+        }
+    }
 private :
 
     bool normalized;

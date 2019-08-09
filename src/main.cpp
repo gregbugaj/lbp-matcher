@@ -34,6 +34,8 @@ void test_image_normalization();
 
 void test_heatmap_001();
 
+void test_histogram_outlier_removal();
+
 int main(int argc, char* argv[])
 {
 
@@ -46,6 +48,8 @@ int main(int argc, char* argv[])
     test_extractor_001();
 //    test_heatmap_001();
     //test_image_normalization();
+
+//    test_histogram_outlier_removal();
     return 0;
 }
 
@@ -169,6 +173,13 @@ void test_lbp_001()
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
     std::cout << "Histograms Raw " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    m0.normalizeOutliers();
+    m1.normalizeOutliers();
+
+    std::cout << "Histograms Outliers " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
 
@@ -435,6 +446,26 @@ void test_hash_004()
     std::cout<< "Distance   = " << std::dec << val <<  " :: " << norm << "\n";
 }
 
+void test_histogram_outlier_removal()
+{
+    Histogram model(9);
+
+    model[0] = 27;
+    model[1] = 23;
+    model[2] = 25;
+    model[3] = 22;
+    model[4] = 23;
+    model[5] = 20;
+    model[6] = 25;
+    model[7] = 29;
+    model[8] = 1110;
+
+    std::cout<< "With outliers   = " << model <<  std::endl;
+
+    model.normalizeOutliers();
+
+    std::cout<< "Normalized outliers   = " << model <<  std::endl;
+}
 
 void test_histogram_scores()
 {

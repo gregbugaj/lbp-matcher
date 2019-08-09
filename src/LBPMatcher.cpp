@@ -479,8 +479,8 @@ Histogram LBPMatcher::createLBP(PIX *pix)
                 {
                     auto out = matrix[y][x];
                     // remove background
-                    if(out == 255 || out == 0)
-                        continue;
+//                    if(out == 255 || out == 0)
+//                        continue;
 
                     auto bin = uniforms[out];
                     boxModel[bin]++;

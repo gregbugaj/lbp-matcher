@@ -92,13 +92,13 @@ public:
      */
     double& operator[](int index)
     {
-        checkIndex(index);
+//        checkIndex(index);
         return bins[index];
     }
 
     double operator[](int index) const
     {
-        checkIndex(index);
+//        checkIndex(index);
         return bins[index];
     }
 
@@ -339,6 +339,9 @@ private :
     std::vector<double> bins;
 
     void checkIndex(int index) const {
+        if(true)
+            return;
+
         if(index < 0 || index > bins.size())
             throw std::runtime_error("Array index out of bound : " + std::to_string(index));
     }

@@ -35,6 +35,7 @@ void test_image_normalization();
 void test_heatmap_001();
 
 void test_histogram_outlier_removal();
+void test_lbp_createlbpmatrix();
 
 int main(int argc, char* argv[])
 {
@@ -50,6 +51,8 @@ int main(int argc, char* argv[])
     //test_image_normalization();
 
 //    test_histogram_outlier_removal();
+
+//    test_lbp_createlbpmatrix();
     return 0;
 }
 
@@ -119,6 +122,23 @@ void test_extractor_001()
     extractor.extract(document, snip);
 }
 
+void test_lbp_createlbpmatrix()
+{
+    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "27.png";
+
+    std::cout <<"Test deck dir : " << deck << std::endl;
+    std::cout <<"Test f1 : " << f1 << std::endl;
+
+    PIX* pix1 = pixUpscaleToGray(f1.c_str());
+
+    auto m0 = LBPMatcher::createLBP(pix1);
+    std::cout << "Histograms " << std::endl;
+    std::cout << m0 << std::endl;
+}
+
+
+
 void test_lbp_000()
 {
 //    auto deck = getTestDeckDirectory("template-claim");
@@ -142,12 +162,14 @@ void test_lbp_000()
     std::cout << m0 << std::endl;
 }
 
+
 void test_lbp_001()
 {
     auto deck = getTestDeckDirectory("deck-patch");
     auto f1 = deck / "patch-1066.png";
+    auto f2 = deck / "patch-1066.png";
 //    auto f2 = deck / "patch-1184.png";
-    auto f2 = deck / "best-1260-249.png";
+//    auto f2 = deck / "best-1260-249.png";
 
     /*auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "1.png";

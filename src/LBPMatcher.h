@@ -15,16 +15,6 @@ enum LbpType
     SIGNED
 };
 
-
-enum MicroTexton
-{
-    SPOT      = 0x00, // 0000 0000
-    SPOT_FLAT = 0xFF, // 1111 1111
-    LINE_END  = 0x30, // 0011 0000
-    EDGE      = 0xE1, // 1110 0001
-    CORNER    = 0x70  // 0111 0000
-};
-
 class LBPMatcher
 {
 
@@ -40,15 +30,6 @@ public :
      * @param pix the pix to create the LBP for
      */
     static void createLBP(int** matrix, LbpType type, PIX* pix);
-
-    /**
-     * Create Texton from the input image
-     * Textons will use 2x2 grid and create 4 distinct features
-     *
-     * @param textonMatrix
-     * @param pix the pix to create textion for
-     */
-    static void createTexton(int** textonMatrix, PIX* pix);
 
     /**
      * Dump the LBP matrix
@@ -87,6 +68,21 @@ public :
      * @return Histogram of extracted features
      */
     static Histogram createLBP(const std::string& filename);
+
+     /**
+      * Generate histogram for given lbp matrix
+      * @param lbpMatrix
+      * @param cols
+      * @param rows
+      * @param x
+      * @param y
+      * @param w
+      * @param h
+      * @return
+      */
+    static Histogram createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 x, l_int32 y, l_int32 w, l_int32 h);
+
+    static std::vector<int> UniformCodes;;
 };
 
 

@@ -82,7 +82,32 @@ public :
       */
     static Histogram createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 x, l_int32 y, l_int32 w, l_int32 h);
 
+
+    /**
+     * Texton determination
+     * Textons are generated from 2x2 grid with values denoted as v1, v2, v3, v4
+     * Four type of texton are possible
+     *
+     * v1, v2
+     * v3, v4
+     * Type definition
+     * <pre>
+     * T1      T2      T3      T4
+     * --------------------------------
+     * | 1,1  |  0,1  |  1,0  |  1,0  |
+     * | 0,0  |  1,0  |  1,0  |  0,1  |
+     * --------------------------------
+     * </pre>
+     *
+     * @param matrix the LBP matrix to generate textons from
+     * @param texton the generated texton matrix
+     * @param w the width of the matrix
+     * @param h the height of the matrix
+     */
+    static void createTexton(int **matrix, int **texton, int w, int h);
+
     static std::vector<int> UniformCodes;;
+
 };
 
 

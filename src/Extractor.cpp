@@ -65,6 +65,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             std::cout << std::endl;
         }
     }
+
     char f2[255];
     sprintf(f2, "/tmp/lbp-matcher/extract-lbp.png");
     LBPMatcher::pixFromMatrix(matrix, dh, dw, f2);
@@ -72,9 +73,6 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     auto m0 = LBPMatcher::createLBP(snippetNorm);
     m0.normalizeOutliers();
     m0.normalize();
-
-    std::cout<<"m0 << " << m0 << std::endl;
-
 /*
     //    auto m2 = LBPMatcher::createLBP(snip);
     auto mhist = LBPMatcher::createLBPHistogram(matrix, dw, dh,1, 1, snippetNorm->w, snippetNorm->h);
@@ -105,40 +103,13 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         if(!box)
             continue;
 
-        PIX* snip = pixClipRectangle(documentNorm, box, NULL);
-        if(!snip)
-        {
-            boxDestroy(&box);
-            continue;
-        }
-
-        auto m2 = LBPMatcher::createLBP(snip);
-        auto mhist = LBPMatcher::createLBPHistogram(matrix, dw, dh, box->x, box->y, box->w, box->h);
-
-        std::cout << std::endl;
-        std::cout << "  SNIP :: " << m2 << std::endl;
-        std::cout << "  HIST :: " << mhist << std::endl;
-        std::cout << std::endl;
-
-        auto grayValue = 0;
-        char f1[255];
-        sprintf(f1, "/tmp/lbp-matcher/patch-%d.png", counter);
-        pixWritePng(f1, snip, 0);
-
-     /*   if(counter > 2)
-            break;*/
-
-        if(true)
-            break;
-
-        ++counter;
-
-        auto m1 = LBPMatcher::createLBP(snip);
+        auto m1= LBPMatcher::createLBPHistogram(matrix, dw, dh, box->x, box->y, box->w, box->h);
         m1.normalizeOutliers();
         m1.normalize();
 
         auto s0 = comp.compare(m0, m1, type);
-        grayValue = s0 * 255;
+        int grayValue = s0 * 255;
+
         pixAtSet(bumpmap, segment.x, segment.y, grayValue);
 
         if(s0 >= max)
@@ -160,9 +131,9 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             std::cout<<"FOUND : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         }
 
-        std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+//        std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         boxDestroy(&box);
-        pixDestroy(&snip);
+//        pixDestroy(&snip);
         ++index;
     }
 

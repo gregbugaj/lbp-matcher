@@ -202,6 +202,9 @@ public:
      */
     void normalizeOutliers()
     {
+        if(true)
+            return;
+
         auto n = bins.size();
         if(n == 0)
             return;
@@ -233,7 +236,6 @@ public:
         std::cout<<"\nMAD :" << mad;
         std::cout<<"\ncutoff :" << cutoff;
 */
-
         for(int i = 0; i < n; ++i)
         {
             double val =  bins[i];

@@ -167,7 +167,6 @@ PIX* normalize(PIX *pix)
     }
     else if (pix->d == 32)
     {
-        //throw std::runtime_error("Conversion PIX BPP of 32 is not yet implemented");
         gray = pixConvertTo8(pix, 0);
     /*    // convert color(32) to grayscale
         PIX* pdata = pixConvertTo8(pix, 0);

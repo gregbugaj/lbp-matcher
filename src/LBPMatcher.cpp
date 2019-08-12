@@ -185,6 +185,10 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     for (int_t y = 0; y < h; ++y)
         image[y] = new int[w];
 
+    int** texton = new int*[h];
+    for (int_t y = 0; y < pix->h; ++y)
+         texton[y] = new int[pix->w];
+
     for (int_t y = 0; y < h; ++y)
     {
         l_uint32* line = data + y * wpl;
@@ -220,6 +224,19 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
                        | ((m > p8) << 0);
 
             matrix[y - pad][x - pad] = out;
+
+            l_int32 v1 = p0;//> 0 ? 1 : 0; // left edge
+            l_int32 v2 = p4;// > 0 ? 1 : 0;
+            l_int32 v3 = p6;// > 0 ? 1 : 0;
+            l_int32 v4 = p5;// > 0 ? 1 : 0;
+
+            byte_t txt = 0;
+            txt |= ((v1 > 0) << 4)
+                 | ((v2 > 0) << 3)
+                 | ((v3 > 0) << 1)
+                 | ((v4 > 0) << 0);
+
+            bitstr(txt);
         }
     }
 

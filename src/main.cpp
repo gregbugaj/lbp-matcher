@@ -143,7 +143,6 @@ void test_lbp_000()
 //    auto f1 = deck / "0.png";
 //
 //    auto f2 = deck / "27_scale_125_.png";
-
 /*    auto deck = getTestDeckDirectory("set-color");
     auto f1 = deck / "194045.jpg";*/
 

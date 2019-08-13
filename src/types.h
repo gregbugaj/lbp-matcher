@@ -247,7 +247,7 @@ public:
 
         double consistency = 1.4826;
         double mad =  absdev[center];
-        double cutoff = median + 8 * mad;
+        double cutoff = median + 10 * mad;
 /*
         std::cout<<"\nmedian:" << median;
         std::cout<<"\nMAD :" << mad;

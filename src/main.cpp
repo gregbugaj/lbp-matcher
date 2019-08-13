@@ -42,11 +42,11 @@ int main(int argc, char* argv[])
 
 //    test_histogram_normalize();
 //    test_histogram_append();
-    test_lbp_000();
+//    test_lbp_000();
 //      test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
-//    test_extractor_001();
+    test_extractor_001();
 //    test_heatmap_001();
     //test_image_normalization();
 
@@ -115,7 +115,7 @@ void test_heatmap_001()
 void test_extractor_001()
 {
     auto deck = getTestDeckDirectory("private");
-    auto document = deck / "clip3.tif";
+    auto document = deck / "clip2.tif";
     auto snip = deck / "patch-1185.png";
 
     Extractor extractor;
@@ -159,15 +159,14 @@ void test_lbp_000()
     std::cout << m0 << std::endl;
 }
 
-
 void test_lbp_001()
 {
-    auto deck = getTestDeckDirectory("deck-patch");
-    auto f1 = deck / "patch-1066.png";
-    auto f2 = deck / "patch-1066.png";
-//    auto f2 = deck / "patch-1184.png";
-//    auto f2 = deck / "best-1260-249.png";
+    auto deck = getTestDeckDirectory("deck-patch-2");
+    auto f1 = deck / "clip2-0.png";
+    auto f2 = deck / "clip3-0.png";
 
+
+//    auto f2 = deck / "best-1260-249.png";
     /*auto deck = getTestDeckDirectory("deck-01");
     auto f1 = deck / "1.png";
     auto f2 = deck / "2.png";
@@ -176,8 +175,8 @@ void test_lbp_001()
     std::cout <<"Test f1 : " << f1 << std::endl;
     std::cout <<"Test f2 : " << f2 << std::endl;
 
-    PIX* pix1 = pixUpscaleToGray(f1.c_str());
-    PIX* pix2 = pixUpscaleToGray(f2.c_str());
+    PIX* pix1 = normalize(pixRead(f1.c_str()));
+    PIX* pix2 = normalize(pixRead(f2.c_str()));
 
     auto m0 = LBPMatcher::createLBP(pix1);
     auto m1 = LBPMatcher::createLBP(pix2);

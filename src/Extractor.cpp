@@ -1,11 +1,14 @@
 #include <leptonica/allheaders.h>
 #include <iostream>
+#include <chrono>
 #include "Extractor.h"
 #include "Segmenter.h"
 #include "leptonutil.h"
 #include "LBPMatcher.h"
 #include "HistogramComparison.h"
 #include "heatmap.h"
+
+using namespace std::chrono;
 
 PIX* Extractor::extract(const std::string &document, const std::string &snippet)
 {
@@ -117,11 +120,16 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     HistogramComparison comp;
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
-    double max = .8;
+    double max = .75;
     Segmenter::Segment best;
 
     int counter = 0 ;
     int index = 0;
+
+    auto size = segments.size();
+    std::cout << "Total segment : " << size << std::endl;
+
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
     for(auto& segment: segments)
     {
@@ -133,7 +141,10 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
 
         BOX* box =  boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
         if(!box)
+        {
+            std::cout << "Bad box ";
             continue;
+        }
 
         auto m1= LBPMatcher::createLBPHistogram(matrix, dw, dh, box->x, box->y, box->w, box->h);
         m1.normalizeOutliers();
@@ -141,7 +152,6 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
 
         auto s0 = comp.compare(m0, m1, type);
         int grayValue = s0 * 255;
-
         pixAtSet(bumpmap, segment.x, segment.y, grayValue);
 
         if(s0 >= max)
@@ -152,7 +162,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             BOX* box1 = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
             PIX* snip1 = pixClipRectangle(documentNorm, box1, NULL);
             char f1[255];
-            sprintf(f1, "/tmp/lbp-matcher/best-%d-%d.png", counter, grayValue);
+            sprintf(f1, "/tmp/lbp-matcher/best-%d-%d-%d.png",  box->x,  box->y, grayValue);
             pixWritePng(f1, snip1, 1);
             counter++;
 
@@ -163,11 +173,15 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             std::cout<<"FOUND : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         }
 
-        std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+//        std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         boxDestroy(&box);
-//        pixDestroy(&snip);
         ++index;
     }
+
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(t2 - t1).count();
+
+    std::cout << "Extractor Time (ms) : "  << duration << std::endl;
 
     std::cout<<"\nMax : " << best.row << "," <<  best.col << " , "<< max <<" ," << std::endl;
     BOX* box = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);

@@ -74,13 +74,13 @@ public :
       * @param lbpMatrix
       * @param cols
       * @param rows
-      * @param x
-      * @param y
+      * @param _x
+      * @param _y
       * @param w
       * @param h
       * @return
       */
-    static Histogram createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 x, l_int32 y, l_int32 w, l_int32 h);
+    static Histogram createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 _x, l_int32 _y, l_int32 w, l_int32 h);
 
 
     /**

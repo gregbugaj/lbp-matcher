@@ -196,15 +196,32 @@ public:
     }
 
     /**
+     * Normalize outliers to fixed value
+     */
+    void normalizeOutliersXX()
+    {
+        auto n = bins.size();
+        if(n == 0)
+            return;
+        double cutoff = 100;
+        for(int i = 0; i < n; ++i)
+        {
+            double val =  bins[i];
+            if(val > cutoff)
+                bins[i]  = cutoff;
+        }
+    }
+
+    /**
      * Normalize Outliers
      * median absolute deviation from median, commonly shortened to the median absolute deviation (MAD)
      * https://eurekastatistics.com/using-the-median-absolute-deviation-to-find-outliers/
      */
     void normalizeOutliers()
     {
-        if(true)
+       /* if(true)
             return;
-
+*/
         auto n = bins.size();
         if(n == 0)
             return;
@@ -230,7 +247,7 @@ public:
 
         double consistency = 1.4826;
         double mad =  absdev[center];
-        double cutoff = median + 10 * mad;
+        double cutoff = median + 8 * mad;
 /*
         std::cout<<"\nmedian:" << median;
         std::cout<<"\nMAD :" << mad;

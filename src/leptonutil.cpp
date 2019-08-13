@@ -1,7 +1,7 @@
 #include <sstream>
 #include "leptonutil.h"
 
-bool debug_pix = false;
+bool debug_pix = true;
 
 void dump(PIX* pix)
 {
@@ -119,7 +119,7 @@ PIX* pixUpscaleToGray(PIX* pix)
     PIX* gray = pixCopy(NULL, pix);
     gray = pixConvertTo8(gray, 0);
     gray = pixScaleGray2xLI(gray);
-    gray = pixBlockconv(gray, 2, 2);
+    gray = pixBlockconv(gray, 1, 1);
     gray = pixScaleAreaMap2(gray);
 
     return gray;

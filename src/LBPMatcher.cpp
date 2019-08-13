@@ -29,6 +29,35 @@ int sign(l_int32 point, l_int32  center)
     return (point - center) >= 0 ? 1 : 0;
 }
 
+
+void LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols, char *filename)
+{
+    PIX* pix = pixFromMatrix(matrix, rows, cols);
+    pixWritePng(filename, pix, 1);
+    pixDestroy(&pix);
+}
+
+PIX* LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols)
+{
+    int w = cols;
+    int h = rows;
+    PIX* pix = pixCreate(w, h, 8);
+    pixSetResolution(pix, 300, 300);
+    l_int32 wpl = pixGetWpl(pix);
+    l_uint32* data = pixGetData(pix);
+
+    for (int_t y = 0; y < h; ++y)
+    {
+        l_uint32* line = data + y * wpl;
+        for (int_t x = 0; x < w; ++x)
+        {
+            SET_DATA_BYTE(line, x, matrix[y][x]);
+        }
+    }
+    return pix;
+}
+
+
 bool isUniform(byte_t a)
 {
     // Uniform descriptors
@@ -172,6 +201,8 @@ void generateLbpNormal(int** matrix, PIX* pix)
  */
 void generateLbpEnhanced(int** matrix, PIX* pix)
 {
+    std::cout<< pix->w << " ::: " << pix->h << std::endl;
+
     // deal with padding
     l_int32  pad = 1;
     PIX* padded  = pixAddBorderGeneral(pix, pad, pad, pad, pad , 255);
@@ -185,9 +216,11 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     for (int_t y = 0; y < h; ++y)
         image[y] = new int[w];
 
-    int** texton = new int*[h];
+
+    int** texton = new int*[pix->h];
     for (int_t y = 0; y < pix->h; ++y)
-         texton[y] = new int[pix->w];
+        texton[y] = new int[pix->w];
+
 
     for (int_t y = 0; y < h; ++y)
     {
@@ -224,20 +257,38 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
                        | ((m > p8) << 0);
 
             matrix[y - pad][x - pad] = out;
-
-            l_int32 v1 = p0;//> 0 ? 1 : 0; // left edge
-            l_int32 v2 = p4;// > 0 ? 1 : 0;
-            l_int32 v3 = p6;// > 0 ? 1 : 0;
-            l_int32 v4 = p5;// > 0 ? 1 : 0;
-
-            byte_t txt = 0;
-            txt |= ((v1 > 0) << 4)
-                 | ((v2 > 0) << 3)
-                 | ((v3 > 0) << 1)
-                 | ((v4 > 0) << 0);
-
-            bitstr(txt);
         }
+    }
+
+    // create additional spatial information, using 4 texture primitives
+    bool primiteTexton = false;
+    if(primiteTexton)
+    {
+        h =  pix->h;
+        w =  pix->w;
+        for (int_t y = 0; y <  pix->h; ++y)
+        {
+            for (int_t x = 0; x < pix->w; ++x)
+            {
+                l_int32 v1 = pixAtGetSan(matrix, h, w, x,     y    ) > 0 ? 1 : 0;; // Top-Left
+                l_int32 v2 = pixAtGetSan(matrix, h, w,  x + 1, y) > 0 ? 1 : 0;; // Top-Right
+                l_int32 v3 = pixAtGetSan(matrix, h, w,  x , y + 1) > 0 ? 1 : 0;; // Bottom-Left
+                l_int32 v4 = pixAtGetSan(matrix, h, w,  x + 1, y + 1) > 0 ? 1 : 0;; // Bottom+Right
+
+                byte_t primitive = 0;
+                primitive |= ((v1 > 0) << 3)
+                             | ((v2 > 0) << 2)
+                             | ((v3 > 0) << 1)
+                             | ((v4 > 0) << 0);
+
+                texton[y][x] = primitive;
+                bitstr(primitive);
+            }
+        }
+
+        char f1[255];
+        sprintf(f1, "/tmp/lbp-matcher/texton-primitive.png");
+        LBPMatcher::pixFromMatrix(texton, h, w, f1);
     }
 
     pixDestroy(&padded);
@@ -435,7 +486,6 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     }
 
     createLBP(matrix, LbpType::ENHANCED, pix);
-    createTexton(matrix, texton, w, h);
 
     // dump matrix
     if(false)
@@ -469,96 +519,23 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     return result;
 }
 
-/*
-Histogram LBPMatcher::createLBPBORKED(PIX *pix)
-{
-    if(pix == nullptr)
-        return Histogram(0);
-
-    if(pix->d != 8)
-        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
-
-    static int counter = 0;
-    int_t w = pix->w;
-    int_t h = pix->h;
-
-    // matrix that will be populated with LBP, data is in row-major order
-    int** matrix = new int*[h];
-    for (int_t y = 0; y < h; ++y)
-        matrix[y] = new int[w];
-
-    createLBP(matrix, LbpType::ENHANCED, pix);
-
-    if(debug_box_pix)
-    {
-        char f1[255];
-        sprintf(f1, "/tmp/lbp-matcher/lbp-enhanced-%d.png", counter);
-        pixFromMatrix(matrix, h, w, f1);
-    }
-
-    auto result = createLBPHistogram(matrix, w, h, 0, 0, w, h);
-
-    counter++;
-    delete[] matrix;
-    return result;
-}
-*/
-
-Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 x, l_int32 y, l_int32 w, l_int32 h)
+Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 _x, l_int32 _y, l_int32 w, l_int32 h)
 {
     static int counter = 0;
     counter++;
-//    std::cout<< "\n  matrix(cols, row) : x, y, w, h = ("<< cols << ", "<< rows   << ") " << x << ", "<< y << ", "<< w << ", "<< h << std::endl;
-    // construct sub matrix
-    int** matrix = new int*[h];
-    for (int j = 0; j < h; ++j)
-        matrix[j] = new int[w];
-
-    for(int j = 0; j < h; ++j)
-    {
-        int ja = y + j;
-        for(int i = 0; i < w; ++i)
-        {
-            int ia = x + i;
-            if(ja < rows && ia < cols)
-                matrix[j][i] = lbpMatrix[ja][ia];
-            else
-                matrix[j][i] = -1; // sentinel value that we can ignore when comparing our hitograms
-        }
-    }
-
-    if(false)
-    {
-        // dump matrix
-        std::cout << "CLIP Matrix " << std::endl;
-        std::cout << std::endl;
-        for (int_t y = 0; y < h; ++y)
-        {
-            std::cout << std::setw(3)  << y << " : ";
-            for (int_t x = 0; x < w; ++x)
-            {
-                auto val = matrix[y][x];
-                std::cout <<  std::setw(3) << val << " ";
-            }
-            std::cout << std::endl;
-        }
-    }
-
-  /*  char f1[255];
-    sprintf(f1, "/tmp/lbp-matcher/lbp-hist-matrix-%d.png", counter);
-    pixFromMatrix(matrix, h, w, f1);*/
-
-    // 2/3 is good
-    auto horizontalPatches = 3; // horizontal partitions
-    auto verticalPatches = 2; // vertical  partitions
+    // number of patches to create for the histogram 2/3 is good
+    auto horizontalPatches = 3;
+    auto verticalPatches = 2;
 
     // horizontal / vertical groups
     int gridHeight = ceil((double) h / (double) verticalPatches);
     int gridWidth = ceil((double) w / (double) horizontalPatches);
+    int totalPatches = horizontalPatches * verticalPatches;
 
-    Histogram result(0);
 //    PIX* lbpPix = pixFromMatrix(matrix, h, w);
     PIX* lbpPix = nullptr;
+    int patchIndex = 0;
+    Histogram unified(totalPatches * 59);
 
     for (int row = 0; row < verticalPatches; ++row)
     {
@@ -580,62 +557,41 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
 
                 char f[255];
                 sprintf(f, "/tmp/lbp-matcher/box-%d-%d-%d.png",counter, row, col);
-//              pixWritePng(f, snip, 0);
+                pixWritePng(f, snip, 0);
                 boxDestroy(&box);
                 pixDestroy(&snip);
             }
 
-            Histogram boxModel(59);
+            int patchOffset = patchIndex * 59;
+
             for (int y = std::max(0, yStart); y < yEnd; ++y)
             {
+                int ya = _y + y;
+                if(ya >= rows)
+                    break;
+
                 for (int x = std::max(0, xStart); x < xEnd; ++x)
                 {
-                    auto val = matrix[y][x];
-                    if(val == 0 || val == -1)
+                    int xa = _x + x;
+                    if(xa >= cols)
+                        break;
+
+                    auto val = lbpMatrix[ya][xa];
+                    if(val == -1)
                         continue;
 
                     auto bin = UniformCodes[val];
-                    boxModel[bin]++;
+                    unified[patchOffset + bin]++;
                 }
             }
-
-            result.append(boxModel);
+            ++patchIndex;
         }
     }
-
-    delete[] matrix;
+//    delete[] matrix;
     pixDestroy(&lbpPix);
-
-    return result;
+    return unified;
  }
 
-
-void LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols, char *filename)
-{
-    PIX* pix = pixFromMatrix(matrix, rows, cols);
-    pixWritePng(filename, pix, 1);
-    pixDestroy(&pix);
-}
-
-PIX* LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols)
-{
-    int w = cols;
-    int h = rows;
-    PIX* pix = pixCreate(w, h, 8);
-    pixSetResolution(pix, 300, 300);
-    l_int32 wpl = pixGetWpl(pix);
-    l_uint32* data = pixGetData(pix);
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        l_uint32* line = data + y * wpl;
-        for (int_t x = 0; x < w; ++x)
-        {
-            SET_DATA_BYTE(line, x, matrix[y][x]);
-        }
-    }
-    return pix;
-}
 
 Histogram LBPMatcher::createLBP(const std::string &filename)
 {

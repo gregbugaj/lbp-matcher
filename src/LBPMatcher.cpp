@@ -29,7 +29,6 @@ int sign(l_int32 point, l_int32  center)
     return (point - center) >= 0 ? 1 : 0;
 }
 
-
 void LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols, char *filename)
 {
     PIX* pix = pixFromMatrix(matrix, rows, cols);
@@ -201,8 +200,6 @@ void generateLbpNormal(int** matrix, PIX* pix)
  */
 void generateLbpEnhanced(int** matrix, PIX* pix)
 {
-    std::cout<< pix->w << " ::: " << pix->h << std::endl;
-
     // deal with padding
     l_int32  pad = 1;
     PIX* padded  = pixAddBorderGeneral(pix, pad, pad, pad, pad , 255);
@@ -215,12 +212,6 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     int** image = new int*[h];
     for (int_t y = 0; y < h; ++y)
         image[y] = new int[w];
-
-
-    int** texton = new int*[pix->h];
-    for (int_t y = 0; y < pix->h; ++y)
-        texton[y] = new int[pix->w];
-
 
     for (int_t y = 0; y < h; ++y)
     {
@@ -258,37 +249,6 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
 
             matrix[y - pad][x - pad] = out;
         }
-    }
-
-    // create additional spatial information, using 4 texture primitives
-    bool primiteTexton = false;
-    if(primiteTexton)
-    {
-        h =  pix->h;
-        w =  pix->w;
-        for (int_t y = 0; y <  pix->h; ++y)
-        {
-            for (int_t x = 0; x < pix->w; ++x)
-            {
-                l_int32 v1 = pixAtGetSan(matrix, h, w, x,     y    ) > 0 ? 1 : 0;; // Top-Left
-                l_int32 v2 = pixAtGetSan(matrix, h, w,  x + 1, y) > 0 ? 1 : 0;; // Top-Right
-                l_int32 v3 = pixAtGetSan(matrix, h, w,  x , y + 1) > 0 ? 1 : 0;; // Bottom-Left
-                l_int32 v4 = pixAtGetSan(matrix, h, w,  x + 1, y + 1) > 0 ? 1 : 0;; // Bottom+Right
-
-                byte_t primitive = 0;
-                primitive |= ((v1 > 0) << 3)
-                             | ((v2 > 0) << 2)
-                             | ((v3 > 0) << 1)
-                             | ((v4 > 0) << 0);
-
-                texton[y][x] = primitive;
-                bitstr(primitive);
-            }
-        }
-
-        char f1[255];
-        sprintf(f1, "/tmp/lbp-matcher/texton-primitive.png");
-        LBPMatcher::pixFromMatrix(texton, h, w, f1);
     }
 
     pixDestroy(&padded);
@@ -343,6 +303,7 @@ void generateLbpEnhancedV1(int** matrix, PIX* pix)
             matrix[y][x] = out;
         }
     }
+
     delete[] image;
 }
 
@@ -351,7 +312,6 @@ void generateLbpEnhancedSlow(int** matrix, PIX* pix)
 {
     int_t w = pix->w;
     int_t h = pix->h;
-    auto total = 0.0;
 
     for (int_t y = 0; y < h; ++y)
     {
@@ -532,10 +492,12 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
     int gridWidth = ceil((double) w / (double) horizontalPatches);
     int totalPatches = horizontalPatches * verticalPatches;
 
+
 //    PIX* lbpPix = pixFromMatrix(matrix, h, w);
     PIX* lbpPix = nullptr;
     int patchIndex = 0;
     Histogram unified(totalPatches * 59);
+
 
     for (int row = 0; row < verticalPatches; ++row)
     {

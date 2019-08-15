@@ -37,6 +37,8 @@ void test_heatmap_001();
 void test_histogram_outlier_removal();
 void test_lbp_createlbpmatrix();
 
+void test_hash_001();
+
 int main(int argc, char* argv[])
 {
 
@@ -52,6 +54,7 @@ int main(int argc, char* argv[])
 
 //    test_histogram_outlier_removal();
 
+//    test_hash_001();
 //    test_lbp_createlbpmatrix();
     return 0;
 }
@@ -114,9 +117,15 @@ void test_heatmap_001()
 
 void test_extractor_001()
 {
-    auto deck = getTestDeckDirectory("private");
+
+    auto deck = getTestDeckDirectory("private-2");
+    auto document = deck / "PID_1091_7889_0_93688240_page_0004.tif";
+    auto snip = deck / "snip-relcd-0.tif";
+//    auto snip = deck / "snip-interest.tif";
+
+/*    auto deck = getTestDeckDirectory("private");
     auto document = deck / "clip2.tif";
-    auto snip = deck / "patch-1185.png";
+    auto snip = deck / "patch-1185.png";*/
 
     Extractor extractor;
     extractor.extract(document, snip);
@@ -146,17 +155,20 @@ void test_lbp_000()
 /*    auto deck = getTestDeckDirectory("set-color");
     auto f1 = deck / "194045.jpg";*/
 
-    auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "27.png";
+/*    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "27.png";*/
+
+    auto deck = getTestDeckDirectory("private-2");
+    auto f1 = deck / "PID_1091_7889_0_93688240_page_0004.tif";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
-
     PIX* pix1 = pixUpscaleToGray(f1.c_str());
-
     auto m0 = LBPMatcher::createLBP(pix1);
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
+
+    pixDestroy(&pix1);
 }
 
 void test_lbp_001()
@@ -293,14 +305,17 @@ void test_lbp_003()
 
 void test_hash_001()
 {
+    auto deck = getTestDeckDirectory("deck-01");
+    auto f1 = deck / "41.png";
+    auto f2 = deck / "47.png";
 //    auto h1 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/44.png", ImageHash::DIFFERENCE);
 //    auto h2 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/deck-01/45.png", ImageHash::DIFFERENCE);
 
     //auto h1 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/0.png", ImageHash::DIFFERENCE);
     //auto h2 = ImageHash::hash("/home/gbugaj/dev/lbp-matcher/test-deck/template-processed/4.png", ImageHash::DIFFERENCE);
 
-     auto h1 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/zeros/29.png", ImageHash::DIFFERENCE);
-     auto h2 = ImageHash::hash("/home/gbugaj/share/devbox/hashing/zeros/56.png", ImageHash::DIFFERENCE);
+     auto h1 = ImageHash::hash(f1, ImageHash::AVERAGE);
+     auto h2 = ImageHash::hash(f2, ImageHash::AVERAGE);
 
     HashDistance hs ;
     auto val = hs.distance(h1, h2);

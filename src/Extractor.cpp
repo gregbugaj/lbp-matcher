@@ -7,6 +7,8 @@
 #include "LBPMatcher.h"
 #include "HistogramComparison.h"
 #include "heatmap.h"
+#include "ImageHash.h"
+#include "HashDistance.h"
 
 using namespace std::chrono;
 
@@ -63,14 +65,10 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     pixWritePng("/tmp/lbp-matcher/documentNorm.png", documentNorm, 0);
     pixWritePng("/tmp/lbp-matcher/snippetNorm.png", snippetNorm, 0);
 
-    // reduce images if possible
-    int_t reductions = 1 ;//std::min(2, calculate_reductions(std::min(documentNorm->w, documentNorm->h)));
-    std::cout << " reductions  = " << reductions;
-
     int dw = documentNorm->w;
     int dh = documentNorm->h;
-    int bw = snippet->w;
-    int bh = snippet->h;
+    int bw = snippetNorm->w;
+    int bh = snippetNorm->h;
 
     std::cout << "Extract  : "<< dw << ", " << dh << "  ::  " << bw <<" , " <<bh <<"\n";
     PIX* bumpmap = pixCreate(dw, dh, 8);
@@ -110,26 +108,22 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     auto m0 = LBPMatcher::createLBP(snippetNorm);
     m0.normalizeOutliers();
     m0.normalize();
-/*
-    //    auto m2 = LBPMatcher::createLBP(snip);
-    auto mhist = LBPMatcher::createLBPHistogram(matrix, dw, dh,1, 1, snippetNorm->w, snippetNorm->h);
-    std::cout << "  SNIP :: " << m0 << std::endl;
-    std::cout << "  HIST :: " << mhist << std::endl;
-    std::cout << std::endl;
-*/
+
     HistogramComparison comp;
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
 
-    double max = .75;
+    double max = .60;
     Segmenter::Segment best;
 
     int counter = 0 ;
+    int counterXX = 0 ;
     int index = 0;
 
     auto size = segments.size();
     std::cout << "Total segment : " << size << std::endl;
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    auto h2 = ImageHash::hash(f2, ImageHash::AVERAGE);
 
     for(auto& segment: segments)
     {
@@ -138,15 +132,38 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         auto y = std::max(0, segment.y);
         auto w = segment.w;
         auto h = segment.w;
-
         BOX* box =  boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
+
         if(!box)
         {
             std::cout << "Bad box ";
             continue;
         }
 
+        PIX*  snip = pixClipRectangle(documentNorm, box, NULL);
+        auto h1 = ImageHash::hash(snip, ImageHash::AVERAGE);
+
+        HashDistance hs ;
+        auto val = hs.distance(h1, h2);
+        auto norm = hs.normalized(h1, h2);
+        pixAtSet(bumpmap, segment.x, segment.y, 50);
+        if(norm > .75)
+        {
+            auto gv = norm * 255.0;
+            pixAtSet(bumpmap, segment.x, segment.y, gv);
+            ++counterXX;
+        }
+//        std::cout<< "Distance   = " << val << " :: " << norm << "\n";
+
+        pixDestroy(&snip);
+        ++index;
+        if(true)
+            continue;
+
         auto m1= LBPMatcher::createLBPHistogram(matrix, dw, dh, box->x, box->y, box->w, box->h);
+
+        if(index % 10000)
+            std::cout<<"ROW : " << segment.row << "," <<  segment.col << "\n";
         m1.normalizeOutliers();
         m1.normalize();
 
@@ -158,7 +175,6 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         {
             max = s0;
             best = segment;
-
             BOX* box1 = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
             PIX* snip1 = pixClipRectangle(documentNorm, box1, NULL);
             char f1[255];
@@ -173,7 +189,9 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             std::cout<<"FOUND : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
         }
 
-//        std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+        if(index % 10000)
+            std::cout<<"ROW : " << segment.row << "," <<  segment.col << " , "<< s0 <<" ," <<grayValue<< "\n";
+
         boxDestroy(&box);
         ++index;
     }
@@ -181,17 +199,18 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
 
+    std::cout << "counterXX  : "  << counterXX << std::endl;
     std::cout << "Extractor Time (ms) : "  << duration << std::endl;
-
-    std::cout<<"\nMax : " << best.row << "," <<  best.col << " , "<< max <<" ," << std::endl;
+/*    std::cout<<"\nMax : " << best.row << "," <<  best.col << " , "<< max <<" ," << std::endl;
     BOX* box = boxCreate(std::max(0, best.x), std::max(0, best.y), best.w, best.h);
     PIX* snip = pixClipRectangle(documentNorm, box, NULL);
     char f1[255];
 
     sprintf(f1, "/tmp/lbp-matcher/extracted-snip-%d-%d.png", best.x, best.y);
     pixWritePng(f1, snip, 1);
-    pixWritePng("/tmp/lbp-matcher/bumpmap.png", bumpmap, 1);
+  */
 
+    pixWritePng("/tmp/lbp-matcher/bumpmap.png", bumpmap, 1);
     delete[] matrix;
     return NULL;
 }

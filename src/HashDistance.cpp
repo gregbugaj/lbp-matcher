@@ -14,7 +14,6 @@ int HashDistance::distance(const hash_t &x, const hash_t &y) const
 {
     auto z = x ^ y;
     auto p = popcnt(z);
-
     if(debug)
     {
         std::cout<<"---- HashDistance ---- " << std::endl;
@@ -36,7 +35,6 @@ double HashDistance::normalized(const hash_t &x, const hash_t &y) const
 double HashDistance::normalize(const int& distance) const
 {
     auto size = static_cast<double>(hashsize());
-
     if(distance < 0 || distance > size)
         throw std::runtime_error(std::string("Distance out of bounds for  : ")
                                          .append(" hash = " + (int)size)

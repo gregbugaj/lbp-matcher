@@ -4,6 +4,7 @@
 
 hash_t AverageHash::hash(PIX* pix) const
 {
+    static int counter = 0;
     int_t w = 8;
     int_t h = 8;
 
@@ -13,9 +14,13 @@ hash_t AverageHash::hash(PIX* pix) const
     l_uint32 total  = sum(reduced);
     l_uint32 avg    = total / (w * h);
 
-    pixWritePng("/tmp/lbp-matcher/normalized.png", normalized, 1);
-    pixWritePng("/tmp/lbp-matcher/reduced.png", reduced, 1);
+/*    char f[255];
+    sprintf(f, "/tmp/lbp-matcher/normalized-%d.png",counter);
+    pixWritePng(f, normalized, 1);
+    sprintf(f, "/tmp/lbp-matcher/reduced-%d.png",counter);
+    pixWritePng(f, reduced, 1);*/
 
+    ++counter;
     hash_t out = 0;
 
     int_t wpl      = pixGetWpl(reduced);
@@ -32,7 +37,7 @@ hash_t AverageHash::hash(PIX* pix) const
             uinit64_t one = (val > avg) ? 1 : 0;
             out |= one << pos;
 
-            trace(out, pos, one);
+//            trace(out, pos, one);
         }
     }
 

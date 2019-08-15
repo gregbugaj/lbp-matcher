@@ -1,7 +1,7 @@
 #include <sstream>
 #include "leptonutil.h"
 
-bool debug_pix = true;
+bool debug_pix = false;
 
 void dump(PIX* pix)
 {
@@ -174,13 +174,13 @@ PIX* normalize(PIX *pix)
         pdata = reduce(pix, 400, 0);
         pdata = pixConvertTo8(pdata, 0);
         //    pdata = reduce(pdata, 500, 300);*/
-
     }
     else
     {
         // Grayscale 8bpp/ Color 16/32 bpp
         gray = pixConvertTo8(pix, 0);
     }
+
     if (debug_pix)
     {
         char f1[255];

@@ -1,4 +1,5 @@
 #include <sstream>
+#include <nmmintrin.h>
 #include "leptonutil.h"
 
 bool debug_pix = false;
@@ -193,6 +194,22 @@ PIX* normalize(PIX *pix)
     return gray;
 }
 
+int_t pixCountPixels(PIX* pix)
+{
+    if(!pix)
+        return 0;
+
+    l_uint32* p   = pix->data;
+    l_uint32* e   = p + (pix->wpl * pix->h);
+    int_t   cnt = 0;
+
+    for (; p != e; *p++)
+    {
+        int x = _mm_popcnt_u32(x);
+        cnt += x;
+    }
+    return cnt;
+}
 
 /**
  * Smoothing and converting binary image to grayscale image

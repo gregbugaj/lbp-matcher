@@ -107,4 +107,11 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom);
  */
 PIX* reduce(PIX *pix, int width, int height) ;
 
+/**
+ * Pix count on pixlels
+ * @param pix the pix to count pixles for
+ *
+ * @return count of on pixels
+ */
+int_t pixCountPixels(PIX* pix);
 #endif //LBP_MATCHER_LEPTONUTIL_H

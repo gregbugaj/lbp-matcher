@@ -141,7 +141,15 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         }
 
         PIX*  snip = pixClipRectangle(documentNorm, box, NULL);
+        auto count = pixCountPixels(snip);
+//        auto count = sum(snip);
+//        std::cout<< "count = " << count << std::endl;
+
+        if(true)
+            continue;
+
         auto h1 = ImageHash::hash(snip, ImageHash::AVERAGE);
+
 
         HashDistance hs ;
         auto val = hs.distance(h1, h2);

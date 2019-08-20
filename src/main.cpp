@@ -120,14 +120,15 @@ void test_heatmap_001()
 void test_extractor_001()
 {
 
-/*    auto deck = getTestDeckDirectory("private-2");
+    auto deck = getTestDeckDirectory("private-2");
     auto document = deck / "PID_1091_7889_0_93688240_page_0004.tif";
     auto snip = deck / "snip-relcd-0.tif";
 //    auto snip = deck / "snip-interest.tif";*/
 
+/*
     auto deck = getTestDeckDirectory("private");
-    auto document = deck / "clip3.tif";
-    auto snip = deck / "patch-1185.png";
+    auto document = deck / "clip2.tif";
+    auto snip = deck / "patch-1185.png";*/
 
     Extractor extractor;
     extractor.extract(document, snip);

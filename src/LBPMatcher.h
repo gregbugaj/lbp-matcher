@@ -82,7 +82,6 @@ public :
       */
     static Histogram createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 rows, l_int32 _x, l_int32 _y, l_int32 w, l_int32 h);
 
-
     /**
      * Texton determination
      * Textons are generated from 2x2 grid with values denoted as v1, v2, v3, v4

@@ -255,94 +255,6 @@ void generateLbpEnhanced(int** matrix, PIX* pix)
     delete[] image;
 }
 
-void generateLbpEnhancedV1(int** matrix, PIX* pix)
-{
-    int_t w = pix->w;
-    int_t h = pix->h;
-    l_int32 wpl    = pixGetWpl(pix);
-    l_uint32* data = pixGetData(pix);
-
-    int** image = new int*[h];
-    for (int_t y = 0; y < h; ++y)
-        image[y] = new int[w];
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        l_uint32* line = data + y * wpl;
-        for (int_t x = 0; x < w; ++x)
-        {
-            image[y][x] = GET_DATA_BYTE(line, x);
-        }
-    }
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        for (int_t x = 0; x < w; ++x)
-        {
-            l_int32 p0 = pixAtGetSan(image, h, w, x,     y    ); // Center
-            l_int32 p1 = pixAtGetSan(image, h, w,  x - 1, y - 1);
-            l_int32 p2 = pixAtGetSan(image, h, w,  x,     y - 1);
-            l_int32 p3 = pixAtGetSan(image, h, w,  x + 1, y - 1);
-            l_int32 p4 = pixAtGetSan(image, h, w,  x + 1, y    );
-            l_int32 p5 = pixAtGetSan(image, h, w,  x + 1, y + 1);
-            l_int32 p6 = pixAtGetSan(image, h, w,  x    , y + 1);
-            l_int32 p7 = pixAtGetSan(image, h, w,  x - 1, y + 1);
-            l_int32 p8 = pixAtGetSan(image, h, w,  x - 1, y    );
-
-            byte_t  out = 0;
-            double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
-            out |=     ((m > p1) << 7)
-                       | ((m > p2) << 6)
-                       | ((m > p3) << 5)
-                       | ((m > p4) << 4)
-                       | ((m > p5) << 3)
-                       | ((m > p6) << 2)
-                       | ((m > p7) << 1)
-                       | ((m > p8) << 0);
-
-            matrix[y][x] = out;
-        }
-    }
-
-    delete[] image;
-}
-
-
-void generateLbpEnhancedSlow(int** matrix, PIX* pix)
-{
-    int_t w = pix->w;
-    int_t h = pix->h;
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        for (int_t x = 0; x < w; ++x)
-        {
-            l_int32 p0 = pixAtGetSan(pix, x,     y    ); // Center
-            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1);
-            l_int32 p2 = pixAtGetSan(pix, x,     y - 1);
-            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1);
-            l_int32 p4 = pixAtGetSan(pix, x + 1, y    );
-            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1);
-            l_int32 p6 = pixAtGetSan(pix, x    , y + 1);
-            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1);
-            l_int32 p8 = pixAtGetSan(pix, x - 1, y    );
-
-            byte_t  out = 0;
-            double m =  (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
-            out |=     ((m > p1) << 7)
-                       | ((m > p2) << 6)
-                       | ((m > p3) << 5)
-                       | ((m > p4) << 4)
-                       | ((m > p5) << 3)
-                       | ((m > p6) << 2)
-                       | ((m > p7) << 1)
-                       | ((m > p8) << 0);
-
-            matrix[y][x] = out;
-        }
-    }
-}
-
 /**
  * Crate Signed-Enhanced Local Binary Pattern image
  *
@@ -400,7 +312,6 @@ void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
         throw std::runtime_error("Unhandled lbp type");
 }
 
-
 void LBPMatcher::createTexton(int **matrix, int **texton, int w, int h)
 {
     for (int_t y = 0; y < h; ++y)
@@ -437,13 +348,8 @@ Histogram LBPMatcher::createLBP(PIX *pix)
 
     // matrix that will be populated with LBP Microtextons and Textons(4 types)
     int** matrix = new int*[h];
-    int** texton = new int*[h];
-
     for (int_t y = 0; y < h; ++y)
-    {
         matrix[y] = new int[w];
-        texton[y] = new int[w];
-    }
 
     createLBP(matrix, LbpType::ENHANCED, pix);
 
@@ -483,8 +389,8 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
 {
     static int counter = 0;
     counter++;
-    // number of patches to create for the histogram 2/3 is good
-    auto horizontalPatches = 3;
+    // number of patches to create for the histogram 3/2  4/2 is good
+    auto horizontalPatches = 4;
     auto verticalPatches = 2;
 
     // horizontal / vertical groups
@@ -492,12 +398,10 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
     int gridWidth = ceil((double) w / (double) horizontalPatches);
     int totalPatches = horizontalPatches * verticalPatches;
 
-
 //    PIX* lbpPix = pixFromMatrix(matrix, h, w);
     PIX* lbpPix = nullptr;
     int patchIndex = 0;
     Histogram unified(totalPatches * 59);
-
 
     for (int row = 0; row < verticalPatches; ++row)
     {
@@ -549,11 +453,10 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
             ++patchIndex;
         }
     }
-//    delete[] matrix;
+
     pixDestroy(&lbpPix);
     return unified;
  }
-
 
 Histogram LBPMatcher::createLBP(const std::string &filename)
 {
@@ -568,9 +471,7 @@ Histogram LBPMatcher::createLBP(const std::string &filename)
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
-
     std::cout <<  "createLBP Time (ms) : "  << duration << std::endl;
-
     return model;
 }
 

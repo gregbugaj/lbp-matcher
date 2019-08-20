@@ -113,5 +113,5 @@ PIX* reduce(PIX *pix, int width, int height) ;
  *
  * @return count of on pixels
  */
-int_t pixCountPixels(PIX* pix);
+int_t pixCountPixelsFast(PIX* pix);
 #endif //LBP_MATCHER_LEPTONUTIL_H

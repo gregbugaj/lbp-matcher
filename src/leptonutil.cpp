@@ -194,7 +194,7 @@ PIX* normalize(PIX *pix)
     return gray;
 }
 
-int_t pixCountPixels(PIX* pix)
+int_t pixCountPixelsFast(PIX* pix)
 {
     if(!pix)
         return 0;
@@ -203,9 +203,9 @@ int_t pixCountPixels(PIX* pix)
     l_uint32* e   = p + (pix->wpl * pix->h);
     int_t   cnt = 0;
 
-    for (; p != e; *p++)
+    for (; p != e; p++)
     {
-        int x = _mm_popcnt_u32(x);
+        int_t x = _mm_popcnt_u32(x);
         cnt += x;
     }
     return cnt;

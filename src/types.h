@@ -219,9 +219,9 @@ public:
      */
     void normalizeOutliers()
     {
-       /* if(true)
-            return;
-*/
+        if(true)
+           return;
+
         auto n = bins.size();
         if(n == 0)
             return;

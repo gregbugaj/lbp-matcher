@@ -119,10 +119,11 @@ void test_heatmap_001()
 
 void test_extractor_001()
 {
-
     auto deck = getTestDeckDirectory("private-2");
     auto document = deck / "PID_1091_7889_0_93688240_page_0004.tif";
-    auto snip = deck / "snip-relcd-0.tif";
+//    auto snip = deck / "snip-relcd-0.tif";
+//    auto snip = deck / "snipp-claimtotal.tif";
+    auto snip = deck / "snipp-claimtotal-original.tif";
 //    auto snip = deck / "snip-interest.tif";*/
 
 /*
@@ -176,10 +177,15 @@ void test_lbp_000()
 
 void test_lbp_001()
 {
+/*
     auto deck = getTestDeckDirectory("deck-patch-2");
     auto f1 = deck / "clip2-0.png";
     auto f2 = deck / "clip3-0.png";
+*/
 
+    auto deck = getTestDeckDirectory("private-2");
+    auto f1 = deck / "snipp-claimtotal-original.tif";
+    auto f2 = deck / "snipp-claimtotal.tif";
 
 //    auto f2 = deck / "best-1260-249.png";
     /*auto deck = getTestDeckDirectory("deck-01");
@@ -192,6 +198,18 @@ void test_lbp_001()
 
     PIX* pix1 = normalize(pixRead(f1.c_str()));
     PIX* pix2 = normalize(pixRead(f2.c_str()));
+
+    pix2 = pixScaleToSize(pix2, pix1->w, pix1->h);
+
+    auto h1 = ImageHash::hash(pix1, ImageHash::AVERAGE);
+    auto h2 = ImageHash::hash(pix2, ImageHash::AVERAGE);
+
+    HashDistance hs ;
+    auto val = hs.distance(h1, h2);
+    auto norm = hs.normalized(h1, h2);
+
+    std::cout<< "Distance   = " << val << "\n";
+    std::cout<< "Normalized = " << norm << "\n";
 
     auto m0 = LBPMatcher::createLBP(pix1);
     auto m1 = LBPMatcher::createLBP(pix2);
@@ -233,7 +251,6 @@ void test_lbp_001()
     std::cout << "Histograms " << std::endl;
     std::cout << m0 << std::endl;
     std::cout << m1<< std::endl;
-
 }
 
 void test_lbp_002()

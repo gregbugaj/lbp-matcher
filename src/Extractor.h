@@ -4,9 +4,9 @@
 #include <string>
 #include "fileutil.h"
 
-
 /**
  * https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_template_matching/py_template_matching.html
+ * http://paulbourke.net/miscellaneous/correlate/
  */
 class Extractor
 {
@@ -30,6 +30,5 @@ public :
      */
     PIX* extract(const std::string& document, const std::string& snippet);
 };
-
 
 #endif //LBP_MATCHER_EXTRACTOR_H

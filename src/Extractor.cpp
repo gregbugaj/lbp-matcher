@@ -111,7 +111,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
     std::cout<< "Template Snippet : " << m0 << std::endl;
 
-    double max = .80;
+    double max = .60;
     Segmenter::Segment best;
 
     int counter = 0 ;
@@ -154,7 +154,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
 
         pixAtSet(bumpmap, segment.x, segment.y, 0);
 
-        BOX* box =  boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w, segment.h);
+        BOX* box =  boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w + 2, segment.h + 2);
         if(!box)
             continue;
 
@@ -181,7 +181,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             continue;
         }
 
-        PIX* snip = pixClipRectangle(documentReduced, box, NULL);
+   /*     PIX* snip = pixClipRectangle(documentReduced, box, NULL);
         auto h1 = ImageHash::hash(snip, ImageHash::AVERAGE);
         HashDistance hs;
         auto norm = hs.normalized(h1, h2);
@@ -192,6 +192,8 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         }
 
         pixDestroy(&snip);
+        */
+
         ++index;
 
         auto m1 = LBPMatcher::createLBPHistogram(matrix, dw, dh, box->x, box->y, box->w, box->h);

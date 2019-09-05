@@ -61,7 +61,7 @@ std::vector<Segmenter::Segment> Segmenter::segment(int w, int h, int templw, int
     int templHalfW = ceil((double) w / (double) templw);
     int templHalfH = ceil((double) h / (double) templh);
 
-    int step = 2;
+    int step = 1;
 
     for (int y = 0; y < h; y = y + step)
     {

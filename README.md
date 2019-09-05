@@ -1,15 +1,19 @@
 # TODO / Implement
 
+
+VERY GOOD Information
+https://www.ijcaonline.org/archives/volume153/number10/swaroop-2016-ijca-912165.pdf
+
+
 # Noise reduction by using a threashold
 
 # References 
+http://www.loc.gov/pictures/static/data/hh/resources/digitizing.html
 
 https://pdfs.semanticscholar.org/82f9/0f605287e026e00ac5d4ee34af6e3ec8bb91.pdf
 
 Efficient Spatio-Temporal Local Binary Patterns for Spontaneous Facial Micro-Expression Recognition
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4438071/
-
-
 
 
 A CO-TRAINING APPROACH TO AUTOMATIC FACE RECOGNITION

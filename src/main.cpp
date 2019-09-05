@@ -122,8 +122,8 @@ void test_extractor_001()
     auto deck = getTestDeckDirectory("private-2");
     auto document = deck / "PID_1091_7889_0_93688240_page_0004.tif";
 //    auto snip = deck / "snip-relcd-0.tif";
-//    auto snip = deck / "snipp-claimtotal.tif";
-    auto snip = deck / "snipp-claimtotal-original.tif";
+     auto snip = deck / "snipp-claimtotal.tif";
+    //auto snip = deck / "snipp-claimtotal-original.tif";
 //    auto snip = deck / "snip-interest.tif";*/
 
 /*

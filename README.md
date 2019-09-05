@@ -2,14 +2,14 @@
 
 
 VERY GOOD Information
+https://pdfs.semanticscholar.org/8e03/d2433f982a51c12c9cbb7dc8502b3d22807b.pdf
+
 https://www.ijcaonline.org/archives/volume153/number10/swaroop-2016-ijca-912165.pdf
 
 
 # Noise reduction by using a threashold
 
 # References 
-http://www.loc.gov/pictures/static/data/hh/resources/digitizing.html
-
 https://pdfs.semanticscholar.org/82f9/0f605287e026e00ac5d4ee34af6e3ec8bb91.pdf
 
 Efficient Spatio-Temporal Local Binary Patterns for Spontaneous Facial Micro-Expression Recognition

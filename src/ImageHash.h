@@ -48,6 +48,17 @@ public :
     static hash_t hash(PIX* pix, const HashMethod& method);
 
     /**
+     * Get hash value from image
+     *
+     * @param pix1 input image
+     * @param pix2 input image
+     * @param method the method used to obtain hash
+     *
+     * @return similarity in range 0-1
+     */
+    static double hash(PIX* pix1,PIX* pix2, const HashMethod& method);
+
+    /**
      * Get hash value from image provided via filename
      *
      * @param filename input image

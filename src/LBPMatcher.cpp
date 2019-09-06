@@ -65,7 +65,6 @@ bool isUniform(byte_t a)
     // 0101 0000  (4 Transitions : NonUniform) 0x50
     // 0000 1010  (4 Transitions : NonUniform) 0xA
     // 0000 1001  (3 Transitions : NonUniform) 0x9
-
     return transition_lbp(a) <= 2;
 }
 
@@ -312,21 +311,6 @@ void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
         throw std::runtime_error("Unhandled lbp type");
 }
 
-void LBPMatcher::createTexton(int **matrix, int **texton, int w, int h)
-{
-    for (int_t y = 0; y < h; ++y)
-    {
-        for (int_t x = 0; x < w; ++x)
-        {
-            double v1 = 0;
-            double v2 = 0;
-            double v3 = 0;
-            double v4 = 0;
-        }
-    }
-}
-
-
 Histogram LBPMatcher::createLBP(PIX *pix)
 {
     if(pix == nullptr)
@@ -351,10 +335,10 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];
 
-    createLBP(matrix, LbpType::ENHANCED, pix);
+    createLBP(matrix, LbpType::SIGNED, pix);
 
     // dump matrix
-    if(false)
+//    if(false)
     {
         std::cout << "LBP Matrix " << std::endl;
         std::cout << std::endl;
@@ -443,6 +427,7 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
                         break;
 
                     auto val = lbpMatrix[ya][xa];
+
                     if(val == -1)
                         continue;
 
@@ -453,7 +438,6 @@ Histogram LBPMatcher::createLBPHistogram(int **lbpMatrix, l_int32 cols, l_int32 
             ++patchIndex;
         }
     }
-
     pixDestroy(&lbpPix);
     return unified;
  }

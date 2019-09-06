@@ -7,6 +7,7 @@
 #include "DifferenceHash.h"
 #include "PerceptualHash.h"
 #include "fileutil.h"
+#include "HashDistance.h"
 
 // Handlers used to create different hashes
 ImageHash::HandlerTypeMap  ImageHash::handlers  = createHandlers();
@@ -18,16 +19,24 @@ hash_t ImageHash::hash(PIX* pix, const HashMethod& method)
     return handler->hash(pix);
 }
 
+double ImageHash::hash(PIX* pix1, PIX* pix2, const HashMethod& method)
+{
+    auto handler = ImageHash::handlers[method];
+    auto h1 = handler->hash(pix1);
+    auto h2 = handler->hash(pix2);
+
+    HashDistance hs ;
+    return hs.normalized(h1, h2);
+}
+
 hash_t ImageHash::hash(const std::string &filename, const ImageHash::HashMethod &method)
 {
     validateFileExists(filename);
     PIX* pix = pixRead(filename.c_str());
-
     if(pix)
     {
         auto hs = hash(pix, method);
         pixDestroy(&pix);
-
         return hs;
     }
 

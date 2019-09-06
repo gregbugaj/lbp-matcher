@@ -20,7 +20,6 @@
 #include "leptonutil.h"
 #include <nmmintrin.h>
 
-
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
 
@@ -34,6 +33,7 @@ void test_histogram_normalize();
 void test_extractor_001();
 void test_image_normalization();
 
+void test_histogram_scales();
 void test_heatmap_001();
 
 void test_histogram_outlier_removal();
@@ -44,20 +44,23 @@ void test_hash_001();
 int main(int argc, char* argv[])
 {
 
-//    test_histogram_normalize();
+//   test_histogram_normalize();
 //    test_histogram_append();
+
+// test_histogram_scales();
+
 //    test_lbp_000();
 //      test_lbp_001();
 //    test_lbp_003();
 //    test_histogram_scores();
-      test_extractor_001();
+//      test_extractor_001();
 //    test_heatmap_001();
     //test_image_normalization();
 
 //    test_histogram_outlier_removal();
 
 //    test_hash_001();
-//    test_lbp_createlbpmatrix();
+    test_lbp_createlbpmatrix();
     return 0;
 }
 
@@ -111,7 +114,6 @@ void test_heatmap_001()
     auto colorscale = deck / "colorscale_jet.jpg";
     /*auto pix = pixReadJpeg (colorscale.c_str(), 1, 1, nullptr, 0);
     heatmapGenerateLookupTable(pix);*/
-
 //    Pix* p = pixRead("/tmp/lbp-matcher/bumpmap.png");
     Pix* p = pixRead("/tmp/lbp-matcher/height-map-surface-representation.png");
     heatmap(p);
@@ -119,35 +121,104 @@ void test_heatmap_001()
 
 void test_extractor_001()
 {
-    auto deck = getTestDeckDirectory("private-2");
-    auto document = deck / "PID_1091_7889_0_93688240_page_0004.tif";
-//    auto snip = deck / "snip-relcd-0.tif";
-     auto snip = deck / "snipp-claimtotal.tif";
+    //    auto snip = deck / "snip-relcd-0.tif";
     //auto snip = deck / "snipp-claimtotal-original.tif";
 //    auto snip = deck / "snip-interest.tif";*/
-
 /*
     auto deck = getTestDeckDirectory("private");
     auto document = deck / "clip2.tif";
     auto snip = deck / "patch-1185.png";*/
 
+    auto deck = getTestDeckDirectory("private-2");
+    auto document = deck / "sub01-300dpi.tif";
+    auto snip = deck / "snippet-04-300dpi.tif";
+
     Extractor extractor;
     extractor.extract(document, snip);
 }
 
+void test_histogram_scales()
+{
+    auto deck = getTestDeckDirectory("private-2");
+    auto snip = deck / "snippet-02-300dpi.tif";
+
+    PIX* pix1 = pixUpscaleToGray(snip.c_str());
+    PIX* pix2  = pixScale(pix1, .9f, .9f);
+    PIX* pix3  = pixScale(pix1, 1.1f, 1.1f);
+
+    auto m0 = LBPMatcher::createLBP(pix1);
+    auto m1 = LBPMatcher::createLBP(pix2);
+    auto m2 = LBPMatcher::createLBP(pix3);
+
+    std::cout << "Histograms " << std::endl;
+    std::cout << "Full : " << m0 << std::endl;
+    std::cout << "Down : " << m1 << std::endl;
+    std::cout << "Up : " << m2 << std::endl;
+
+    pixWritePng("/tmp/lbp-matcher/full.png", pix1, 0);
+    pixWritePng("/tmp/lbp-matcher/down.png", pix2, 0);
+    pixWritePng("/tmp/lbp-matcher/up.png", pix3, 0);
+}
+
 void test_lbp_createlbpmatrix()
 {
-    auto deck = getTestDeckDirectory("deck-01");
-    auto f1 = deck / "27.png";
+    auto deck = getTestDeckDirectory("private-2");
+    auto f1 = deck / "snippet-02-300dpi.tif";
+    //auto f2 = deck / "snippet-03-300dpi.tif";
+    auto f2 = deck / "snippet-04-300dpi.tif";
 
     std::cout <<"Test deck dir : " << deck << std::endl;
     std::cout <<"Test f1 : " << f1 << std::endl;
+    std::cout <<"Test f1 : " << f2 << std::endl;
 
-    PIX* pix1 = pixUpscaleToGray(f1.c_str());
+    PIX* pix1 = normalize(pixRead(f1.c_str()));
+    PIX* pix2 = normalize(pixRead(f2.c_str()));
+
+    pix1 = pixClipToBoundingBox(pix1);
+    pix2 = pixClipToBoundingBox(pix2);
+
+    l_float32 scalex = pix2->w * 1.0 / pix1 ->w * 1.0;
+    l_float32 scaley = pix2->h * 1.0 / pix1 ->h * 1.0;
+
+    std::cout<< scalex << " : " << scaley << std::endl;
+    pix1 = pixScale(pix1, scalex, scaley);
+
+    pixWritePng("/tmp/lbp-matcher/pix1.png", pix1, 0);
+    pixWritePng("/tmp/lbp-matcher/pix2.png", pix2, 0);
+
+/*    pix1 = pixScale(pix1, 2, 2);
+    pix2 = pixScale(pix2, 2, 2);*/
+
+    auto norm = ImageHash::hash(pix1, pix2, ImageHash::AVERAGE);
+    std::cout<< "Hash :: " << norm << " : " << norm << std::endl;
 
     auto m0 = LBPMatcher::createLBP(pix1);
-    std::cout << "Histograms " << std::endl;
+    auto m1 = LBPMatcher::createLBP(pix2);
+
+    HistogramComparison comp;
+    auto type = HistogramComparison::CompareType::CHI_SQUARED;
+
+    std::cout << "Histograms Raw " << std::endl;
     std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    m0.normalize();
+    m1.normalize();
+
+    std::cout << "Histograms Outliers " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    auto s0 = comp.compare(m0, m0, type);
+    auto s1 = comp.compare(m1, m1, type);
+    auto s2 = comp.compare(m0, m1, type);
+    auto s3 = comp.compare(m1, m0, type);
+
+    std::cout << "Scores :" << std::endl;
+    std::cout << "s0 : " << std::dec << s0  << std::endl;
+    std::cout << "s1 : " << std::dec << s1  << std::endl;
+    std::cout << "s2 : " << std::dec << s2  << std::endl;
+    std::cout << "s3 : " << std::dec << s3  << std::endl;
 }
 
 void test_lbp_000()

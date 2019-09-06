@@ -44,16 +44,16 @@ PIX* reduce(PIX* pix, int_t reductions)
 
     PIX* local = pixClone(pix);
     int_t n    = reductions;
-
     while (n > 0)
     {
         local = pixScaleAreaMap2(local);
         char f[255];
-        sprintf(f, "/tmp/lbp-matcher/reduce-%d.png",n);
+        sprintf(f, "/tmp/lbp-matcher/reduce-%d.png", (reductions - n));
         pixWritePng(f, local, 0);
 
         if(!local)
             return nullptr;
+
         --n;
     }
 
@@ -66,7 +66,11 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     PIX* documentNorm = normalize(document);
     PIX* snippetNorm  = normalize(snippet);
 
-    auto reductions = 0;// calculate_reductions(std::max(dw, dh));
+    documentNorm = pixScale(documentNorm, 2, 2);
+    snippetNorm = pixScale(snippetNorm, 2, 2);
+
+    auto reductions =  0; //calculate_reductions(std::max(document->w, document->h));
+    std::cout << "Reduction : "<< reductions <<"\n";
     auto documentReduced = reduce(documentNorm, reductions);
     auto snippetReduced  = reduce(snippetNorm, reductions);
     auto documentReducedBitonal = pixConvertTo1(documentReduced, 127);
@@ -111,7 +115,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     auto type = HistogramComparison::CompareType::CHI_SQUARED;
     std::cout<< "Template Snippet : " << m0 << std::endl;
 
-    double max = .60;
+    double max = .65;
     Segmenter::Segment best;
 
     int counter = 0 ;
@@ -129,8 +133,8 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
     pixCountPixels(snippetReducedBitonal, &templateSnippetPixelCount, nullptr);
 
     int half = templateSnippetPixelCount / 2;
-    int lower = templateSnippetPixelCount - half;
-    int upper = templateSnippetPixelCount + half;
+    int lower = templateSnippetPixelCount - half / 3;
+    int upper = templateSnippetPixelCount + half / 3;
 
     int halfConnection = snippetConnections / 2;
     int lowerConnection = snippetConnections - halfConnection;
@@ -153,8 +157,8 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         auto h = segment.w;
 
         pixAtSet(bumpmap, segment.x, segment.y, 0);
-
         BOX* box =  boxCreate(std::max(0, segment.x), std::max(0, segment.y), segment.w + 2, segment.h + 2);
+
         if(!box)
             continue;
 
@@ -166,7 +170,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
         l_int32 snippetPixelCount = 0;
         pixCountPixels(snippetBitonal, &snippetPixelCount, nullptr);
 
-        if(snippetPixelCount == 0  || snippetPixelCount < lower || snippetPixelCount > upper)
+        if(snippetPixelCount == 0 || snippetPixelCount < lower || snippetPixelCount > upper)
         {
             pixDestroy(&snippetBitonal);
             continue;
@@ -181,7 +185,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
             continue;
         }
 
-   /*     PIX* snip = pixClipRectangle(documentReduced, box, NULL);
+        /* PIX* snip = pixClipRectangle(documentReduced, box, NULL);
         auto h1 = ImageHash::hash(snip, ImageHash::AVERAGE);
         HashDistance hs;
         auto norm = hs.normalized(h1, h2);

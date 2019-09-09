@@ -1,8 +1,6 @@
 #include <iostream>
-#include <algorithm>
 #include <bitset>
 #include <set>
-#include <iterator>
 #include <complex>
 #include <vector>
 
@@ -338,7 +336,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
     createLBP(matrix, LbpType::SIGNED, pix);
 
     // dump matrix
-//    if(false)
+    if(false)
     {
         std::cout << "LBP Matrix " << std::endl;
         std::cout << std::endl;

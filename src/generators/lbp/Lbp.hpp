@@ -3,14 +3,14 @@
 
 #include <LbpGenerator.hpp>
 
-class LBP : LBPGenerator {
-
+/**
+ * Original Local Binary Pattern
+ */
+class LBP : public LBPGenerator {
 public:
-
     LBP();
+    void generate(int** matrix, PIX* pix) const;
     ~LBP();
-
-    void generate(int** matrix, PIX* pix);
 };
 
 #endif //LBP_MATCHER_LBP_HPP

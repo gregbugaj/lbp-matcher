@@ -312,3 +312,30 @@ PIX* reduce(PIX *pix, int width, int height)
 {
     return pixScaleToSize(pix, width, height);
 }
+
+void pixFromMatrix(int **matrix, int rows, int cols, char *filename)
+{
+    PIX* pix = pixFromMatrix(matrix, rows, cols);
+    pixWritePng(filename, pix, 1);
+    pixDestroy(&pix);
+}
+
+PIX* pixFromMatrix(int **matrix, int rows, int cols)
+{
+    int w = cols;
+    int h = rows;
+    PIX* pix = pixCreate(w, h, 8);
+    pixSetResolution(pix, 300, 300);
+    l_int32 wpl = pixGetWpl(pix);
+    l_uint32* data = pixGetData(pix);
+
+    for (int_t y = 0; y < h; ++y)
+    {
+        l_uint32* line = data + y * wpl;
+        for (int_t x = 0; x < w; ++x)
+        {
+            SET_DATA_BYTE(line, x, matrix[y][x]);
+        }
+    }
+    return pix;
+}

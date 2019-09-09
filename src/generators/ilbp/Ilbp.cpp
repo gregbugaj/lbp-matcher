@@ -1,10 +1,10 @@
-#include "Lbp.hpp"
+#include "Ilbp.hpp"
 
-LBP::LBP() {
-    std::cout<<"Constructor LBP" << std::endl;
+ILBP::ILBP() {
+    std::cout<<"Constructor ILBP" << std::endl;
 }
 
-void LBP::generate(int **matrix, PIX *pix) const {
+void ILBP::generate(int **matrix, PIX *pix) const {
     std::cout<<"Generate : LBP" << std::endl;
     // deal with padding
     l_int32  pad = 1;
@@ -43,15 +43,15 @@ void LBP::generate(int **matrix, PIX *pix) const {
             l_int32 p8 = pixAtGetSan(image, h, w,  x - 1, y    );
 
             byte_t  out = 0;
-
-            out |=   ((p1 > p0) << 7)
-                     | ((p2 > p0) << 6)
-                     | ((p3 > p0) << 5)
-                     | ((p4 > p0) << 4)
-                     | ((p5 > p0) << 3)
-                     | ((p6 > p0) << 2)
-                     | ((p7 > p0) << 1)
-                     | ((p8 > p0) << 0);
+            double m =  (p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 8;
+            out |=   ((p1 > m) << 7)
+                     | ((p2 > m) << 6)
+                     | ((p3 > m) << 5)
+                     | ((p4 > m) << 4)
+                     | ((p5 > m) << 3)
+                     | ((p6 > m) << 2)
+                     | ((p7 > m) << 1)
+                     | ((p8 > m) << 0);
 
             matrix[y - pad][x - pad] = out;
         }
@@ -61,6 +61,6 @@ void LBP::generate(int **matrix, PIX *pix) const {
     delete[] image;
 }
 
-LBP::~LBP() {
-    std::cout<<"Destructor LBP" << std::endl;
+ILBP::~ILBP() {
+    std::cout<<"Destructor ILBP" << std::endl;
 }

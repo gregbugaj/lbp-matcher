@@ -19,6 +19,10 @@
 #include "heatmap.h"
 #include "leptonutil.h"
 #include <nmmintrin.h>
+#include <generators/lbp/Lbp.hpp>
+#include <generators/elbp/Elbp.hpp>
+#include <generators/slbp/Slbp.hpp>
+#include <generators/ilbp/Ilbp.hpp>
 
 using namespace std::chrono;
 namespace  fs = std::experimental::filesystem;
@@ -41,9 +45,12 @@ void test_lbp_createlbpmatrix();
 
 void test_hash_001();
 
+void test_lbp_generators();
+
 int main(int argc, char* argv[])
 {
 
+    test_lbp_generators();
 //   test_histogram_normalize();
 //    test_histogram_append();
 
@@ -60,7 +67,7 @@ int main(int argc, char* argv[])
 //    test_histogram_outlier_removal();
 
 //    test_hash_001();
-    test_lbp_createlbpmatrix();
+    //test_lbp_createlbpmatrix();
     return 0;
 }
 
@@ -136,6 +143,49 @@ void test_extractor_001()
     Extractor extractor;
     extractor.extract(document, snip);
 }
+
+void test_lbp_generators()
+{
+    auto deck = getTestDeckDirectory("private-2");
+    auto snip = deck / "snippet-02-300dpi.tif";
+
+    PIX* pix1 = pixUpscaleToGray(snip.c_str());
+
+    LBP gen1;
+    ILBP gen2;
+    ELBP gen3;
+    //SLBP gen3;
+
+    auto m0 = LBPMatcher::createLBP(pix1, gen1);
+    auto m1 = LBPMatcher::createLBP(pix1, gen2);
+    auto m3 = LBPMatcher::createLBP(pix1, gen3);
+
+    auto h = pix1->h;
+    auto w = pix1->w;
+
+    char f2[255];
+    sprintf(f2, "/tmp/lbp-matcher/refactor-LBP.png");
+    pixFromMatrix(m0, h, w, f2);
+
+    sprintf(f2, "/tmp/lbp-matcher/refactor-ILBP.png");
+    pixFromMatrix(m1, h, w, f2);
+
+    sprintf(f2, "/tmp/lbp-matcher/refactor-ELBP.png");
+    pixFromMatrix(m3, h, w, f2);
+
+    /*
+     *     auto m2 = LBPMatcher::createLBP(pix1, gen3);
+    std::cout << "Histograms " << std::endl;
+    std::cout << "Full : " << m0 << std::endl;
+    std::cout << "Down : " << m1 << std::endl;
+    std::cout << "Up : " << m2 << std::endl;
+
+    pixWritePng("/tmp/lbp-matcher/full.png", pix1, 0);
+    pixWritePng("/tmp/lbp-matcher/down.png", pix1, 0);
+    pixWritePng("/tmp/lbp-matcher/up.png", pix1, 0);
+     */
+}
+
 
 void test_histogram_scales()
 {

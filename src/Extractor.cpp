@@ -105,7 +105,7 @@ PIX* Extractor::extract(PIX* document, PIX* snippet)
 
     char f2[255];
     sprintf(f2, "/tmp/lbp-matcher/extract-lbp.png");
-    LBPMatcher::pixFromMatrix(matrix, dh, dw, f2);
+    pixFromMatrix(matrix, dh, dw, f2);
 
     auto m0 = LBPMatcher::createLBP(snippetReduced);
     m0.normalizeOutliers();
@@ -310,7 +310,7 @@ PIX* extractAA(PIX* document, PIX* snippet)
 
     char f2[255];
     sprintf(f2, "/tmp/lbp-matcher/extract-lbp.png");
-    LBPMatcher::pixFromMatrix(matrix, dh, dw, f2);
+    pixFromMatrix(matrix, dh, dw, f2);
 
     auto m0 = LBPMatcher::createLBP(snippetNorm);
     m0.normalizeOutliers();

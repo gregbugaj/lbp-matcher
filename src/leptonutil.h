@@ -108,10 +108,32 @@ PIX* normalize(PIX *pix, int padLeft, int padRight, int padTop, int padBottom);
 PIX* reduce(PIX *pix, int width, int height) ;
 
 /**
- * Pix count on pixlels
- * @param pix the pix to count pixles for
+ * Pix count on pixels
+ * @param pix the pix to count pixels for
  *
  * @return count of on pixels
  */
 int_t pixCountPixelsFast(PIX* pix);
+
+
+/**
+ * Dump the LBP matrix
+ *
+ * @param matrix the lbp matrix to dump
+ * @param row the height of the matrix
+ * @param cols the width of the matrix
+ * @param filename the filename to output pix data to
+ */
+void pixFromMatrix(int **matrix, int rows, int cols, char* filename);
+
+/**
+ * Dump the LBP matrix
+ *
+ * @param matrix the lbp matrix to dump
+ * @param row the height of the matrix
+ * @param cols the width of the matrix
+ * @param filename the filename to output pix data to
+ */
+PIX* pixFromMatrix(int **matrix, int rows, int cols);
+
 #endif //LBP_MATCHER_LEPTONUTIL_H

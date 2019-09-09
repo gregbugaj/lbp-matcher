@@ -12,8 +12,6 @@
 
 using namespace std::chrono;
 
-typedef std::vector<std::pair<int_t, int_t>> neighbor_list;
-
 bool debug_box_pix = false;
 
 void clamp(std::pair<int_t, int_t>& p, const int& w, const int& h)
@@ -27,34 +25,6 @@ int sign(l_int32 point, l_int32  center)
     return (point - center) >= 0 ? 1 : 0;
 }
 
-void LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols, char *filename)
-{
-    PIX* pix = pixFromMatrix(matrix, rows, cols);
-    pixWritePng(filename, pix, 1);
-    pixDestroy(&pix);
-}
-
-PIX* LBPMatcher::pixFromMatrix(int **matrix, int rows, int cols)
-{
-    int w = cols;
-    int h = rows;
-    PIX* pix = pixCreate(w, h, 8);
-    pixSetResolution(pix, 300, 300);
-    l_int32 wpl = pixGetWpl(pix);
-    l_uint32* data = pixGetData(pix);
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        l_uint32* line = data + y * wpl;
-        for (int_t x = 0; x < w; ++x)
-        {
-            SET_DATA_BYTE(line, x, matrix[y][x]);
-        }
-    }
-    return pix;
-}
-
-
 bool isUniform(byte_t a)
 {
     // Uniform descriptors
@@ -66,22 +36,6 @@ bool isUniform(byte_t a)
     return transition_lbp(a) <= 2;
 }
 
-// typical configurations
-// P, R = (8, 1), (16, 2) and (8, 2)
-neighbor_list neighbors(int_t x, int_t y, int_t radius, int_t points)
-{
-    std::vector<std::pair<int_t, int_t>> out;
-    for (int p = 0; p < points; ++p)
-    {
-        // If we don't round we would need to use use bilinear interpolation without rounding
-        double t = (2 * M_PI * p) / points;
-        int xp = round(x + radius * cos(t));
-        int yp = round(y - radius * sin(t));
-
-        out.push_back(std::make_pair(xp, yp));
-    }
-    return out;
-}
 // https://tpgit.github.io/Leptonica/arithlow_8c_source.html#l00161
 
 /**
@@ -144,50 +98,9 @@ inline l_int32 pixAtGetSan(int** data, int_t h, int_t w, int_t x, int_t y)
 {
     if(y < 0 || y >= h || x < 0 || x >= w)
         return 0;
-
     return data[y][x];
 }
 
-/**
- * Crate Local Binary Pattern image
- *
- * @param matrix the lbp matrix to populate
- * @param pix the pix to generate lbp for
- */
-void generateLbpNormal(int** matrix, PIX* pix)
-{
-    int_t w = pix->w;
-    int_t h = pix->h;
-
-    for (int_t y = 0; y < h; ++y)
-    {
-        for (int_t x = 0; x < w; ++x)
-        {
-            l_int32 p0 = pixAtGetSan(pix, x,     y    ); // Center
-            l_int32 p1 = pixAtGetSan(pix, x - 1, y - 1);
-            l_int32 p2 = pixAtGetSan(pix, x,     y - 1);
-            l_int32 p3 = pixAtGetSan(pix, x + 1, y - 1);
-            l_int32 p4 = pixAtGetSan(pix, x + 1, y    );
-            l_int32 p5 = pixAtGetSan(pix, x + 1, y + 1);
-            l_int32 p6 = pixAtGetSan(pix, x    , y + 1);
-            l_int32 p7 = pixAtGetSan(pix, x - 1, y + 1);
-            l_int32 p8 = pixAtGetSan(pix, x - 1, y);
-
-            byte_t  out = 0;
-
-            out |=   ((p0 > p1) << 7)
-                     | ((p0 > p2) << 6)
-                     | ((p0 > p3) << 5)
-                     | ((p0 > p4) << 4)
-                     | ((p0 > p5) << 3)
-                     | ((p0 > p6) << 2)
-                     | ((p0 > p7) << 1)
-                     | ((p0 > p8) << 0);
-
-            matrix[y][x] = out;
-        }
-    }
-}
 
 /**
  * Crate Enhanced (improved) Local Binary Pattern image
@@ -294,14 +207,45 @@ void generateLbpSigned(int** matrix, PIX* pix)
     }
 }
 
+void LBPMatcher::createLBP(int** matrix, PIX* pix, const LBPGenerator& generator)
+{
+    if(pix->d != 8)
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+
+    generator.generate(matrix, pix);
+}
+
+int** LBPMatcher::createLBP(PIX* pix,const LBPGenerator& generator)
+{
+    if(pix->d != 8)
+        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
+
+    static int counter = 0;
+    if(debug_box_pix)
+    {
+        char f1[255];
+        sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
+        pixWritePng(f1, pix, 0);
+    }
+
+    auto w = pix->w;
+    auto h = pix->h;
+    auto** matrix = new int*[h];
+
+    for (int_t y = 0; y < h; ++y)
+        matrix[y] = new int[w];
+
+    createLBP(matrix, pix, generator);
+
+    return matrix;
+}
+
 void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
 {
     if(pix->d != 8)
         throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
-    if(type == LbpType ::NORMAL)
-        generateLbpNormal(matrix, pix);
-    else if(type == LbpType ::ENHANCED)
+    if(type == LbpType ::ENHANCED)
         generateLbpEnhanced(matrix, pix);
     else if(type == LbpType ::SIGNED)
         generateLbpSigned(matrix, pix);
@@ -328,7 +272,7 @@ Histogram LBPMatcher::createLBP(PIX *pix)
         pixWritePng(f1, pix, 0);
     }
 
-    // matrix that will be populated with LBP Microtextons and Textons(4 types)
+    // matrix that will be populated with LBP Microtextons
     int** matrix = new int*[h];
     for (int_t y = 0; y < h; ++y)
         matrix[y] = new int[w];

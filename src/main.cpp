@@ -144,46 +144,101 @@ void test_extractor_001()
     extractor.extract(document, snip);
 }
 
-void test_lbp_generators()
-{
+
+void test_lbp_generators() {
+
+    /* auto deck = getTestDeckDirectory("template-claim");
+     auto snip = deck / "0.png";
+     auto snip2 = deck / "3.png";
+    */
+
     auto deck = getTestDeckDirectory("private-2");
-    auto snip = deck / "snippet-02-300dpi.tif";
+    auto snip = deck / "sub01-300dpi.tif";
+
+//    auto deck = getTestDeckDirectory("set-color");
+//    auto snip = deck / "194045.jpg";
+//    PIX *pix1 = pixUpscaleToGray(snip.c_str());
+
+    PIX *pix1 = normalize(pixRead(snip.c_str()));
+
+    LBP gen1;
+    ILBP gen2;
+    ELBP gen3;
+
+    auto d4 = LBPMatcher::createLBP(pix1, gen3);
+    char f2[255];
+    sprintf(f2, "/tmp/lbp-matcher/refactor-ELBP-sub01-300dpi.png");
+    pixFromMatrix(d4, pix1->h, pix1->w, f2);
+}
+
+void test_lbp_generatorsXX()
+{
+    auto deck = getTestDeckDirectory("template-claim");
+    auto snip = deck / "0.png";
+    auto snip2 = deck / "9.png";
+
+    //auto deck = getTestDeckDirectory("private-2");
+    //auto document = deck / "sub01-300dpi.tif";
 
     PIX* pix1 = pixUpscaleToGray(snip.c_str());
+    PIX* pix2 = pixUpscaleToGray(snip2.c_str());
 
     LBP gen1;
     ILBP gen2;
     ELBP gen3;
     //SLBP gen3;
 
-    auto m0 = LBPMatcher::createLBP(pix1, gen1);
-    auto m1 = LBPMatcher::createLBP(pix1, gen2);
-    auto m3 = LBPMatcher::createLBP(pix1, gen3);
+    auto d0 = LBPMatcher::createLBP(pix1, gen1);
+    auto d1 = LBPMatcher::createLBP(pix1, gen2);
+    auto d3 = LBPMatcher::createLBP(pix1, gen3);
+    auto d4 = LBPMatcher::createLBP(pix2, gen3);
 
     auto h = pix1->h;
     auto w = pix1->w;
 
     char f2[255];
     sprintf(f2, "/tmp/lbp-matcher/refactor-LBP.png");
-    pixFromMatrix(m0, h, w, f2);
+    pixFromMatrix(d0, h, w, f2);
 
     sprintf(f2, "/tmp/lbp-matcher/refactor-ILBP.png");
-    pixFromMatrix(m1, h, w, f2);
+    pixFromMatrix(d1, h, w, f2);
 
     sprintf(f2, "/tmp/lbp-matcher/refactor-ELBP.png");
-    pixFromMatrix(m3, h, w, f2);
+    pixFromMatrix(d3, h, w, f2);
 
-    /*
-     *     auto m2 = LBPMatcher::createLBP(pix1, gen3);
-    std::cout << "Histograms " << std::endl;
-    std::cout << "Full : " << m0 << std::endl;
-    std::cout << "Down : " << m1 << std::endl;
-    std::cout << "Up : " << m2 << std::endl;
+    sprintf(f2, "/tmp/lbp-matcher/refactor-ELBP2.png");
+    pixFromMatrix(d4, pix2->h, pix2->w, f2);
 
-    pixWritePng("/tmp/lbp-matcher/full.png", pix1, 0);
-    pixWritePng("/tmp/lbp-matcher/down.png", pix1, 0);
-    pixWritePng("/tmp/lbp-matcher/up.png", pix1, 0);
-     */
+    auto m0 = LBPMatcher::createLBPHistogram(d3, w, h, 0, 0, w, h);
+    auto m1 = LBPMatcher::createLBPHistogram(d4, pix2->w, pix2->h, 0, 0, pix2->w, pix2->h);
+
+    std::cout<< "m0 : " << m0 << std::endl;
+    std::cout<< "m1 : " << m1 << std::endl;
+
+    HistogramComparison comp;
+    auto type = HistogramComparison::CompareType::CHI_SQUARED;
+
+    std::cout << "Histograms Raw " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    m0.normalize();
+    m1.normalize();
+
+    std::cout << "Histograms Outliers " << std::endl;
+    std::cout << m0 << std::endl;
+    std::cout << m1<< std::endl;
+
+    auto s0 = comp.compare(m0, m0, type);
+    auto s1 = comp.compare(m1, m1, type);
+    auto s2 = comp.compare(m0, m1, type);
+    auto s3 = comp.compare(m1, m0, type);
+
+    std::cout << "Scores :" << std::endl;
+    std::cout << "s0 : " << std::dec << s0  << std::endl;
+    std::cout << "s1 : " << std::dec << s1  << std::endl;
+    std::cout << "s2 : " << std::dec << s2  << std::endl;
+    std::cout << "s3 : " << std::dec << s3  << std::endl;
 }
 
 

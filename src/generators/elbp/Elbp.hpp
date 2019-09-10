@@ -6,6 +6,8 @@
 /**
  * Enhanced Local Binary Pattern
  *
+ * https://liris.cnrs.fr/Documents/Liris-5004.pdf
+ *
  * 1) For every pixel(x, y) in an image, I, choose P neighboring pixels at a radius R.
  * 2) Calculate the intensity difference of the current pixel (x, y) with the P neighboring pixels.
  * 3. Threshold the intensity difference, such that all the negative differences are assigned 0 and all the positive differences are assigned 1, forming a bit vector.
@@ -20,19 +22,26 @@ public:
     ~ELBP();
 
 protected:
+
     // typical configurations
     // P, R = (8, 1), (16, 2) and (8, 2)
-    neighbor_list neighborscd(int_t x, int_t y, int_t radius, int_t points) const
+    neighbor_list neighbor(int_t x, int_t y, int_t radius, int_t points) const
     {
         std::vector<std::pair<int_t, int_t>> out;
+
         for (int p = 0; p < points; ++p)
         {
             // If we don't round we would need to use use bilinear interpolation without rounding
             double t = (2 * M_PI * p) / points;
-            int xp = round(x + radius * cos(t));
-            int yp = round(y - radius * sin(t));
+            double xx = x + radius * cos(t);
+            double yy = y - radius * sin(t);
 
-            out.push_back(std::make_pair(xp, yp));
+            int fx = static_cast<int>(floor(xx));
+            int fy = static_cast<int>(floor(yy));
+            int cx = static_cast<int>(ceil(xx));
+            int cy = static_cast<int>(ceil(yy));
+
+            out.push_back(std::make_pair(fx, fy));
         }
         return out;
     }

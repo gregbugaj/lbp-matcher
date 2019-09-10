@@ -221,7 +221,7 @@ int** LBPMatcher::createLBP(PIX* pix,const LBPGenerator& generator)
         throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
 
     static int counter = 0;
-    if(debug_box_pix)
+    if(true)
     {
         char f1[255];
         sprintf(f1, "/tmp/lbp-matcher/lbp-normalized-%d.png", counter);
@@ -230,10 +230,14 @@ int** LBPMatcher::createLBP(PIX* pix,const LBPGenerator& generator)
 
     auto w = pix->w;
     auto h = pix->h;
-    auto** matrix = new int*[h];
 
+    // new matrix and zero it out
+    int** matrix = new int*[h];
     for (int_t y = 0; y < h; ++y)
+    {
         matrix[y] = new int[w];
+        memset(matrix[y], 0, w * sizeof(int));
+    }
 
     createLBP(matrix, pix, generator);
 
@@ -242,15 +246,7 @@ int** LBPMatcher::createLBP(PIX* pix,const LBPGenerator& generator)
 
 void LBPMatcher::createLBP(int** matrix, LbpType type, PIX* pix)
 {
-    if(pix->d != 8)
-        throw std::runtime_error("PIX BPP (bits per pixel) expected to be 8 but got " + std::to_string(pix->d));
-
-    if(type == LbpType ::ENHANCED)
-        generateLbpEnhanced(matrix, pix);
-    else if(type == LbpType ::SIGNED)
-        generateLbpSigned(matrix, pix);
-    else
-        throw std::runtime_error("Unhandled lbp type");
+  throw std::runtime_error("createLBP not supported");
 }
 
 Histogram LBPMatcher::createLBP(PIX *pix)

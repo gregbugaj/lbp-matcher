@@ -315,6 +315,21 @@ PIX* reduce(PIX *pix, int width, int height)
 
 void pixFromMatrix(int **matrix, int rows, int cols, char *filename)
 {
+    std::cout << "LBP Matrix " << std::endl;
+    std::cout << std::endl;
+    for (int_t y = 0; y < rows; ++y)
+    {
+        std::cout << std::setw(3)  << y << " : ";
+        for (int_t x = 0; x < cols; ++x)
+        {
+            auto val = matrix[y][x];
+            std::cout <<std::setw(3) << val << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+
     PIX* pix = pixFromMatrix(matrix, rows, cols);
     pixWritePng(filename, pix, 1);
     pixDestroy(&pix);

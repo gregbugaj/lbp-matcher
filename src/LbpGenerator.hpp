@@ -23,7 +23,7 @@ public:
     {
         if(y < 0 || y >= h || x < 0 || x >= w)
             return 0;
-        return data[y][x];
+        return  data[y][x];
     }
 
     /**

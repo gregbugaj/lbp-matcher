@@ -1,5 +1,10 @@
 # TODO / Implement
 
+# mxnet setup
+``
+sudo apt-get install libblas-dev liblapack-dev
+```
+
 
 VERY GOOD Information
 https://pdfs.semanticscholar.org/8e03/d2433f982a51c12c9cbb7dc8502b3d22807b.pdf

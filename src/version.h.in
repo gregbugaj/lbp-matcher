@@ -1,0 +1,11 @@
+#ifndef __VERSION_H_
+#define __VERSION_H_
+
+#define PROGRAM_NAME "lbp-matcher"
+#define VERSION_MAJOR "1"
+#define VERSION_MINOR "0"
+#define VERSION_PATCH "0"
+#define GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
+
+#endif
+

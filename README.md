@@ -1,9 +1,81 @@
 # TODO / Implement
 
+https://github.com/Kolkir/mlcpp
+https://cocodataset.org/#home
+https://github.com/h2oai/deepwater
+https://www.h2o.ai/
+
+https://github.com/h2oai/deepwater/blob/master/mxnet/image_train.cxx
+
+
 # mxnet setup
 ``
 sudo apt-get install libblas-dev liblapack-dev
 ```
+
+https://medium.com/analytics-vidhya/cnns-architectures-lenet-alexnet-vgg-googlenet-resnet-and-more-666091488df5
+
+https://github.com/julitopower/FindMxNet
+https://github.com/c3sr/scope/tree/master/cmake/modules
+
+
+http://34.201.8.176/versions/1.1.0/install/ubuntu_setup.html
+https://nextjournal.com/mpd/compiling-mxnet
+
+https://github.com/dmlc/gluon-cv/blob/master/scripts/deployment/cpp-inference/CMakeLists.txt
+
+
+sudo apt-cache search libgl | grep '^libgl[^a-z]'
+
+libgl1-mesa-dev - free implementation of the OpenGL API -- GLX development files
+libgl1-mesa-dri - free implementation of the OpenGL API -- DRI modules
+
+
+Build without CUDE/OpenCV
+https://github.com/RobotLocomotion/drake/issues/2087
+
+$ sudo rm /usr/lib/x86_64-linux-gnu/libGL.so
+$ sudo ln -s /usr/lib/libGL.so.1 /usr/lib/x86_64-linux-gnu/libGL.so
+
+cmake -DUSE_CPP_PACKAGE=1 -DUSE_OPENCV=0 -DCMAKE_BUILD_TYPE=Release -GNinja ..
+
+
+Build without CUDA support
+
+mkdir -p build
+cmake -DUSE_CUDA=0 -DUSE_CUDA_PATH=/usr/local/cuda -DUSE_CUDNN=1 -DUSE_MKLDNN=1 -DUSE_CPP_PACKAGE=1 -DCMAKE_BUILD_TYPE=Release -GNinja ..
+ninja -v
+
+
+ninja -v
+[1/23] cd /home/gbugaj/dev/3rdparty/mxnet/cpp-package/scripts && echo Running:\ OpWrapperGenerator.py && python OpWrapperGenerator.py /home/gbugaj/dev/3rdparty/mxnet/build/libmxnet.so
+Running: OpWrapperGenerator.py
+
+
+Build with CUDA ls
+
+
+cmake -DUSE_CUDA=1 -DUSE_CUDA_PATH=/usr/local/cuda -DUSE_CUDNN=1 -DUSE_MKLDNN=1 -DUSE_CPP_PACKAGE=1 -DCMAKE_BUILD_TYPE=Release -GNinja ..
+ninja -v
+
+sudo apt-get install -y build-essential libatlas-base-dev libopencv-dev graphviz virtualenv cmake ninja-build libopenblas-dev liblapack-dev python3-dev
+
+
+make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas
+
+
+Makefile:362: WARNING: Significant performance increases can be achieved by installing and enabling gperftools or jemalloc development packages
+cd /home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core; make libdmlc.a USE_SSE=1 config=/home/gbugaj/dev/3rdparty/mxnet/make/config.mk; cd /home/gbugaj/dev/3rdparty/mxnet
+g++ -shared -fPIC example/lib_api/mylib.cc -o libsample_lib.so -I include/mxnet
+make[1]: Entering directory '/home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core'
+make[1]: 'libdmlc.a' is up to date.
+make[1]: Leaving directory '/home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core'
+
+
+https://mxnet.apache.org/api/cpp/docs/tutorials/basics
+----------------------------------
+
+
 
 
 VERY GOOD Information

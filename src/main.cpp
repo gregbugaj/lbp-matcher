@@ -15,12 +15,11 @@ void train_mxnet();
 static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
 // static Context global_ctx(mxnet::cpp::kCPU,0);
 
-
 int main(int argc, char const *argv[]) {
     std::cout << "MxNet Base";
     try {
         Lenet lenet;
-        lenet.Run(2);
+        lenet.Run(4);
         MXNotifyShutdown();
     } catch (dmlc::Error &err) {
         LG << "Status: FAIL";

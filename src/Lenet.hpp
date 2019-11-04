@@ -39,16 +39,51 @@ public:
 #endif
     {}
 
-    void Run(int max_epoch) {
-        /*
-         * LeCun, Yann, Leon Bottou, Yoshua Bengio, and Patrick Haffner.
-         * "Gradient-based learning applied to document recognition."
-         * Proceedings of the IEEE (1998)
-         * */
+    /**
+     * Load checkpoint
+     *
+     * @param filepath
+     * @param exe
+     */
+    void LoadCheckpoint(const std::string filepath, Executor* exe) {
+        std::map<std::string, NDArray> params = NDArray::LoadToMap(filepath);
+        for (auto iter : params) {
+            auto type = iter.first.substr(0, 4);
+            auto name = iter.first.substr(4);
+            NDArray target;
+            if (type == "arg:")
+                target = exe->arg_dict()[name];
+            else if (type == "aux:")
+                target = exe->aux_dict()[name];
+            else
+                continue;
+            iter.second.CopyTo(&target);
+        }
+    }
 
+    /**
+     * Save current check point
+     * @param filepath
+     * @param net
+     * @param exe
+     */
+    void SaveCheckpoint(const std::string filepath, Symbol net, Executor* exe) {
+
+        auto save_args = exe->arg_dict();
+        /*we do not want to save the data and label*/
+        save_args.erase("data");
+        save_args.erase("label");
+        // copy any aux array
+        for (auto iter : exe->aux_dict()){
+            save_args.insert({"aux:" + iter.first, iter.second});
+        }
+        NDArray::Save(filepath, save_args);
+    }
+
+    void Run(int max_epoch) {
         /*define the symbolic net*/
         Symbol data = Symbol::Variable("data");
-        Symbol data_label = Symbol::Variable("data_label");
+        Symbol data_label = Symbol::Variable("label");
         Symbol conv1_w("conv1_w"), conv1_b("conv1_b");
         Symbol conv2_w("conv2_w"), conv2_b("conv2_b");
         Symbol conv3_w("conv3_w"), conv3_b("conv3_b");
@@ -81,7 +116,7 @@ public:
         Symbol lenet = SoftmaxOutput("softmax", fc2, data_label);
 
         for (auto s : lenet.ListArguments()) {
-            LG << s;
+            LG << "arg : " << s;
         }
 
         /*setup basic configs*/
@@ -119,7 +154,7 @@ public:
         /*init some of the args*/
         // map<string, NDArray> args_map;
         args_map["data"] = data_array.Slice(0, batch_size).Copy(ctx_dev);
-        args_map["data_label"] = label_array.Slice(0, batch_size).Copy(ctx_dev);
+        args_map["label"] = label_array.Slice(0, batch_size).Copy(ctx_dev);
         NDArray::WaitAll();
 
         LG << "here slice fin";
@@ -144,8 +179,8 @@ public:
 
         Executor *exe = lenet.SimpleBind(ctx_dev, args_map);
         auto arg_names = lenet.ListArguments();
-
-        for (int ITER = 0; ITER < max_epoch; ++ITER) {
+        for (int epoch = 0; epoch < max_epoch; ++epoch) {
+            auto tic = std::chrono::system_clock::now();
             size_t start_index = 0;
             while (start_index < train_num) {
                 if (start_index + batch_size > train_num) {
@@ -154,7 +189,7 @@ public:
                 args_map["data"] =
                         train_data.Slice(start_index, start_index + batch_size)
                                 .Copy(ctx_dev);
-                args_map["data_label"] =
+                args_map["label"] =
                         train_label.Slice(start_index, start_index + batch_size)
                                 .Copy(ctx_dev);
                 start_index += batch_size;
@@ -164,17 +199,28 @@ public:
                 exe->Backward();
                 // Update parameters
                 for (size_t i = 0; i < arg_names.size(); ++i) {
-                    if (arg_names[i] == "data" || arg_names[i] == "data_label") continue;
+                    if (arg_names[i] == "data" || arg_names[i] == "label") continue;
                     opt->Update(i, exe->arg_arrays[i], exe->grad_arrays[i]);
                 }
             }
 
-            LG << "Iter " << ITER
+            LG << "Iter " << epoch
                << ", accuracy: " << ValAccuracy(batch_size * 10, lenet);
+
+            /*save the parameters*/
+            std::string prefix = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.";
+            std::string param_path = prefix + "-" + std::to_string(epoch) + ".params";
+
+            LG << "EPOCH: " << epoch << " Saving to..." << param_path;
+            SaveCheckpoint(param_path, lenet, exe);
+            auto toc = std::chrono::system_clock::now();
+            LG << "Epoch[" << epoch << "] Time Cost:" <<
+                      std::chrono::duration_cast< std::chrono::seconds>(toc - tic).count() << " seconds ";
         }
 
+        std::cout<<"Saving network" << std::endl;
         auto json  = lenet.ToJSON();
-
+        // output the network
         std::cout << json;
         lenet.Save("/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json");
 
@@ -185,7 +231,9 @@ public:
 private:
     Context ctx_cpu;
     Context ctx_dev;
+
     std::map<std::string, NDArray> args_map;
+
     NDArray train_data;
     NDArray train_label;
     NDArray val_data;
@@ -225,7 +273,7 @@ private:
             }
             args_map["data"] =
                     val_data.Slice(start_index, start_index + batch_size).Copy(ctx_dev);
-            args_map["data_label"] =
+            args_map["label"] =
                     val_label.Slice(start_index, start_index + batch_size).Copy(ctx_dev);
             start_index += batch_size;
             NDArray::WaitAll();

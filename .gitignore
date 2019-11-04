@@ -58,3 +58,4 @@ fabric.properties
 .idea/
 
 # End of https://www.gitignore.io/api/clion+all
+/test-deck/data/mnist_data/mnist_train.csv

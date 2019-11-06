@@ -6,7 +6,27 @@ https://github.com/h2oai/deepwater
 https://www.h2o.ai/
 
 https://github.com/h2oai/deepwater/blob/master/mxnet/image_train.cxx
+https://github.com/Kolkir/mlcpp/tree/master/rcnn-mxnet
+https://beta.mxnet.io/guide/4-train.html
 
+# Logo detection
+https://www.oreilly.com/ideas/logo-detection-using-apache-mxnet
+
+# Handwritten recognition
+https://github.com/rohun-tripathi/Handwriting_recognition/tree/master/project_documentation
+https://github.com/awslabs/handwritten-text-recognition-for-apache-mxnet/blob/master/5_a_character_error_distance.ipynb
+
+
+# Database of hand written text
+http://www.fki.inf.unibe.ch/DBs/iamGraphDB/iLogin/index.php
+
+# Generating Test Data
+https://github.com/leocvml/mxnet-im2rec_tutorial
+
+```
+python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/class_a /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/ --recursive --list --num-thread 8
+python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/class_a.lst /home/gbugaj/dev/lbp-matcher/test-deck/data/rec
+```
 
 # mxnet setup
 ``
@@ -156,3 +176,5 @@ https://www.researchgate.net/figure/Different-texture-primitives-detected-by-the
 https://www.researchgate.net/publication/251202290_Texture_analysis_with_local_binary_patterns
 http://www.mecs-press.org/ijigsp/ijigsp-v4-n7/IJIGSP-V4-N7-6.pdf 
 https://www.researchgate.net/publication/268349505_Texton_Based_Shape_Features_on_Local_Binary_Pattern_for_Age_Classification
+
+

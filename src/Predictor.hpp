@@ -3,15 +3,20 @@
 
 #include <string>
 #include <set>
-#include <experimental/filesystem>
-#include <mxnet-cpp/MxNetCpp.h>
 #include <fstream>
+#include <experimental/filesystem>
+#include "mxnet/c_api.h"
+#include "mxnet/tuple.h"
+#include <mxnet-cpp/MxNetCpp.h>
 
 namespace fs = std::experimental::filesystem;
 using namespace mxnet::cpp;
 using namespace std::chrono;
 
 /**
+ * class Predictor
+ *
+ * This class encapsulates the functionality to load the model, prepare dataset and run the forward pass.
  * https://mxnet.apache.org/api/cpp/docs/tutorials/cpp_inference
  */
 class Predictor {
@@ -51,6 +56,7 @@ private:
         std::ifstream fhandle(name.c_str());
         return fhandle.good();
     }
+
     int GetDataLayerType();
 
     std::map<std::string, NDArray> args_map_;

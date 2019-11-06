@@ -1,24 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-/*!
- */
 #include <fstream>
 #include <map>
 #include <string>
@@ -39,13 +18,54 @@ public:
 #endif
     {}
 
+    Symbol LenetSymbol() {
+        /*define the symbolic net*/
+        Symbol data = Symbol::Variable("data");
+        Symbol data_label = Symbol::Variable("data_label");
+        Symbol conv1_w("conv1_w"), conv1_b("conv1_b");
+        Symbol conv2_w("conv2_w"), conv2_b("conv2_b");
+        Symbol conv3_w("conv3_w"), conv3_b("conv3_b");
+        Symbol fc1_w("fc1_w"), fc1_b("fc1_b");
+        Symbol fc2_w("fc2_w"), fc2_b("fc2_b");
+
+        Symbol conv1 = Convolution("conv1", data, conv1_w, conv1_b, Shape(5, 5), 20);
+        Symbol tanh1 = Activation("tanh1", conv1, ActivationActType::kTanh);
+        Symbol pool1 = Pooling("pool1", tanh1, Shape(2, 2), PoolingPoolType::kMax,
+                               false, false, PoolingPoolingConvention::kValid, Shape(2, 2));
+
+        Symbol conv2 = Convolution("conv2", pool1, conv2_w, conv2_b, Shape(5, 5), 50);
+        Symbol tanh2 = Activation("tanh2", conv2, ActivationActType::kTanh);
+        Symbol pool2 = Pooling("pool2", tanh2, Shape(2, 2), PoolingPoolType::kMax,
+                               false, false, PoolingPoolingConvention::kValid, Shape(2, 2));
+
+        Symbol flatten = Flatten("flatten", pool2);
+        Symbol fc1 = FullyConnected("fc1", flatten, fc1_w, fc1_b, 500);
+        Symbol tanh3 = Activation("tanh3", fc1, ActivationActType::kTanh);
+        Symbol fc2 = FullyConnected("fc2", tanh3, fc2_w, fc2_b, 10);
+
+        Symbol lenet = SoftmaxOutput("softmax", fc2, data_label);
+
+        return lenet;
+    }
+
+    NDArray ResizeInput(NDArray data, const Shape new_shape) {
+        NDArray pic = data.Reshape(Shape(0, 1, 28, 28));
+        NDArray output;
+        Operator("_contrib_BilinearResize2D")
+                .SetParam("height", new_shape[2])
+                .SetParam("width", new_shape[3])
+                        (pic).Invoke(output);
+        return output;
+    }
+
+
     /**
      * Load checkpoint
      *
      * @param filepath
      * @param exe
      */
-    void LoadCheckpoint(const std::string filepath, Executor* exe) {
+    void LoadCheckpoint(const std::string filepath, Executor *exe) {
         std::map<std::string, NDArray> params = NDArray::LoadToMap(filepath);
         for (auto iter : params) {
             auto type = iter.first.substr(0, 4);
@@ -67,246 +87,159 @@ public:
      * @param net
      * @param exe
      */
-    void SaveCheckpoint(const std::string filepath, Symbol net, Executor* exe) {
-
+    void SaveCheckpoint(const std::string filepath, Symbol net, Executor *exe) {
         auto save_args = exe->arg_dict();
         /*we do not want to save the data and label*/
         save_args.erase("data");
-        save_args.erase("label");
+        save_args.erase("data_label");
+
         // copy any aux array
-        for (auto iter : exe->aux_dict()){
+        for (auto iter : exe->aux_dict()) {
             save_args.insert({"aux:" + iter.first, iter.second});
         }
         NDArray::Save(filepath, save_args);
     }
 
     void Run(int max_epoch) {
-        /*define the symbolic net*/
-        Symbol data = Symbol::Variable("data");
-        Symbol data_label = Symbol::Variable("label");
-        Symbol conv1_w("conv1_w"), conv1_b("conv1_b");
-        Symbol conv2_w("conv2_w"), conv2_b("conv2_b");
-        Symbol conv3_w("conv3_w"), conv3_b("conv3_b");
-        Symbol fc1_w("fc1_w"), fc1_b("fc1_b");
-        Symbol fc2_w("fc2_w"), fc2_b("fc2_b");
-
-        Symbol conv1 =
-                Convolution("conv1", data, conv1_w, conv1_b, Shape(5, 5), 20);
-        Symbol tanh1 = Activation("tanh1", conv1, ActivationActType::kTanh);
-        Symbol pool1 = Pooling("pool1", tanh1, Shape(2, 2), PoolingPoolType::kMax,
-                               false, false, PoolingPoolingConvention::kValid, Shape(2, 2));
-
-        Symbol conv2 = Convolution("conv2", pool1, conv2_w, conv2_b,
-                                   Shape(5, 5), 50);
-        Symbol tanh2 = Activation("tanh2", conv2, ActivationActType::kTanh);
-        Symbol pool2 = Pooling("pool2", tanh2, Shape(2, 2), PoolingPoolType::kMax,
-                               false, false, PoolingPoolingConvention::kValid, Shape(2, 2));
-
-        Symbol conv3 = Convolution("conv3", pool2, conv3_w, conv3_b,
-                                   Shape(2, 2), 500);
-        Symbol tanh3 = Activation("tanh3", conv3, ActivationActType::kTanh);
-        Symbol pool3 = Pooling("pool3", tanh3, Shape(2, 2), PoolingPoolType::kMax,
-                               false, false, PoolingPoolingConvention::kValid, Shape(1, 1));
-
-        Symbol flatten = Flatten("flatten", pool3);
-        Symbol fc1 = FullyConnected("fc1", flatten, fc1_w, fc1_b, 500);
-        Symbol tanh4 = Activation("tanh4", fc1, ActivationActType::kTanh);
-        Symbol fc2 = FullyConnected("fc2", tanh4, fc2_w, fc2_b, 10);
-
-        Symbol lenet = SoftmaxOutput("softmax", fc2, data_label);
-
-        for (auto s : lenet.ListArguments()) {
-            LG << "arg : " << s;
-        }
 
         /*setup basic configs*/
-        int val_fold = 1;
         int W = 28;
         int H = 28;
-        int batch_size = 42;
+        int batch_size = 128;
+
         float learning_rate = 1e-4;
         float weight_decay = 1e-4;
 
-        /*prepare the data*/
-        std::vector<float> data_vec, label_vec;
-        size_t data_count = GetData(&data_vec, &label_vec);
-        const float *dptr = data_vec.data();
-        const float *lptr = label_vec.data();
-        NDArray data_array = NDArray(Shape(data_count, 1, W, H), ctx_cpu,
-                                     false);  // store in main memory, and copy to
-        // device memory while training
-        NDArray label_array =
-                NDArray(Shape(data_count), ctx_cpu,
-                        false);  // it's also ok if just store them all in device memory
-        data_array.SyncCopyFromCPU(dptr, data_count * W * H);
-        label_array.SyncCopyFromCPU(lptr, data_count);
-        data_array.WaitToRead();
-        label_array.WaitToRead();
+        auto dev_ctx = Context::cpu();
+        int num_gpu;
+        MXGetGPUCount(&num_gpu);
+#if !MXNET_USE_CPU
+        if (num_gpu > 0) {
+            dev_ctx = Context::gpu();
+        }
+#endif
+        auto lenet = LenetSymbol();
+        std::map<std::string, NDArray> args_map;
 
-        size_t train_num = data_count * (1 - val_fold / 10.0);
-        train_data = data_array.Slice(0, train_num);
-        train_label = label_array.Slice(0, train_num);
-        val_data = data_array.Slice(train_num, data_count);
-        val_label = label_array.Slice(train_num, data_count);
+        const Shape data_shape = Shape(batch_size, 1, H, W),
+                label_shape = Shape(batch_size);
+        args_map["data"] = NDArray(data_shape, dev_ctx);
+        args_map["data_label"] = NDArray(label_shape, dev_ctx);
+        lenet.InferArgsMap(dev_ctx, &args_map, args_map);
 
-        LG << "here read fin";
+        args_map["fc1_w"] = NDArray(Shape(500, 4 * 4 * 50), dev_ctx);
+        NDArray::SampleGaussian(0, 1, &args_map["fc1_w"]);
+        args_map["fc2_b"] = NDArray(Shape(10), dev_ctx);
+        args_map["fc2_b"] = 0;
 
-        /*init some of the args*/
-        // map<string, NDArray> args_map;
-        args_map["data"] = data_array.Slice(0, batch_size).Copy(ctx_dev);
-        args_map["label"] = label_array.Slice(0, batch_size).Copy(ctx_dev);
-        NDArray::WaitAll();
+        std::vector<std::string> data_files = {
+                "/home/gbugaj/dev/lbp-matcher/test-deck/data/mnist_data/train-images-idx3-ubyte",
+                "/home/gbugaj/dev/lbp-matcher/test-deck/data/mnist_data/train-labels-idx1-ubyte",
+                "/home/gbugaj/dev/lbp-matcher/test-deck/data/mnist_data/t10k-images-idx3-ubyte",
+                "/home/gbugaj/dev/lbp-matcher/test-deck/data/mnist_data/t10k-labels-idx1-ubyte"
+        };
 
-        LG << "here slice fin";
-        /*
-         * we can also feed in some of the args other than the input all by
-         * ourselves,
-         * fc2-w , fc1-b for example:
-         * */
-        // args_map["fc2_w"] =
-        // NDArray(mshadow::Shape2(500, 4 * 4 * 50), ctx_dev, false);
-        // NDArray::SampleGaussian(0, 1, &args_map["fc2_w"]);
-        // args_map["fc1_b"] = NDArray(mshadow::Shape1(10), ctx_dev, false);
-        // args_map["fc1_b"] = 0;
+        auto train_iter = MXDataIter("MNISTIter");
+        if (!setDataIter(&train_iter, "Train", data_files, batch_size)) {
+            throw std::runtime_error("Unable to create Train Iterator");
+        }
 
-        lenet.InferArgsMap(ctx_dev, &args_map, args_map);
-        Optimizer* opt = OptimizerRegistry::Find("ccsgd");
+        auto val_iter = MXDataIter("MNISTIter");
+        if (!setDataIter(&val_iter, "Label", data_files, batch_size)) {
+            throw std::runtime_error("Unable to create Train Iterator");
+        }
+
+        Optimizer *opt = OptimizerRegistry::Find("sgd");
         opt->SetParam("momentum", 0.9)
                 ->SetParam("rescale_grad", 1.0)
                 ->SetParam("clip_gradient", 10)
                 ->SetParam("lr", learning_rate)
                 ->SetParam("wd", weight_decay);
 
-        Executor *exe = lenet.SimpleBind(ctx_dev, args_map);
+
+        auto *exec = lenet.SimpleBind(dev_ctx, args_map);
         auto arg_names = lenet.ListArguments();
-        for (int epoch = 0; epoch < max_epoch; ++epoch) {
+
+        // Create metrics
+        Accuracy train_acc, val_acc;
+
+        for (int iter = 0; iter < max_epoch; ++iter) {
+            int samples = 0;
+            train_iter.Reset();
+            train_acc.Reset();
+
             auto tic = std::chrono::system_clock::now();
-            size_t start_index = 0;
-            while (start_index < train_num) {
-                if (start_index + batch_size > train_num) {
-                    start_index = train_num - batch_size;
-                }
-                args_map["data"] =
-                        train_data.Slice(start_index, start_index + batch_size)
-                                .Copy(ctx_dev);
-                args_map["label"] =
-                        train_label.Slice(start_index, start_index + batch_size)
-                                .Copy(ctx_dev);
-                start_index += batch_size;
+
+            while (train_iter.Next()) {
+                samples += batch_size;
+                auto data_batch = train_iter.GetDataBatch();
+
+                ResizeInput(data_batch.data, data_shape).CopyTo(&args_map["data"]);
+                data_batch.label.CopyTo(&args_map["data_label"]);
                 NDArray::WaitAll();
 
-                exe->Forward(true);
-                exe->Backward();
+                // Compute gradients
+                exec->Forward(true);
+                exec->Backward();
+
                 // Update parameters
                 for (size_t i = 0; i < arg_names.size(); ++i) {
-                    if (arg_names[i] == "data" || arg_names[i] == "label") continue;
-                    opt->Update(i, exe->arg_arrays[i], exe->grad_arrays[i]);
+                    if (arg_names[i] == "data" || arg_names[i] == "data_label")
+                        continue;
+                    opt->Update(i, exec->arg_arrays[i], exec->grad_arrays[i]);
                 }
+
+                // Update metric
+                train_acc.Update(data_batch.label, exec->outputs[0]);
             }
 
-            LG << "Iter " << epoch
-               << ", accuracy: " << ValAccuracy(batch_size * 10, lenet);
-
             /*save the parameters*/
-            std::string prefix = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.";
-            std::string param_path = prefix + "-" + std::to_string(epoch) + ".params";
+            std::string prefix = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet";
+            std::string param_path = prefix + "-" + std::to_string(iter) + ".params";
 
-            LG << "EPOCH: " << epoch << " Saving to..." << param_path;
-            SaveCheckpoint(param_path, lenet, exe);
+            LG << "EPOCH: " << iter << " Saving to..." << param_path;
+            SaveCheckpoint(param_path, lenet, exec);
+
+            // one epoch of training is finished
             auto toc = std::chrono::system_clock::now();
-            LG << "Epoch[" << epoch << "] Time Cost:" <<
-                      std::chrono::duration_cast< std::chrono::seconds>(toc - tic).count() << " seconds ";
+            float duration = std::chrono::duration_cast<std::chrono::milliseconds>
+                                     (toc - tic).count() / 1000.0;
+
+            LG << "Epoch[" << iter << "] " << samples / duration << " samples/sec " << "Train-Accuracy="
+               << train_acc.Get();
+
+            val_iter.Reset();
+            val_acc.Reset();
+
+            Accuracy acu;
+            val_iter.Reset();
+            while (val_iter.Next()) {
+                auto data_batch = val_iter.GetDataBatch();
+                ResizeInput(data_batch.data, data_shape).CopyTo(&args_map["data"]);
+                data_batch.label.CopyTo(&args_map["data_label"]);
+                NDArray::WaitAll();
+
+                // Only forward pass is enough as no gradient is needed when evaluating
+                exec->Forward(false);
+                NDArray::WaitAll();
+                acu.Update(data_batch.label, exec->outputs[0]);
+                val_acc.Update(data_batch.label, exec->outputs[0]);
+            }
+            LG << "Epoch[" << iter << "] Val-Accuracy=" << val_acc.Get();
         }
 
-        std::cout<<"Saving network" << std::endl;
-        auto json  = lenet.ToJSON();
+        std::cout << "Saving network" << std::endl;
+        auto json = lenet.ToJSON();
         // output the network
         std::cout << json;
         lenet.Save("/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json");
 
-        delete exe;
+        delete exec;
         delete opt;
+        MXNotifyShutdown();
     }
 
 private:
     Context ctx_cpu;
     Context ctx_dev;
-
-    std::map<std::string, NDArray> args_map;
-
-    NDArray train_data;
-    NDArray train_label;
-    NDArray val_data;
-    NDArray val_label;
-
-    size_t GetData(std::vector<float> *data, std::vector<float> *label) {
-//        const char *train_data_path = "./data/mnist_data/mnist_train.csv";
-        const char *train_data_path = "/home/gbugaj/dev/lbp-matcher/test-deck/data/mnist_data/mnist_train.csv";
-        std::ifstream inf(train_data_path);
-        std::string line;
-        inf >> line;  // ignore the header
-        size_t _N = 0;
-        while (inf >> line) {
-            for (auto &c : line) c = (c == ',') ? ' ' : c;
-            std::stringstream ss;
-            ss << line;
-            float _data;
-            ss >> _data;
-            label->push_back(_data);
-            while (ss >> _data) data->push_back(_data / 256.0);
-            _N++;
-        }
-        inf.close();
-        return _N;
-    }
-
-    float ValAccuracy(int batch_size, Symbol lenet) {
-        size_t val_num = val_data.GetShape()[0];
-
-        size_t correct_count = 0;
-        size_t all_count = 0;
-
-        size_t start_index = 0;
-        while (start_index < val_num) {
-            if (start_index + batch_size > val_num) {
-                start_index = val_num - batch_size;
-            }
-            args_map["data"] =
-                    val_data.Slice(start_index, start_index + batch_size).Copy(ctx_dev);
-            args_map["label"] =
-                    val_label.Slice(start_index, start_index + batch_size).Copy(ctx_dev);
-            start_index += batch_size;
-            NDArray::WaitAll();
-
-            Executor *exe = lenet.SimpleBind(ctx_dev, args_map);
-            exe->Forward(false);
-
-            const auto &out = exe->outputs;
-            NDArray out_cpu = out[0].Copy(ctx_cpu);
-            NDArray label_cpu =
-                    val_label.Slice(start_index - batch_size, start_index).Copy(ctx_cpu);
-
-            NDArray::WaitAll();
-
-            const mx_float *dptr_out = out_cpu.GetData();
-            const mx_float *dptr_label = label_cpu.GetData();
-            for (int i = 0; i < batch_size; ++i) {
-                float label = dptr_label[i];
-                int cat_num = out_cpu.GetShape()[1];
-                float p_label = 0, max_p = dptr_out[i * cat_num];
-                for (int j = 0; j < cat_num; ++j) {
-                    float p = dptr_out[i * cat_num + j];
-                    if (max_p < p) {
-                        p_label = j;
-                        max_p = p;
-                    }
-                }
-                if (label == p_label) correct_count++;
-            }
-            all_count += batch_size;
-
-            delete exe;
-        }
-        return correct_count * 1.0 / all_count;
-    }
 };

@@ -1,5 +1,9 @@
 # TODO / Implement
 
+// Remove committed git file
+ git filter-branch --force --index-filter ' git rm --cached --ignore-unmatch  test-deck/data/mnist_data/mnist_train.csv' --prune-empty --tag-name-filter cat
+
+
 https://github.com/Kolkir/mlcpp
 https://cocodataset.org/#home
 https://github.com/h2oai/deepwater

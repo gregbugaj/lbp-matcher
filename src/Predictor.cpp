@@ -135,6 +135,19 @@ int Predictor::GetDataLayerType() {
  * create a new ImageRecordIter according to the given parameters
  */
 bool Predictor::CreateImageRecordIter() {
+
+    auto val_iter = MXDataIter("ImageRecordIter")
+            .SetParam("path_imglist", "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.lst")
+            .SetParam("path_imgrec", "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec")
+            .SetParam("data_shape", Shape(3, 28, 28))
+            .SetParam("batch_size", 1)
+            .CreateDataIter();
+
+    val_iter.Reset();
+    while(val_iter.Next()){
+        auto batch = val_iter.GetData();
+    }
+
     val_iter_ = new MXDataIter("ImageRecordIter");
     if (!FileExists(dataset_)) {
         LG << "Error [dataset_]: " << dataset_ << " must be provided";
@@ -255,9 +268,7 @@ void Predictor::ConvertParamMapToTargetContext(const std::map<std::string, NDArr
 }
 
 
-
-
-/*
+/**
  * The following function randomly initializes the parameters when benchmark_ is true.
  */
 void Predictor::InitParameters() {
@@ -283,6 +294,7 @@ void Predictor::InitParameters() {
             Initializer::StringEndWith(arg_name, "bias_quantize")) {
             paramType = kInt8;
         }
+
         NDArray tmp_arr(shape, global_ctx_, false, paramType);
         xavier(arg_name, &tmp_arr);
         args_map_[arg_name] = tmp_arr.Copy(global_ctx_);
@@ -296,21 +308,20 @@ void Predictor::InitParameters() {
         xavier(aux_name, &tmp_arr);
         aux_map_[aux_name] = tmp_arr.Copy(global_ctx_);
     }
+
     /*WaitAll is need when we copy data between GPU and the main memory*/
     NDArray::WaitAll();
 }
 
-
-
-/*
- * The following function runs the forward pass on the model
- * and use dummy data for benchmark.
+/**
+ * The following function runs the forward pass on the model and use dummy data for benchmark.
  */
 void Predictor::BenchmarkScore(int num_inference_batches) {
     // Create dummy data
     std::vector<float> dummy_data(input_shape_.Size());
     std::default_random_engine generator;
     std::uniform_real_distribution<float> val(0.0f, 1.0f);
+
     for (size_t i = 0; i < static_cast<size_t>(input_shape_.Size()); ++i) {
         dummy_data[i] = static_cast<float>(val(generator));
     }
@@ -340,26 +351,14 @@ void Predictor::BenchmarkScore(int num_inference_batches) {
        << " imgs/s latency:" << ms / input_shape_[0] / num_inference_batches << " ms";
 }
 
-/*
- * \param skipped_batches skip the first number of batches
- *
- */
-bool Predictor::AdvanceDataIter(int skipped_batches) {
-    assert(skipped_batches >= 0);
-    if (skipped_batches == 0) return true;
-    int skipped_count = 0;
-    while (val_iter_->Next()) {
-        if (++skipped_count >= skipped_batches) break;
-    }
-    if (skipped_count != skipped_batches) return false;
-    return true;
-}
-
-/*
+/**
  * The following function runs the forward pass on the model
  * and use real data for testing accuracy and performance.
+ *
+ * https://discuss.mxnet.io/t/run-time-is-different-between-python-and-c/4052/2
+ * https://stackoverflow.com/questions/48743700/mxnet-ndarray-iterator-for-c
  */
-void Predictor::Score(int num_skipped_batches, int num_inference_batches) {
+void Predictor::Score(int num_inference_batches) {
     // Create metrics
     Accuracy val_acc;
 
@@ -367,16 +366,12 @@ void Predictor::Score(int num_skipped_batches, int num_inference_batches) {
     val_acc.Reset();
     int nBatch = 0;
 
-    if (!AdvanceDataIter(num_skipped_batches)) {
-        LG << "skipped batches should less than total batches!";
-        return;
-    }
-
     double ms = ms_now();
     while (val_iter_->Next()) {
         auto data_batch = val_iter_->GetDataBatch();
         data_batch.data.CopyTo(&args_map_["data"]);
         data_batch.label.CopyTo(&args_map_["softmax_label"]);
+
         NDArray::WaitAll();
 
         // running on forward pass
@@ -388,6 +383,7 @@ void Predictor::Score(int num_skipped_batches, int num_inference_batches) {
             break;
         }
     }
+
     ms = ms_now() - ms;
     auto args_name = net_.ListArguments();
     LG << "INFO:" << "Dataset for inference: " << dataset_;
@@ -413,5 +409,6 @@ Predictor::~Predictor() {
     if (!benchmark_ && val_iter_) {
         delete val_iter_;
     }
+
     MXNotifyShutdown();
 }

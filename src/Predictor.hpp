@@ -35,18 +35,21 @@ public:
               int shuffle_chunk_seed,
               int seed, bool benchmark);
     void BenchmarkScore(int num_inference_batches);
-    void Score(int num_skipped_batches, int num_inference_batches);
+    void Score(int num_inference_batches);
     ~Predictor();
 
 private:
     bool CreateImageRecordIter();
-    bool AdvanceDataIter(int skipped_batches);
+
     void LoadModel(const std::string& model_json_file);
+
     void LoadParameters(const std::string& model_parameters_file);
+
     void SplitParamMap(const std::map<std::string, NDArray> &paramMap,
                        std::map<std::string, NDArray> *argParamInTargetContext,
                        std::map<std::string, NDArray> *auxParamInTargetContext,
                        Context targetContext);
+
     void ConvertParamMapToTargetContext(const std::map<std::string, NDArray> &paramMap,
                                         std::map<std::string, NDArray> *paramMapInTargetContext,
                                         Context targetContext);

@@ -65,6 +65,26 @@ else ()
 endif(LEPTONICA_FOUND)
 ### Leptonica
 
+
+
+### OpenCV
+include(FindOpenCV)
+
+message(STATUS "OpenCV found   =  ${OpenCV_FOUND}")
+message(STATUS "OpenCV include =  ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV lib     =  ${OpenCV_LIBRARIES}")
+# message(FATAL_ERROR "OpenCV not setup")
+
+if (OpenCV_FOUND)
+    message(STATUS "OpenCV ready")
+    include_directories(${OpenCV_INCLUDE_DIRS})
+    target_link_libraries(${TARGET_NAME} ${OpenCV_LIBRARIES})
+else ()
+    message(FATAL_ERROR "OpenCV not setup")
+endif(OpenCV_FOUND)
+### OpenCV
+
+
 # MxNet
 include(FindMxNet)
 

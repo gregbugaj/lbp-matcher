@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 int train_mxnet();
 int predict_mxnet();
-
+int iterators_mxnet();
 
 /*The global context, change them if necessary*/
 static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
@@ -21,6 +21,37 @@ static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
 int main(int argc, char const *argv[]) {
     std::cout << "MxNet Base";
     return predict_mxnet();
+}
+
+int iterators_mxnet()
+{
+    Context ctx = Context::cpu();  // Use CPU
+
+    mx_uint num_data_iter_creators;
+    DataIterCreator *data_iter_creators = nullptr;
+
+    int r = MXListDataIters(&num_data_iter_creators, &data_iter_creators);
+    CHECK_EQ(r, 0);
+    LG << "num_data_iter_creators = " << num_data_iter_creators;
+    //output: num_data_iter_creators = 8
+
+    const char *name;
+    const char *description;
+    mx_uint num_args;
+    const char **arg_names;
+    const char **arg_type_infos;
+    const char **arg_descriptions;
+
+    for (mx_uint i = 0; i < num_data_iter_creators; i++) {
+        r = MXDataIterGetIterInfo(data_iter_creators[i], &name, &description,
+                                  &num_args, &arg_names, &arg_type_infos,
+                                  &arg_descriptions);
+        CHECK_EQ(r, 0);
+        LG << " i: " << i << ", name: " << name;
+    }
+
+    MXNotifyShutdown();
+    return 0;
 }
 
 void printUsage() {
@@ -75,7 +106,6 @@ std::vector<T> createVectorFromString(const std::string& input_string) {
 int predict_mxnet()
 {
     // https://gluon-cv.mxnet.io/build/examples_datasets/recordio.html
-
     std::cout << "MxNet Base";
     try {
 
@@ -83,21 +113,20 @@ int predict_mxnet()
 
         std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
         std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
-        std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/class_a.rec";
+        std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
         std::string input_rgb_mean("0 0 0");
         std::string input_rgb_std("1 1 1");
+
         bool use_gpu = false;
         bool enable_tensorrt = false;
         bool benchmark = false;
-        int batch_size = 128;
-        int num_skipped_batches = 0;
+        int batch_size = 1;
         int num_inference_batches = 100;
         std::string data_layer_type("float32");
         std::string input_shape("3 28 28");
         int seed = 48564309;
         int shuffle_chunk_seed = 3982304;
         int data_nthreads = 60;
-
 
         if (model_file_json.empty()
             || (!benchmark && model_file_params.empty())
@@ -106,6 +135,7 @@ int predict_mxnet()
             printUsage();
             return 1;
         }
+
         std::vector<index_t> input_dimensions = createVectorFromString<index_t>(input_shape);
         input_dimensions.insert(input_dimensions.begin(), batch_size);
         Shape input_data_shape(input_dimensions);
@@ -121,7 +151,7 @@ int predict_mxnet()
         if (benchmark) {
             predict.BenchmarkScore(num_inference_batches);
         } else {
-            predict.Score(num_skipped_batches, num_inference_batches);
+            predict.Score(num_inference_batches);
         }
     } catch (dmlc::Error &err) {
         LG << "Status: FAIL";

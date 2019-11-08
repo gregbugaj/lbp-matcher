@@ -4,7 +4,12 @@ https://github.com/Kolkir/mlcpp
 https://cocodataset.org/#home
 https://github.com/h2oai/deepwater
 https://www.h2o.ai/
+https://Comet.ml
+http://www.teracrunch.com/#solution
 
+
+
+https://discuss.mxnet.io/t/run-time-is-different-between-python-and-c/4052/2
 https://github.com/h2oai/deepwater/blob/master/mxnet/image_train.cxx
 https://github.com/Kolkir/mlcpp/tree/master/rcnn-mxnet
 https://beta.mxnet.io/guide/4-train.html
@@ -20,18 +25,34 @@ https://github.com/awslabs/handwritten-text-recognition-for-apache-mxnet/blob/ma
 # Database of hand written text
 http://www.fki.inf.unibe.ch/DBs/iamGraphDB/iLogin/index.php
 
-# Generating Test Data
+# Generating Test Data with im2rec
 https://github.com/leocvml/mxnet-im2rec_tutorial
-
+https://arthurcaillau.com/image-record-iter/
+~/dev/3rdparty/mxnet
 ```
-python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/class_a /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/ --recursive --list --num-thread 8
-python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/class_a.lst /home/gbugaj/dev/lbp-matcher/test-deck/data/rec
+python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query /home/gbugaj/dev/lbp-matcher/test-deck/data/rec --recursive --list --num-thread 8
+python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.lst /home/gbugaj/dev/lbp-matcher/test-deck/data/rec
 ```
 
 # mxnet setup
-``
-sudo apt-get install libblas-dev liblapack-dev
+
+## Setup up OpenCV
+https://milq.github.io/install-opencv-ubuntu-debian/
+https://github.com/milq/milq/blob/master/scripts/bash/install-opencv.sh
+
+# ADD Needed dependencies
+
 ```
+sudo apt-get install -y libopenblas-dev liblapack-dev
+sudo apt-get install libblas-dev liblapack-dev
+sudo apt install libjemalloc1 libjemalloc-dev
+```
+
+# setup 
+https://apt.llvm.org/
+Need to add the key
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+
 
 https://medium.com/analytics-vidhya/cnns-architectures-lenet-alexnet-vgg-googlenet-resnet-and-more-666091488df5
 
@@ -57,8 +78,9 @@ https://github.com/RobotLocomotion/drake/issues/2087
 $ sudo rm /usr/lib/x86_64-linux-gnu/libGL.so
 $ sudo ln -s /usr/lib/libGL.so.1 /usr/lib/x86_64-linux-gnu/libGL.so
 
-cmake -DUSE_CPP_PACKAGE=1 -DUSE_OPENCV=0 -DCMAKE_BUILD_TYPE=Release -GNinja ..
-
+WORKING BUILD
+cmake -DUSE_CPP_PACKAGE=1  -DUSE_CUDA=0  -DUSE_OPENCV=1 -DCMAKE_BUILD_TYPE=Release -GNinja .. && ninja -j7
+ 
 
 Build without CUDA support
 
@@ -67,26 +89,61 @@ cmake -DUSE_CUDA=0 -DUSE_CUDA_PATH=/usr/local/cuda -DUSE_CUDNN=1 -DUSE_MKLDNN=1 
 ninja -v
 
 
+*** IMPORTANT ***
+ERROR : 
+make[3]: *** No rule to make target '/usr/lib/x86_64-linux-gnu/libGL.so', needed by 'src/lbp_matcher'.  Stop.
+
+FIX :
+
+sudo rm /usr/lib/x86_64-linux-gnu/libGL.so
+sudo ln -s /usr/lib/x86_64-linux-gnu/libGL.so.1  /usr/lib/x86_64-linux-gnu/libGL.so
+
+
+*** IMPORTANT ** 
+
+ERROR :
+/usr/bin/ld: cannot find -lavresample
+
+FIX : 
+sudo apt-get install libavresample-dev
+
+
 ninja -v
 [1/23] cd /home/gbugaj/dev/3rdparty/mxnet/cpp-package/scripts && echo Running:\ OpWrapperGenerator.py && python OpWrapperGenerator.py /home/gbugaj/dev/3rdparty/mxnet/build/libmxnet.so
 Running: OpWrapperGenerator.py
 
 
 Build with CUDA ls
-
-
+ 
 cmake -DUSE_CUDA=1 -DUSE_CUDA_PATH=/usr/local/cuda -DUSE_CUDNN=1 -DUSE_MKLDNN=1 -DUSE_CPP_PACKAGE=1 -DCMAKE_BUILD_TYPE=Release -GNinja ..
 ninja -v
 
 sudo apt-get install -y build-essential libatlas-base-dev libopencv-dev graphviz virtualenv cmake ninja-build libopenblas-dev liblapack-dev python3-dev
 
-
 make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas
 
+ -DUSE_LAPACK=OFF \
+
+```
+#!/bin/bash
+mkdir -p build \
+&& cd build \
+&& cmake \
+		-DUSE_CPP_PACKAGE=1 \
+        -DUSE_SSE=ON \
+        -DUSE_CUDA=OFF \
+        -DUSE_OPENCV=ON \
+        -DUSE_OPENMP=ON \
+        -DUSE_MKL_IF_AVAILABLE=OFF \
+        -DUSE_SIGNAL_HANDLER=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -GNinja .. \
+&& ninja -j7
+```
 
 Makefile:362: WARNING: Significant performance increases can be achieved by installing and enabling gperftools or jemalloc development packages
 cd /home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core; make libdmlc.a USE_SSE=1 config=/home/gbugaj/dev/3rdparty/mxnet/make/config.mk; cd /home/gbugaj/dev/3rdparty/mxnet
-g++ -shared -fPIC example/lib_api/mylib.cc -o libsample_lib.so -I include/mxnet
+lsg++ -shared -fPIC example/lib_api/mylib.cc -o libsample_lib.so -I include/mxnet
 make[1]: Entering directory '/home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core'
 make[1]: 'libdmlc.a' is up to date.
 make[1]: Leaving directory '/home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core'
@@ -94,7 +151,6 @@ make[1]: Leaving directory '/home/gbugaj/dev/3rdparty/mxnet/3rdparty/dmlc-core'
 
 https://mxnet.apache.org/api/cpp/docs/tutorials/basics
 ----------------------------------
-
 
 
 

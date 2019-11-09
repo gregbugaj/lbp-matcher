@@ -20,6 +20,7 @@ static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
 
 int main(int argc, char const *argv[]) {
     std::cout << "MxNet Base";
+//    return train_mxnet();
     return predict_mxnet();
 }
 
@@ -106,7 +107,7 @@ std::vector<T> createVectorFromString(const std::string& input_string) {
 int predict_mxnet()
 {
     // https://gluon-cv.mxnet.io/build/examples_datasets/recordio.html
-    std::cout << "MxNet Base";
+    LG << "MxNet predic";
     try {
 
         LG << "Predicting";
@@ -114,19 +115,19 @@ int predict_mxnet()
         std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
         std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
         std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
-        std::string input_rgb_mean("0 0 0");
-        std::string input_rgb_std("1 1 1");
+        std::string input_rgb_mean(".5 .5 .5");
+        std::string input_rgb_std(".5 .5 .5");
 
         bool use_gpu = false;
         bool enable_tensorrt = false;
         bool benchmark = false;
         int batch_size = 1;
-        int num_inference_batches = 100;
+        int num_inference_batches = 500;
         std::string data_layer_type("float32");
-        std::string input_shape("3 28 28");
+        std::string input_shape("1 28 28");
         int seed = 48564309;
         int shuffle_chunk_seed = 3982304;
-        int data_nthreads = 60;
+        int data_nthreads = 1;
 
         if (model_file_json.empty()
             || (!benchmark && model_file_params.empty())
@@ -135,6 +136,13 @@ int predict_mxnet()
             printUsage();
             return 1;
         }
+
+        LG << "--------Net outputs--------";
+        auto net = Symbol::Load(model_file_json);
+        for(const auto & layer_name:net.ListOutputs()){
+            LG<<layer_name;
+        }
+        LG << "---------------------------";
 
         std::vector<index_t> input_dimensions = createVectorFromString<index_t>(input_shape);
         input_dimensions.insert(input_dimensions.begin(), batch_size);

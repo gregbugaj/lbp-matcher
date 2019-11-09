@@ -136,16 +136,9 @@ int Predictor::GetDataLayerType() {
  */
 bool Predictor::CreateImageRecordIter() {
 
-    auto val_iter = MXDataIter("ImageRecordIter")
-            .SetParam("path_imglist", "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.lst")
-            .SetParam("path_imgrec", "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec")
-            .SetParam("data_shape", Shape(3, 28, 28))
-            .SetParam("batch_size", 1)
-            .CreateDataIter();
-
-    val_iter.Reset();
-    while(val_iter.Next()){
-        auto batch = val_iter.GetData();
+    if (!FileExists(dataset_)) {
+        LG << "Error [dataset_]: " << dataset_ << " must be provided";
+        return false;
     }
 
     val_iter_ = new MXDataIter("ImageRecordIter");
@@ -206,6 +199,7 @@ void Predictor::LoadModel(const std::string& model_json_file) {
     }
     LG << "Loading the model from " << model_json_file << std::endl;
     net_ = Symbol::Load(model_json_file);
+
     if (enable_tensorrt_) {
         net_ = net_.GetBackendSymbol("TensorRT");
     }
@@ -377,7 +371,22 @@ void Predictor::Score(int num_inference_batches) {
         // running on forward pass
         executor_->Forward(false);
         NDArray::WaitAll();
+
         val_acc.Update(data_batch.label, executor_->outputs[0]);
+
+        auto preds = executor_->outputs[0].ArgmaxChannel();
+
+        mx_uint len = data_batch.label.GetShape()[0];
+        std::vector<mx_float> pred_data(len);
+        std::vector<mx_float> label_data(len);
+        preds.ArgmaxChannel().SyncCopyToCPU(&pred_data, len);
+        data_batch.label.SyncCopyToCPU(&label_data, len);
+
+        for (mx_uint i = 0; i < len; ++i) {
+            auto val   = pred_data[i]; // predicted
+            auto label = label_data[i]; // expected
+            LG << " :: " << val << " = " << label;
+        }
 
         if (++nBatch >= num_inference_batches) {
             break;

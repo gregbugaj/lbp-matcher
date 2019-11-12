@@ -38,6 +38,10 @@ python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query /home/gbu
 python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.lst /home/gbugaj/dev/lbp-matcher/test-deck/data/rec
 ```
 
+```
+python3 score.py --data-val /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec --model imagenet1k-inception-bn --gpus 0
+```
+
 # mxnet setup
 
 ## Setup up OpenCV

@@ -112,11 +112,15 @@ int predict_mxnet()
 
         LG << "Predicting";
 
-        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
-        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
+//        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
+//        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
+//
+
+        std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
+        std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0011.params";
         std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
-        std::string input_rgb_mean(".5 .5 .5");
-        std::string input_rgb_std(".5 .5 .5");
+        std::string input_rgb_mean("0 0 0");
+        std::string input_rgb_std("1 1 1");
 
         bool use_gpu = false;
         bool enable_tensorrt = false;

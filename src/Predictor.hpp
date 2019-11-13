@@ -68,7 +68,6 @@ private:
     Executor *executor_;
     Shape input_shape_;
     Context global_ctx_ = Context::cpu();
-
     MXDataIter *val_iter_;
     bool use_gpu_;
     bool enable_tensorrt_;

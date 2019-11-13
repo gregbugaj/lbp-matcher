@@ -8,6 +8,7 @@ https://github.com/Kolkir/mlcpp
 https://cocodataset.org/#home
 https://github.com/h2oai/deepwater
 https://www.h2o.ai/
+https://skymind.ai/
 https://Comet.ml
 http://www.teracrunch.com/#solution
 
@@ -15,8 +16,10 @@ http://www.teracrunch.com/#solution
 
 https://discuss.mxnet.io/t/run-time-is-different-between-python-and-c/4052/2
 https://github.com/h2oai/deepwater/blob/master/mxnet/image_train.cxx
+https://github.com/h2oai/deepwater/tree/master/mxnet/test
 https://github.com/Kolkir/mlcpp/tree/master/rcnn-mxnet
 https://beta.mxnet.io/guide/4-train.html
+
 
 # Logo detection
 https://www.oreilly.com/ideas/logo-detection-using-apache-mxnet
@@ -39,7 +42,7 @@ python im2rec.py /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.lst /home
 ```
 
 ```
-python3 score.py --data-val /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec --model imagenet1k-inception-bn --gpus 0
+python3 score.py --data-val /home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec --model imagenet1k-inception-bn --gpus ''
 ```
 
 # mxnet setup

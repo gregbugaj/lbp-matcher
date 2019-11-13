@@ -3,8 +3,7 @@
 
 double ms_now() {
     auto timePoint = std::chrono::high_resolution_clock::now().time_since_epoch();
-    auto ret = std::chrono::duration<double, std::milli>(timePoint).count();
-    return ret;
+    return std::chrono::duration<double, std::milli>(timePoint).count();
 }
 
 // define the data type for NDArray, aliged with the definition in mshadow/base.h
@@ -90,9 +89,13 @@ Predictor::Predictor(const std::string &model_json_file,
     if (dtype == -1) {
         throw std::runtime_error("Unsupported data layer type...");
     }
+
+    //softmax_label
     args_map_["data"] = NDArray(input_shape_, global_ctx_, false, dtype);
     Shape label_shape(input_shape_[0]);
     args_map_["softmax_label"] = NDArray(label_shape, global_ctx_, false);
+
+
     std::vector<NDArray> arg_arrays;
     std::vector<NDArray> grad_arrays;
     std::vector<OpReqType> grad_reqs;
@@ -103,9 +106,9 @@ Predictor::Predictor(const std::string &model_json_file,
                              &aux_arrays, args_map_, std::map<std::string, NDArray>(),
                              std::map<std::string, OpReqType>(), aux_map_);
 
-    for (auto& i : grad_reqs)
+    for (auto& grad : grad_reqs)
     {
-        i = OpReqType::kNullOp;
+        grad = OpReqType::kNullOp;
     }
 
     // Create an executor after binding the model to input parameters.
@@ -165,6 +168,7 @@ bool Predictor::CreateImageRecordIter() {
     // set Batch parameters
     val_iter_->SetParam("batch_size", input_shape_[0]);
 
+
     // image record parameters
     val_iter_->SetParam("shuffle", true);
     val_iter_->SetParam("seed", seed_);
@@ -177,13 +181,14 @@ bool Predictor::CreateImageRecordIter() {
     val_iter_->SetParam("std_g", rgb_std_[1]);
     val_iter_->SetParam("std_b", rgb_std_[2]);
 
+    val_iter_->SetParam("dtype", data_layer_type_);
+
     // set prefetcher parameters
     if (use_gpu_) {
         val_iter_->SetParam("ctx", "gpu");
     } else {
         val_iter_->SetParam("ctx", "cpu");
     }
-    val_iter_->SetParam("dtype", data_layer_type_);
 
     val_iter_->CreateDataIter();
     return true;
@@ -203,8 +208,20 @@ void Predictor::LoadModel(const std::string& model_json_file) {
     if (enable_tensorrt_) {
         net_ = net_.GetBackendSymbol("TensorRT");
     }
-}
 
+    LG << "-------- Net outputs --------";
+    for(const auto& layer_name : net_.ListOutputs()){
+        LG<<layer_name;
+    }
+
+    LG << "-------- Net Arguments --------";
+    for(const auto& args_name : net_.ListArguments())
+    {
+        LG <<  args_name;
+    }
+
+    LG << "---------------------------";
+}
 
 /*
  * The following function loads the model parameters.
@@ -260,7 +277,6 @@ void Predictor::ConvertParamMapToTargetContext(const std::map<std::string, NDArr
         (*paramMapInTargetContext)[pair.first] = pair.second.Copy(targetContext);
     }
 }
-
 
 /**
  * The following function randomly initializes the parameters when benchmark_ is true.
@@ -350,7 +366,6 @@ void Predictor::BenchmarkScore(int num_inference_batches) {
  * and use real data for testing accuracy and performance.
  *
  * https://discuss.mxnet.io/t/run-time-is-different-between-python-and-c/4052/2
- * https://stackoverflow.com/questions/48743700/mxnet-ndarray-iterator-for-c
  */
 void Predictor::Score(int num_inference_batches) {
     // Create metrics
@@ -360,33 +375,62 @@ void Predictor::Score(int num_inference_batches) {
     val_acc.Reset();
     int nBatch = 0;
 
+    LG << "Running the forward pass on model to predict the image";
+    /*
+     * The executor->arg_arrays represent the arguments to the model.
+     *
+     * Copying the image_data that contains the NDArray of input image
+     * to the arg map of the executor. The input is stored with the key "data" in the map.
+     *
+     */
     double ms = ms_now();
     while (val_iter_->Next()) {
         auto data_batch = val_iter_->GetDataBatch();
+
         data_batch.data.CopyTo(&args_map_["data"]);
-        data_batch.label.CopyTo(&args_map_["softmax_label"]);
+        data_batch.label.CopyTo(&args_map_["softmax_label"]); //softmax_label
 
         NDArray::WaitAll();
 
-        // running on forward pass
+        // Run the forward pass.
         executor_->Forward(false);
         NDArray::WaitAll();
 
-        val_acc.Update(data_batch.label, executor_->outputs[0]);
+        // The output is available in executor->outputs.
+        auto array = executor_->outputs[0].Copy(global_ctx_);
 
-        auto preds = executor_->outputs[0].ArgmaxChannel();
+        /*
+        * Find out the maximum accuracy and the index associated with that accuracy.
+        * This is done by using the argmax operator on NDArray.
+        */
+        auto predicted = array.ArgmaxChannel();
+
+        /*
+         * Wait until all the previous write operations on the 'predicted'
+         * NDArray to be complete before we read it.
+         * This method guarantees that all previous write operations that pushed into the backend engine
+         * for execution are actually finished.
+         */
+        predicted.WaitToRead();
+//        best_idx = predicted.At(0, 0);
+//        best_accuracy = array.At(0, best_idx);
 
         mx_uint len = data_batch.label.GetShape()[0];
         std::vector<mx_float> pred_data(len);
         std::vector<mx_float> label_data(len);
-        preds.ArgmaxChannel().SyncCopyToCPU(&pred_data, len);
+
+        predicted.SyncCopyToCPU(&pred_data, len);
         data_batch.label.SyncCopyToCPU(&label_data, len);
 
         for (mx_uint i = 0; i < len; ++i) {
-            auto val   = pred_data[i]; // predicted
+            auto val   = pred_data[i];  // predicted
             auto label = label_data[i]; // expected
-            LG << " :: " << val << " = " << label;
+            auto accuracy = array.At(0, i);
+
+            LG << "Found, Expected, Accuracy  :: " << i << " : " << val << " = " << label << " : " << accuracy;
         }
+
+        val_acc.Update(data_batch.label, executor_->outputs[0]);
 
         if (++nBatch >= num_inference_batches) {
             break;
@@ -394,6 +438,7 @@ void Predictor::Score(int num_inference_batches) {
     }
 
     ms = ms_now() - ms;
+
     auto args_name = net_.ListArguments();
     LG << "INFO:" << "Dataset for inference: " << dataset_;
     LG << "INFO:" << "label_name = " << args_name[args_name.size()-1];

@@ -22,6 +22,7 @@ public:
         /*define the symbolic net*/
         Symbol data = Symbol::Variable("data");
         Symbol data_label = Symbol::Variable("data_label");
+
         Symbol conv1_w("conv1_w"), conv1_b("conv1_b");
         Symbol conv2_w("conv2_w"), conv2_b("conv2_b");
         Symbol conv3_w("conv3_w"), conv3_b("conv3_b");

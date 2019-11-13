@@ -114,10 +114,9 @@ int predict_mxnet()
 
 //        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
 //        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
-//
 
         std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
-        std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0011.params";
+        std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0012.params";
         std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
         std::string input_rgb_mean("0 0 0");
         std::string input_rgb_std("1 1 1");
@@ -125,13 +124,13 @@ int predict_mxnet()
         bool use_gpu = false;
         bool enable_tensorrt = false;
         bool benchmark = false;
-        int batch_size = 1;
-        int num_inference_batches = 500;
+        int batch_size = 500;
+        int num_inference_batches = 100;
         std::string data_layer_type("float32");
         std::string input_shape("1 28 28");
         int seed = 48564309;
         int shuffle_chunk_seed = 3982304;
-        int data_nthreads = 1;
+        int data_nthreads = 4;
 
         if (model_file_json.empty()
             || (!benchmark && model_file_params.empty())
@@ -140,13 +139,6 @@ int predict_mxnet()
             printUsage();
             return 1;
         }
-
-        LG << "--------Net outputs--------";
-        auto net = Symbol::Load(model_file_json);
-        for(const auto & layer_name:net.ListOutputs()){
-            LG<<layer_name;
-        }
-        LG << "---------------------------";
 
         std::vector<index_t> input_dimensions = createVectorFromString<index_t>(input_shape);
         input_dimensions.insert(input_dimensions.begin(), batch_size);
@@ -160,13 +152,14 @@ int predict_mxnet()
                           dataset, data_nthreads, data_layer_type, rgb_mean, rgb_std, shuffle_chunk_seed,
                           seed, benchmark);
 
+        benchmark = false;
         if (benchmark) {
             predict.BenchmarkScore(num_inference_batches);
         } else {
             predict.Score(num_inference_batches);
         }
     } catch (dmlc::Error &err) {
-        LG << "Status: FAIL";
+        LG << "Status: FAIL " << err.what();
         LG << "With Error: " << MXGetLastError();
         return 1;
     }

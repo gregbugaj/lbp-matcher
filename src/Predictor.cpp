@@ -90,11 +90,10 @@ Predictor::Predictor(const std::string &model_json_file,
         throw std::runtime_error("Unsupported data layer type...");
     }
 
-    //softmax_label
-    args_map_["data"] = NDArray(input_shape_, global_ctx_, false, dtype);
     Shape label_shape(input_shape_[0]);
-    args_map_["softmax_label"] = NDArray(label_shape, global_ctx_, false);
 
+    args_map_["data"] = NDArray(input_shape_, global_ctx_, false, dtype);
+    args_map_["data_label"] = NDArray(label_shape, global_ctx_, false);
 
     std::vector<NDArray> arg_arrays;
     std::vector<NDArray> grad_arrays;
@@ -388,8 +387,7 @@ void Predictor::Score(int num_inference_batches) {
         auto data_batch = val_iter_->GetDataBatch();
 
         data_batch.data.CopyTo(&args_map_["data"]);
-        data_batch.label.CopyTo(&args_map_["softmax_label"]); //softmax_label
-
+        data_batch.label.CopyTo(&args_map_["data_label"]);
         NDArray::WaitAll();
 
         // Run the forward pass.
@@ -412,8 +410,8 @@ void Predictor::Score(int num_inference_batches) {
          * for execution are actually finished.
          */
         predicted.WaitToRead();
-//        best_idx = predicted.At(0, 0);
-//        best_accuracy = array.At(0, best_idx);
+//      best_idx = predicted.At(0, 0);
+//      best_accuracy = array.At(0, best_idx);
 
         mx_uint len = data_batch.label.GetShape()[0];
         std::vector<mx_float> pred_data(len);

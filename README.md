@@ -11,6 +11,7 @@ https://www.h2o.ai/
 https://skymind.ai/
 https://Comet.ml
 http://www.teracrunch.com/#solution
+https://www.netguru.com/
 
 
 
@@ -19,7 +20,6 @@ https://github.com/h2oai/deepwater/blob/master/mxnet/image_train.cxx
 https://github.com/h2oai/deepwater/tree/master/mxnet/test
 https://github.com/Kolkir/mlcpp/tree/master/rcnn-mxnet
 https://beta.mxnet.io/guide/4-train.html
-
 
 # Logo detection
 https://www.oreilly.com/ideas/logo-detection-using-apache-mxnet

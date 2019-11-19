@@ -19,14 +19,18 @@ static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
 // static Context global_ctx(mxnet::cpp::kCPU,0);
 
 int main(int argc, char const *argv[]) {
-    std::cout << "MxNet Base";
+    LG << "MxNet Base";
 //    return train_mxnet();
     return predict_mxnet();
 }
 
+/*!
+ * Dump existing data iterators
+ * @return
+ */
 int iterators_mxnet()
 {
-    Context ctx = Context::cpu();  // Use CPU
+    auto ctx = Context::cpu();  // Use CPU
 
     mx_uint num_data_iter_creators;
     DataIterCreator *data_iter_creators = nullptr;
@@ -107,16 +111,16 @@ std::vector<T> createVectorFromString(const std::string& input_string) {
 int predict_mxnet()
 {
     // https://gluon-cv.mxnet.io/build/examples_datasets/recordio.html
-    LG << "MxNet predic";
+    LG << "MxNet Predicting";
     try {
-
-        LG << "Predicting";
-
 //        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
-//        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-9.params";
+//        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-3.params";
 
+        // Generated via Python
         std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
-        std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0012.params";
+        std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0015.params";
+        /**/
+
         std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
         std::string input_rgb_mean("0 0 0");
         std::string input_rgb_std("1 1 1");
@@ -124,8 +128,8 @@ int predict_mxnet()
         bool use_gpu = false;
         bool enable_tensorrt = false;
         bool benchmark = false;
-        int batch_size = 500;
-        int num_inference_batches = 100;
+        int batch_size = 64;
+        int num_inference_batches = 300;
         std::string data_layer_type("float32");
         std::string input_shape("1 28 28");
         int seed = 48564309;
@@ -184,7 +188,6 @@ int train_mxnet()
     }
     return 0;
 }
-
 
 fs::path getTestDeckDirectory(const std::string &folder) {
     auto path = fs::current_path();

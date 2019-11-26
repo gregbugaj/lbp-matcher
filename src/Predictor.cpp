@@ -384,6 +384,8 @@ void Predictor::Score(int num_inference_batches) {
      */
     double ms = ms_now();
     while (val_iter_->Next()) {
+        LG << "Batch # " << nBatch;
+
         auto data_batch = val_iter_->GetDataBatch();
 
         data_batch.data.CopyTo(&args_map_["data"]);
@@ -393,8 +395,6 @@ void Predictor::Score(int num_inference_batches) {
         // Run the forward pass.
         executor_->Forward(false);
         NDArray::WaitAll();
-
-        // The output is available in executor->outputs.
         auto array = executor_->outputs[0].Copy(global_ctx_);
 
         /*
@@ -410,8 +410,11 @@ void Predictor::Score(int num_inference_batches) {
          * for execution are actually finished.
          */
         predicted.WaitToRead();
-//      best_idx = predicted.At(0, 0);
-//      best_accuracy = array.At(0, best_idx);
+        NDArray::WaitAll();
+
+/*        auto best_idx = predicted.At(0);
+        auto best_accuracy = array.At(0, best_idx);
+        LG << "best_idx, best_accuracy = " << best_idx << " : " << best_accuracy;*/
 
         mx_uint len = data_batch.label.GetShape()[0];
         std::vector<mx_float> pred_data(len);
@@ -423,13 +426,17 @@ void Predictor::Score(int num_inference_batches) {
         for (mx_uint i = 0; i < len; ++i) {
             auto val   = pred_data[i];  // predicted
             auto label = label_data[i]; // expected
-            auto accuracy = array.At(0, i);
 
-            LG << "Found, Expected, Accuracy  :: " << i << " : " << val << " = " << label << " : " << accuracy;
+            auto best_idx = predicted.At(i);
+            auto best_accuracy = array.At(0, best_idx);
+//            LG << "best_idx, best_accuracy = " << best_idx << " : " << best_accuracy;
+
+            auto accuracy = array.At(0, i);
+            //std::cout << "Accuracy[" << i << "] = " << std::setprecision(8) << accuracy << std::endl;
+            LG << "Found, Expected, Accuracy  :: " << i << " : " << val << " = " << label << " : " << accuracy << " == " << best_accuracy;
         }
 
         val_acc.Update(data_batch.label, executor_->outputs[0]);
-
         if (++nBatch >= num_inference_batches) {
             break;
         }

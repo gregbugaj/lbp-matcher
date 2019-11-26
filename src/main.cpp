@@ -11,7 +11,9 @@ using namespace mxnet::cpp;
 using namespace std::chrono;
 
 int train_mxnet();
+
 int predict_mxnet();
+
 int iterators_mxnet();
 
 /*The global context, change them if necessary*/
@@ -20,16 +22,15 @@ static mxnet::cpp::Context global_ctx(mxnet::cpp::kCPU, 0);
 
 int main(int argc, char const *argv[]) {
     LG << "MxNet Base";
-//    return train_mxnet();
-    return predict_mxnet();
+    return train_mxnet();
+//    return predict_mxnet();
 }
 
 /*!
  * Dump existing data iterators
  * @return
  */
-int iterators_mxnet()
-{
+int iterators_mxnet() {
     auto ctx = Context::cpu();  // Use CPU
 
     mx_uint num_data_iter_creators;
@@ -85,7 +86,7 @@ void printUsage() {
  * Convert the input string of number into the vector.
  */
 template<typename T>
-std::vector<T> createVectorFromString(const std::string& input_string) {
+std::vector<T> createVectorFromString(const std::string &input_string) {
     std::vector<T> dst_vec;
     char *p_next;
     T elem;
@@ -108,18 +109,17 @@ std::vector<T> createVectorFromString(const std::string& input_string) {
     return dst_vec;
 }
 
-int predict_mxnet()
-{
+int predict_mxnet() {
     // https://gluon-cv.mxnet.io/build/examples_datasets/recordio.html
     LG << "MxNet Predicting";
     try {
-//        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
-//        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-3.params";
+        std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
+        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-3.params";
 
         // Generated via Python
-        std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
+        /*std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
         std::string model_file_params = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-0015.params";
-        /**/
+        */
 
         std::string dataset = "/home/gbugaj/dev/lbp-matcher/test-deck/data/rec/query.rec";
         std::string input_rgb_mean("0 0 0");
@@ -129,7 +129,7 @@ int predict_mxnet()
         bool enable_tensorrt = false;
         bool benchmark = false;
         int batch_size = 64;
-        int num_inference_batches = 300;
+        int num_inference_batches = 100;
         std::string data_layer_type("float32");
         std::string input_shape("1 28 28");
         int seed = 48564309;
@@ -174,12 +174,11 @@ int predict_mxnet()
  * https://github.com/apache/incubator-mxnet/blob/master/tools/im2rec.py
  * @return
  */
-int train_mxnet()
-{
+int train_mxnet() {
     std::cout << "MxNet Base";
     try {
         Lenet lenet;
-        lenet.Run(10);
+        lenet.Run(1);
         MXNotifyShutdown();
     } catch (dmlc::Error &err) {
         LG << "Status: FAIL";

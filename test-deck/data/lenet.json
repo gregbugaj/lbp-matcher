@@ -8,11 +8,19 @@
     {
       "op": "null", 
       "name": "conv1_w", 
+      "attrs": {
+        "kernel": "(5, 5)", 
+        "num_filter": "20"
+      }, 
       "inputs": []
     }, 
     {
       "op": "null", 
       "name": "conv1_b", 
+      "attrs": {
+        "kernel": "(5, 5)", 
+        "num_filter": "20"
+      }, 
       "inputs": []
     }, 
     {
@@ -59,11 +67,19 @@
     {
       "op": "null", 
       "name": "conv2_w", 
+      "attrs": {
+        "kernel": "(5, 5)", 
+        "num_filter": "50"
+      }, 
       "inputs": []
     }, 
     {
       "op": "null", 
       "name": "conv2_b", 
+      "attrs": {
+        "kernel": "(5, 5)", 
+        "num_filter": "50"
+      }, 
       "inputs": []
     }, 
     {
@@ -115,11 +131,13 @@
     {
       "op": "null", 
       "name": "fc1_w", 
+      "attrs": {"num_hidden": "500"}, 
       "inputs": []
     }, 
     {
       "op": "null", 
       "name": "fc1_b", 
+      "attrs": {"num_hidden": "500"}, 
       "inputs": []
     }, 
     {
@@ -141,6 +159,7 @@
     {
       "op": "null", 
       "name": "fc2_w", 
+      "attrs": {"num_hidden": "10"}, 
       "inputs": []
     }, 
     {

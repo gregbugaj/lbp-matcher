@@ -114,7 +114,7 @@ int predict_mxnet() {
     LG << "MxNet Predicting";
     try {
         std::string model_file_json = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json";
-        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-3.params";
+        std::string model_file_params = "/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet-1.params";
 
         // Generated via Python
         /*std::string model_file_json = "/home/gbugaj/dev/3rdparty/mxnet/example/image-classification/mnist_py-symbol.json";
@@ -178,7 +178,7 @@ int train_mxnet() {
     std::cout << "MxNet Base";
     try {
         Lenet lenet;
-        lenet.Run(1);
+        lenet.Run(10);
         MXNotifyShutdown();
     } catch (dmlc::Error &err) {
         LG << "Status: FAIL";

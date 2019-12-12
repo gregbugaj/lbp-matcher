@@ -29,6 +29,24 @@ public:
         Symbol fc1_w("fc1_w"), fc1_b("fc1_b");
         Symbol fc2_w("fc2_w"), fc2_b("fc2_b");
 
+        conv1_w.SetAttribute("kernel", "(5, 5)");
+        conv1_w.SetAttribute("num_filter", "20");
+
+        conv1_b.SetAttribute("kernel", "(5, 5)");
+        conv1_b.SetAttribute("num_filter", "20");
+
+
+        conv2_w.SetAttribute("kernel", "(5, 5)");
+        conv2_w.SetAttribute("num_filter", "50");
+
+        conv2_b.SetAttribute("kernel", "(5, 5)");
+        conv2_b.SetAttribute("num_filter", "50");
+
+        fc1_w.SetAttribute("num_hidden", "500");
+        fc1_b.SetAttribute("num_hidden", "500");
+
+        fc2_w.SetAttribute("num_hidden", "10");
+        fc2_w.SetAttribute("num_hidden", "10");
 
         // first conv
         Symbol conv1 = Convolution("conv1", data, conv1_w, conv1_b, Shape(5, 5), 20);
@@ -201,6 +219,7 @@ public:
         float learning_rate = 1e-4;
         float weight_decay = 1e-4;
 
+
         auto dev_ctx = Context::cpu();
         int num_gpu;
         MXGetGPUCount(&num_gpu);
@@ -257,7 +276,6 @@ public:
                 ->SetParam("lr", learning_rate)
                 ->SetParam("wd", weight_decay);
 
-
         auto *exec = lenet.SimpleBind(dev_ctx, args_map);
         auto arg_names = lenet.ListArguments();
 
@@ -303,7 +321,6 @@ public:
             SaveCheckpoint(param_path, lenet, exec);
             lenet.Save("/home/gbugaj/dev/lbp-matcher/test-deck/data/lenet.json");
 
-
             // one epoch of training is finished
             auto toc = std::chrono::system_clock::now();
             float duration = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -326,6 +343,7 @@ public:
                 // Only forward pass is enough as no gradient is needed when evaluating
                 exec->Forward(false);
                 NDArray::WaitAll();
+
                 acu.Update(data_batch.label, exec->outputs[0]);
                 val_acc.Update(data_batch.label, exec->outputs[0]);
             }
